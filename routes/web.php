@@ -43,12 +43,15 @@ Route::get('/dashboard', function() {
 
 use App\Http\Controllers\Auth\LoginController;
 
-Route::get('/login', function() {
-    return view('auth.login');
-})->name('auth.login');
+Route::middleware(['guest'])->group(function () {   
+    Route::get('/login', [
+        LoginController::class, 'view'
+    ])->name('auth.login.view');
 
-Route::post('/login', [LoginController::class, 'authenticate'])
-       ->name('auth.login.authenticate');
+    Route::post('/login', [
+        LoginController::class, 'handle'
+    ])->name('auth.login.handle'); 
+});
 
 /**
  * Log user out of the system
@@ -59,4 +62,22 @@ Route::post('/login', [LoginController::class, 'authenticate'])
 use App\Http\Controllers\Auth\LogoutController;
 
 Route::post('/logout', LogoutController::class)
-       ->name('auth.logout');
+    ->middleware('auth')->name('auth.logout');
+
+/**
+ * Change user's password.
+ * 
+ * 
+ */
+
+use App\Http\Controllers\Auth\ChangePasswordController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/changepassword', [
+        ChangePasswordController::class, 'view'
+    ])->name('auth.changepassword.view');
+
+    Route::post('/changepassword', [
+        ChangePasswordController::class, 'handle'
+    ])->name('auth.changepassword.handle');
+});

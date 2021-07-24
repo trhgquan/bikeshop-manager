@@ -9,6 +9,22 @@ use App\Http\Controllers\Controller;
 class LogoutController extends Controller
 {
     /**
+     * Notification message when logged out successfully.
+     * 
+     * @var array
+     */
+    private $logoutMessage = [
+        'success' => 'Dang xuat thanh cong'
+    ];
+
+    /**
+     * Path / route to redirect when logged out.
+     * 
+     * @var string
+     */
+    private $logoutRedirect = 'auth.login.view';
+
+    /**
      * Only method to invoke logout procedure.
      * 
      * @param  \Illuminate\Http\Request $request
@@ -21,6 +37,8 @@ class LogoutController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->route('auth.login');
+        return redirect()
+            ->route($this->logoutRedirect)
+            ->with('notify', $this->logoutMessage);
     }
 }
