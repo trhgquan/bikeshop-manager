@@ -48,3 +48,16 @@ php artisan migrate
 ```
 php artisan db:seed
 ```
+
+## Chạy trên domain ở local
+ (VD: `bike.test`)
+
+- Sửa file `hosts`, trỏ `bike.test` về `127.0.0.1`.
+- Sửa file `.env`:
+```
+APP_URL=http://bike.test
+```
+- Lệnh artisan serve có thêm parameter `--host`:
+```
+php artisan serve --host=bike.test [--port=8000]
+```
