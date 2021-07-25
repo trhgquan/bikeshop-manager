@@ -22,15 +22,15 @@ class LogoutController extends Controller
      * 
      * @var string
      */
-    private $logoutRedirect = 'auth.login.view';
+    private $logoutRedirect = 'auth.login.index';
 
     /**
-     * Only method to invoke logout procedure.
+     * Handle logout procedure.
      * 
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request) {
+    public function handle(Request $request) {
         Auth::logout();
 
         $request->session()->invalidate();
@@ -40,5 +40,14 @@ class LogoutController extends Controller
         return redirect()
             ->route($this->logoutRedirect)
             ->with('notify', $this->logoutMessage);
+    }
+
+    /**
+     * By default, user cannot access to logout route with GET method.
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function index() {
+        return redirect('dashboard');
     }
 }

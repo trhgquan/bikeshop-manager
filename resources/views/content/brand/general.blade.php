@@ -2,10 +2,8 @@
 
 @section('page-content')
 
-Quan ly hang xe
-
-@include('content.brand.navbar')
-
+<b>Quan ly hang xe</b><br/>
+<a href="{{ route('brands.create') }}">Them hang xe</a><br/>
 @yield('page-form')
 
 @yield('page-table')

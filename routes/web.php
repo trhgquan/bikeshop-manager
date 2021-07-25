@@ -38,15 +38,15 @@ Route::get('/dashboard', function() {
 /**
  * Log user in the system.
  * 
- * 
+ * User should NOT be logged in before acccesing this route.
  */
 
 use App\Http\Controllers\Auth\LoginController;
 
 Route::middleware(['guest'])->group(function () {   
     Route::get('/login', [
-        LoginController::class, 'view'
-    ])->name('auth.login.view');
+        LoginController::class, 'index'
+    ])->name('auth.login.index');
 
     Route::post('/login', [
         LoginController::class, 'handle'
@@ -56,26 +56,31 @@ Route::middleware(['guest'])->group(function () {
 /**
  * Log user out of the system
  * 
- * 
+ * User should logged in before access this route.
  */
 
 use App\Http\Controllers\Auth\LogoutController;
 
-Route::post('/logout', LogoutController::class)
-    ->middleware('auth')->name('auth.logout');
+Route::post('/logout', [
+    LogoutController::class, 'handle'
+])->middleware('auth')->name('auth.logout');
+
+Route::get('/logout', [
+    LogoutController::class, 'index'
+]);
 
 /**
  * Change user's password.
  * 
- * 
+ * User should logged in before access this route.
  */
 
 use App\Http\Controllers\Auth\ChangePasswordController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/changepassword', [
-        ChangePasswordController::class, 'view'
-    ])->name('auth.changepassword.view');
+        ChangePasswordController::class, 'index'
+    ])->name('auth.changepassword.index');
 
     Route::post('/changepassword', [
         ChangePasswordController::class, 'handle'
@@ -92,28 +97,5 @@ Route::middleware(['auth'])->group(function () {
 
 use App\Http\Controllers\Bike\BrandController;
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/brands', [
-        BrandController::class, 'view'
-    ])->name('brand.view');
-
-    Route::get('/brands/add', [
-        BrandController::class, 'add'
-    ])->name('brand.add.view');
-
-    Route::get('/brands/{id}', [
-        BrandController::class, 'viewId'
-    ])->name('brand.view.id');
-
-    Route::get('/brands/{id}/edit', [
-        BrandController::class, 'edit'
-    ])->name('brand.edit.view');
-
-    Route::post('/brands/{id}/edit', [
-        BrandController::class, 'update'
-    ])->name('brand.edit');
-
-    Route::post('/brands/{id}/delete', [
-        BrandController::class, 'delete'
-    ])->name('brand.delete');
-});
+Route::resource('brands', BrandController::class)
+    ->middleware('auth');

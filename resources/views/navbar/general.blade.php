@@ -5,13 +5,13 @@
     </a>
   </li>
   <li>
-    <a href="{{ route('auth.changepassword.view') }}">
+    <a href="{{ route('auth.changepassword.index') }}">
       Doi mat khau
     </a>
   </li>
   <li>
     <form id="logoutForm" action="{{ route('auth.logout') }}" method="POST">
-      <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+      @csrf
       <a type="submit" href="#" id="logoutBtn">Dang xuat</a>
     </form>
   </li>

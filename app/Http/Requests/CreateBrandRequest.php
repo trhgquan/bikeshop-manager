@@ -4,40 +4,37 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChangePasswordRequest extends FormRequest
+class CreateBrandRequest extends FormRequest
 {
     /**
-     * Validation rules for ChangePasswordController.
+     * Validation rules for LoginController.
      * 
      * @var array
      */
     private $validationRules = [
-        'password' => 'required|current_password',
-        'new_password' => 'required|min:8',
-        'confirm_password' => 'required|same:new_password'
+        'brand_name' => 'required|min:6|max:50',
+        'brand_description' => 'required|min:20|max:100'
     ];
 
     /**
-     * Validation message for ChangePasswordController.
+     * Validation messages for LoginController.
      * 
      * @var array
      */
     private $validationMessages = [
-        'required' => 'Ban chua dien o :attribute',
-        'current_password' => ':attribute khong khop',
-        'min' => 'Do dai o :attribute phai toi thieu :min ky tu',
-        'same' => 'O :attribute khong trung voi o :other'
+        'required' => 'O :attribute bi bo trong.',
+        'min' => 'O :attribute phai co do dai it nhat :min ky tu.',
+        'max' => 'O :attribute phai co do dai nhieu nhat :max ky tu.'
     ];
 
     /**
-     * Validation attributes for ChangePasswordController.
+     * Validation attributes for BrandController.
      * 
      * @var array
      */
     private $validationAttributes = [
-        'password' => 'Mat khau hien tai',
-        'new_password' => 'Mat khau moi',
-        'confirm_password' => 'Nhap lai mat khau moi'
+        'brand_name' => 'Ten hang xe',
+        'brand_description' => 'Mo ta hang xe'
     ];
 
     /**
@@ -70,7 +67,7 @@ class ChangePasswordRequest extends FormRequest
     /**
      * Get custom attributes for validator errors.
      * 
-     * @return array
+     * @param array
      */
     public function attributes() {
         return $this->validationAttributes;

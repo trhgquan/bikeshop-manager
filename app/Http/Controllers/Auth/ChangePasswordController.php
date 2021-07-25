@@ -41,6 +41,17 @@ class ChangePasswordController extends Controller
     }
 
     /**
+     * Save new password to the database.
+     * 
+     * @param  \App\Models\User $user
+     * @param  string $password
+     */
+    private function store(User $user, string $password) {
+        $user->password = $password;
+        $user->save();
+    }
+
+    /**
      * Invoke change password procedure.
      * 
      * @param  \App\Http\Requests\ChangePasswordRequest $request
@@ -54,7 +65,7 @@ class ChangePasswordController extends Controller
         $new_password = Hash::make($validated['new_password']);
 
         // Update new password.
-        User::find(Auth::id())->setPassword($new_password);
+        $this->store(Auth::user(), $new_password);
 
         // Confirm password change success, then send notification.
         if ($this->confirmChangeSuccess($new_password)) {
@@ -68,8 +79,7 @@ class ChangePasswordController extends Controller
      * 
      * @return \Illuminate\View\View
      */
-    public function view() : \Illuminate\View\View
-    {
+    public function index() {
         return view('auth.password');
     }
 }

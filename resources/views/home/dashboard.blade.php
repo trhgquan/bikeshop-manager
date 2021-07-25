@@ -3,7 +3,7 @@
 @section('page-content')
 <ul>
   <li>
-    <a href="{{ route('brand.view') }}">
+    <a href="{{ route('brands.index') }}">
       Quan ly hang xe
     </a>
   </li>
