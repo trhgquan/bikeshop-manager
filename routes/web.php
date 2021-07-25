@@ -81,3 +81,39 @@ Route::middleware(['auth'])->group(function () {
         ChangePasswordController::class, 'handle'
     ])->name('auth.changepassword.handle');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Bike Brand route.
+| 
+| These routes do Bike Brand actions.
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\Bike\BrandController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/brands', [
+        BrandController::class, 'view'
+    ])->name('brand.view');
+
+    Route::get('/brands/add', [
+        BrandController::class, 'add'
+    ])->name('brand.add.view');
+
+    Route::get('/brands/{id}', [
+        BrandController::class, 'viewId'
+    ])->name('brand.view.id');
+
+    Route::get('/brands/{id}/edit', [
+        BrandController::class, 'edit'
+    ])->name('brand.edit.view');
+
+    Route::post('/brands/{id}/edit', [
+        BrandController::class, 'update'
+    ])->name('brand.edit');
+
+    Route::post('/brands/{id}/delete', [
+        BrandController::class, 'delete'
+    ])->name('brand.delete');
+});

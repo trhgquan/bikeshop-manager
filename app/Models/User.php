@@ -41,4 +41,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Set password for account.
+     * 
+     * @param  string $password
+     */
+    public function setPassword($password) {
+        $this->password = $password;
+        $this->save();
+    }
 }

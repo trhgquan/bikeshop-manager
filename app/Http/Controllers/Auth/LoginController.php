@@ -6,41 +6,44 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 
 class LoginController extends Controller
 {
     /**
-     * Validation rules for LoginController.
-     */
-    private $validationRules = [
-        'username' => 'required',
-        'password' => 'required'
-    ];
-
-    /**
      * Authentication messages.
+     * 
+     * @var array
      */
     private $authenticationMessage = [
         'failed' => 'Thong tin dang nhap sai, vui long thu lai!'
     ];
 
     /**
-     * Get credentials from HTTP Request.
-     * 
-     * @param  \Illuminate\Http\Request $request
-     * @return array
-     */
-    private function getCredentials(Request $request) {
-        return array(
-            'username' => $request->username,
-            'password' => $request->password
-        );
-    }
-
-    /**
      * Path / route name to redirect to (if no access-before page).
      */
     private $redirectTo = 'dashboard';
+
+    /**
+     * Handle an authentication request.
+     * 
+     * @param  \App\Http\Requests\LoginRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function handle(LoginRequest $request) {
+        // Get validated form data.
+        $credentials = $request->validated();
+
+        // Attempt to log in.
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            return redirect()->intended($this->redirectTo);
+        }
+
+        // Log in failed.
+        return back()->withErrors($this->authenticationMessage);
+    }
 
     /**
      * Show the login form.
@@ -49,26 +52,5 @@ class LoginController extends Controller
      */
     public function view() {
         return view('auth.login');
-    }
-
-    /**
-     * Handle an authentication request.
-     * 
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function handle(Request $request) {
-        $validator = Validator::make(
-            $request->all(),
-            $this->validationRules
-        );
-
-        if (Auth::attempt($this->getCredentials($request))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended($this->redirectTo);
-        }
-
-        return back()->withErrors($this->authenticationMessage);
     }
 }
