@@ -20,18 +20,31 @@ git clone <url repository>
 composer install
 ```
 3. Vào file `.env` và cài biến môi trường:
+- Database:
 ```
 DB_HOST=<DATABASE HOST>
 DB_USERNAME=<DATABASE USERNAME>
 DB_PASSWORD=<DATABASE PASSWORD>
 ```
-4. **<ins style="color: red;">NHỚ BẬT MYSQL!</ins>**
+- APP_KEY:
+
+Khởi tạo key:
+```
+php artisan key:generate
+```
+
+Chép key mới tạo, xong paste vào
+```
+APP_KEY=<key mới tạo>
+```
+
+4. **NHỚ BẬT MYSQL!**
 5. Tạo database (vào MySQL tạo!)
 6. Tạo các bảng liên quan
 ```
 php artisan migrate
 ```
-6. Seed data
+6. Seed data (chủ yếu là account đầu)
 ```
 php artisan db:seed
 ```
