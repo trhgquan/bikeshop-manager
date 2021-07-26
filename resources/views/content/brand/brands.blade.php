@@ -24,8 +24,8 @@ Danh sach cac hang xe hien co:
   <td>{{ $brand->id }}</td>
   <td>{{ $brand->brand_name }}</td>
   <td>{{ $brand->brand_description }}</td>
-  <td>{{ $brand->created_at->format('h:m:s d-m-Y') }}</td>
-  <td>{{ $brand->updated_at->format('h:m:s d-m-Y') }}</td>
+  <td>{{ $brand->created_at->format('d-m-Y') }}</td>
+  <td>{{ $brand->updated_at->format('d-m-Y') }}</td>
   <td>
     <a href="{{ route('brands.show', $brand->id) }}">
       Chi tiet
