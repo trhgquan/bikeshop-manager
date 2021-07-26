@@ -1,6 +1,6 @@
 Chao <b>{{ Auth::user()->name }}</b>
 
-@include('navbar.general')
+@include('navbar.layouts')
 
 @include('popup.error')
 

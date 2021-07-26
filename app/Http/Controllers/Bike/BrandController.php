@@ -27,13 +27,20 @@ class BrandController extends Controller
     ];
 
     /**
+     * Number of records per page to display.
+     * 
+     * @var int
+     */
+    private $resultsPerPage = 10;
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $brands = Brand::all();
-        return view('content.brand.brands', compact('brands'));
+        $brands = Brand::paginate($this->resultsPerPage);
+        return view('content.brand.dashboard', compact('brands'));
     }
 
     /**
@@ -71,7 +78,7 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Brand $brand) {
-        return view('content.brand.brands', compact('brand'));
+        return view('content.brand.details', compact('brand'));
     }
 
     /**
@@ -115,5 +122,14 @@ class BrandController extends Controller
      */
     public function destroy(Brand $brand) {
         echo $brand->brand_name . ' is going to be deleted!';
+
+        // Havent gone too far here, since this needs some
+        // changes on the database to remove relational records.
+        //
+        // To be more clear: I'll update the database and set up
+        // some foreign keys. These keys, with the inDelete trigger,
+        // will delete records in other tables if a brand is deleted.
+        //
+        // TODO: Add foreign keys and delete trigger.
     }
 }

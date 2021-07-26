@@ -1,22 +1,14 @@
-@extends('content.brand.general')
+@extends('content.brand.layouts')
 
 @section('page-table')
-@if (isset($brand))
-Hang xe: {{ $brand->brand_name }}<br/>
-Mo ta:<br/>
-{{ $brand->brand_description }}<br/>
-Ngay them: {{ $brand->created_at->format('d-m-Y') }}<br/>
-Ngay sua: {{ $brand->updated_at->format('d-m-Y') }}<br/>
-<a href="{{ route('brands.edit', $brand->id) }}">Chinh sua hang xe</a>
-@else
 Danh sach cac hang xe hien co:
+@if ($brands->count() > 0)
 <table>
 <tr>
   <td>id</td>
   <td>ten hang</td>
   <td>hanh dong</td>
 </tr>
-@if ($brands->count() > 0)
 @foreach ($brands as $brand)
 <tr>
   <td>{{ $brand->id }}</td>
@@ -31,9 +23,9 @@ Danh sach cac hang xe hien co:
   </td>
 </tr>
 @endforeach
+</table>
+{{-- {{ $brands->links() }} --}}
 @else
 Hien tai khong co hang xe nao!
-@endif
-</table>
 @endif
 @endsection

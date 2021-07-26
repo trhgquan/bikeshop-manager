@@ -41,15 +41,15 @@ Route::get('/dashboard', function() {
  * User should NOT be logged in before acccesing this route.
  */
 
-use App\Http\Controllers\Auth\LoginController;
-
 Route::middleware(['guest'])->group(function () {   
     Route::get('/login', [
-        LoginController::class, 'index'
+        App\Http\Controllers\Auth\LoginController::class,
+        'index'
     ])->name('auth.login.index');
 
     Route::post('/login', [
-        LoginController::class, 'handle'
+        App\Http\Controllers\Auth\LoginController::class,
+        'handle'
     ])->name('auth.login.handle'); 
 });
 
@@ -59,14 +59,14 @@ Route::middleware(['guest'])->group(function () {
  * User should logged in before access this route.
  */
 
-use App\Http\Controllers\Auth\LogoutController;
-
 Route::post('/logout', [
-    LogoutController::class, 'handle'
+    App\Http\Controllers\Auth\LogoutController::class,
+    'handle'
 ])->middleware('auth')->name('auth.logout');
 
 Route::get('/logout', [
-    LogoutController::class, 'index'
+    App\Http\Controllers\Auth\LogoutController::class,
+    'index'
 ]);
 
 /**
@@ -75,15 +75,15 @@ Route::get('/logout', [
  * User should logged in before access this route.
  */
 
-use App\Http\Controllers\Auth\ChangePasswordController;
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/changepassword', [
-        ChangePasswordController::class, 'index'
+        App\Http\Controllers\Auth\ChangePasswordController::class,
+        'index'
     ])->name('auth.changepassword.index');
 
     Route::post('/changepassword', [
-        ChangePasswordController::class, 'handle'
+        App\Http\Controllers\Auth\ChangePasswordController::class,
+        'handle'
     ])->name('auth.changepassword.handle');
 });
 
@@ -95,7 +95,25 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\Bike\BrandController;
+Route::resource(
+    'brands', 
+    App\Http\Controllers\Bike\BrandController::class
+)->middleware('auth');
 
-Route::resource('brands', BrandController::class)
-    ->middleware('auth');
+/*
+|--------------------------------------------------------------------------
+| APIs.
+| 
+| These APIs don't have to get through the auth:api middleware.
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api')->group(function () {
+    Route::get('/brands/{keyword}', [
+        App\Http\Controllers\Bike\APIs\BrandAPIController::class, 
+        'find'
+    ]);
+    Route::get('/brands', [
+        App\Http\Controllers\Bike\APIs\BrandAPIController::class,
+        'all'
+    ]);
+});

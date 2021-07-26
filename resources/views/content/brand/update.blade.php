@@ -1,4 +1,4 @@
-@extends('content.brand.general')
+@extends('content.brand.layouts')
 
 @section('page-form')
 Chinh sua hang xe:<br/>
