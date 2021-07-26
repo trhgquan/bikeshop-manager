@@ -2,10 +2,11 @@
 
 @section('page-table')
 @if (isset($brand))
-Thong tin hang xe {{ $brand->brand_name }}:<br/>
-
-{{ $brand->brand_description }}
-
+Hang xe: {{ $brand->brand_name }}<br/>
+Mo ta:<br/>
+{{ $brand->brand_description }}<br/>
+Ngay them: {{ $brand->created_at->format('d-m-Y') }}<br/>
+Ngay sua: {{ $brand->updated_at->format('d-m-Y') }}<br/>
 <a href="{{ route('brands.edit', $brand->id) }}">Chinh sua hang xe</a>
 @else
 Danh sach cac hang xe hien co:
@@ -13,9 +14,6 @@ Danh sach cac hang xe hien co:
 <tr>
   <td>id</td>
   <td>ten hang</td>
-  <td>mo ta</td>
-  <td>ngay them</td>
-  <td>ngay sua</td>
   <td>hanh dong</td>
 </tr>
 @if ($brands->count() > 0)
@@ -23,9 +21,6 @@ Danh sach cac hang xe hien co:
 <tr>
   <td>{{ $brand->id }}</td>
   <td>{{ $brand->brand_name }}</td>
-  <td>{{ $brand->brand_description }}</td>
-  <td>{{ $brand->created_at->format('d-m-Y') }}</td>
-  <td>{{ $brand->updated_at->format('d-m-Y') }}</td>
   <td>
     <a href="{{ route('brands.show', $brand->id) }}">
       Chi tiet

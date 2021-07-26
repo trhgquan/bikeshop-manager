@@ -32,9 +32,8 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        return view('content.brand.brands', [
-            'brands' => Brand::all()
-        ]);
+        $brands = Brand::all();
+        return view('content.brand.brands', compact('brands'));
     }
 
     /**
@@ -57,11 +56,11 @@ class BrandController extends Controller
         $validator = $request->validated();
         
         // Create a new brand!
-        Brand::create($validator);
+        $new_brand = Brand::create($validator);
 
         // Return with a congratulation message!
         return redirect()
-                ->route('brands.create')
+                ->route('brands.show', $new_brand)
                 ->with('notify', $this->successMessages['create']);
     }
 
