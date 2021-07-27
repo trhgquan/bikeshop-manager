@@ -19,7 +19,7 @@ class BrandAPIController extends Controller
      */
     public function all() {
         return BrandResource::collection(
-            Brand::all()
+            Brand::paginate($this->resultsPerPage)
         );
     }
 

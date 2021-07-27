@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Bike;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBrandRequest;
 use App\Models\Brand;
@@ -63,7 +64,12 @@ class BrandController extends Controller
         $validator = $request->validated();
         
         // Create a new brand!
-        $new_brand = Brand::create($validator);
+        $new_brand = Brand::create([
+            'brand_name' => $validator['brand_name'],
+            'brand_description' => $validator['brand_description'],
+            'created_by_user' => Auth::id(),
+            'updated_by_user' => Auth::id()
+        ]);
 
         // Return with a congratulation message!
         return redirect()
@@ -102,8 +108,11 @@ class BrandController extends Controller
         // Get validated data.
         $validator = $request->validated();
 
-        // Update brand
+        // Update brand's information.
         $brand->update($validator);
+
+        // Update last_update_user.
+        $brand->updated_by_user = Auth::id();
 
         // Save
         $brand->save();

@@ -110,7 +110,7 @@ Route::resource(
 Route::prefix('api')->group(function () {
     Route::get('/brands/{keyword}', [
         App\Http\Controllers\Bike\APIs\BrandAPIController::class, 
-        'find'
+        'search'
     ]);
     Route::get('/brands', [
         App\Http\Controllers\Bike\APIs\BrandAPIController::class,

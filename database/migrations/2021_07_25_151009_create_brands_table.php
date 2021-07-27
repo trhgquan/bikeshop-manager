@@ -17,7 +17,25 @@ class CreateBrandsTable extends Migration
             $table->id();
             $table->string('brand_name');
             $table->string('brand_description');
+            $table->unsignedBigInteger('created_by_user');
+            $table->unsignedBigInteger('updated_by_user');
             $table->timestamps();
+        });
+
+        /**
+         * Adding foreign keys.
+         * 
+         * brands.created_by_user -> users.id
+         * brands.updated_by_user -> users.id
+         */
+        Schema::table('brands', function (Blueprint $table) {
+            $table->foreign('created_by_user')
+                ->references('id')
+                ->on('users');
+
+            $table->foreign('updated_by_user')
+                ->references('id')
+                ->on('users');
         });
     }
 

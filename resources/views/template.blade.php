@@ -1,4 +1,4 @@
-Chao <b>{{ Auth::user()->name }}</b>
+Chao <b>{{ Auth::user()->nameAndUsername() }}</b>
 
 @include('navbar.layouts')
 

@@ -22,5 +22,12 @@ class AccountSeeder extends Seeder
             'email' => 'thquan@fit.hcmus.edu.vn',
             'password' => Hash::make('thquan@fit.hcmus.edu.vn')
         ]);
+
+        DB::table('users')->insert([
+            'name' => 'Tran Lui Xuong',
+            'username' => 'tlxuong',
+            'email' => 'tlxuong@fit.hcmus.edu.vn',
+            'password' => Hash::make('tlxuong@fit.hcmus.edu.vn')
+        ]);
     }
 }
