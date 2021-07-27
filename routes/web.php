@@ -102,6 +102,19 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
+| Bikes route.
+| 
+| These routes do Bikes actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'bikes',
+    App\Http\Controllers\Bike\BikeController::class
+)->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
 | APIs.
 | 
 | These APIs don't have to get through the auth:api middleware.

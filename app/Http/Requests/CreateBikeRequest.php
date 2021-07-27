@@ -4,37 +4,40 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateBrandRequest extends FormRequest
+class CreateBikeRequest extends FormRequest
 {
     /**
-     * Validation rules for LoginController.
+     * Validation rules for BikeController
      * 
      * @var array
      */
     private $validationRules = [
-        'brand_name' => 'required|min:6|max:50',
-        'brand_description' => 'required|min:20|max:100'
+        'brand_id' => 'required|exists:brands,id',
+        'bike_name' => 'required|min:6|max:20',
+        'bike_description' => 'required|min:20|max:100'
     ];
 
     /**
-     * Validation messages for LoginController.
+     * Validation messages for BikeController
      * 
      * @var array
      */
     private $validationMessages = [
         'required' => 'O :attribute bi bo trong.',
-        'min' => 'O :attribute phai co toi thieu :min ky tu.',
-        'max' => 'O :attribute phai co toi da :max ky tu.'
+        'exists' => 'Vui long chon :attribute hop le.',
+        'min' => 'O :attribute phai co toi thieu :min ky tu',
+        'max' => 'O :attribute phai co toi da :max ky tu'
     ];
 
     /**
-     * Validation attributes for BrandController.
+     * Validation attributes for BikeController
      * 
      * @var array
      */
     private $validationAttributes = [
-        'brand_name' => 'Ten hang xe',
-        'brand_description' => 'Mo ta hang xe'
+        'brand_id' => 'Ten hang',
+        'bike_name' => 'Ten loai xe',
+        'bike_description' => 'Mo ta loai xe'
     ];
 
     /**
@@ -56,7 +59,7 @@ class CreateBrandRequest extends FormRequest
     }
 
     /**
-     * Get the error messages for the defined validation rules.
+     * Get the error message for the defined validation rules.
      * 
      * @return array
      */
@@ -67,7 +70,7 @@ class CreateBrandRequest extends FormRequest
     /**
      * Get custom attributes for validator errors.
      * 
-     * @param array
+     * @return array
      */
     public function attributes() {
         return $this->validationAttributes;

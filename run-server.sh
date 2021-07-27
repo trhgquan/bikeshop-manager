@@ -1,5 +1,8 @@
 #!/bin/bash
 
+domain=bike.test
+port=8000
+
 # Stop LAMPP services on finish.
 function finish {
   echo "Stopping LAMPP services."
@@ -12,7 +15,7 @@ trap finish EXIT
 sudo /opt/lampp/lampp start
 
 # Serve server (with domain bike.test, read README)
-php artisan serve --host=bike.test --port=8000
+php artisan serve --host=$domain --port=$port
 
 # Normally start server on http://localhost:8000
 # php artisan serve

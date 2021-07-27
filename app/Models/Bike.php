@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Brand extends Model
+class Bike extends Model
 {
     use HasFactory;
 
@@ -15,8 +15,9 @@ class Brand extends Model
      * @var array
      */
     protected $fillable = [
-        'brand_name',
-        'brand_description',
+        'brand_id',
+        'bike_name',
+        'bike_description',
         'created_by_user',
         'updated_by_user'
     ];
@@ -26,42 +27,46 @@ class Brand extends Model
      * 
      * @var array
      */
-    protected $casts = [
+    protected $cast = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
 
     /**
-     * Get Bikes that belongs to this Brand.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Get the Brand that owns the Bike
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function bikes() {
-        return $this->hasMany(Bike::class);
+    public function brand() {
+        return $this->belongsTo(
+            Brand::class, 
+            'brand_id', 
+            'id'
+        );
     }
-
+    
     /**
-     * Get the user that created the Brand
+     * Get the User that created the Bike.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function created_by() {
         return $this->belongsTo(
-            User::class, 
+            User::class,
             'created_by_user',
             'id'
         );
     }
 
     /**
-     * Get the user that last edit the Brand.
+     * Get the User that last updated the Bike.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function updated_by() {
         return $this->belongsTo(
-            User::class, 
-            'updated_by_user', 
+            User::class,
+            'updated_by_user',
             'id'
         );
     }
