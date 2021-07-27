@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\BikeResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BrandResource extends JsonResource
@@ -16,6 +17,7 @@ class BrandResource extends JsonResource
         return [
             'id' => $this->id,
             'brand_name' => $this->brand_name,
+            'bikes' => BikeResource::collection($this->bikes)
         ];
     }
 }

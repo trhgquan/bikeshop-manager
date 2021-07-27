@@ -14,6 +14,11 @@ class BikeResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'bike_name' => $this->bike_name,
+            'brand_id' => $this->brand->id,
+            'brand_name' => $this->brand->brand_name
+        ];
     }
 }

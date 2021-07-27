@@ -118,15 +118,25 @@ Route::resource(
 | APIs.
 | 
 | These APIs don't have to get through the auth:api middleware.
+|
+| Supported search and get_all.
 |--------------------------------------------------------------------------
 */
 Route::prefix('api')->group(function () {
-    Route::get('/brands/{keyword}', [
-        App\Http\Controllers\Bike\APIs\BrandAPIController::class, 
-        'search'
-    ]);
     Route::get('/brands', [
         App\Http\Controllers\Bike\APIs\BrandAPIController::class,
         'all'
+    ]);
+    Route::get('/brands/search/{keyword}', [
+        App\Http\Controllers\Bike\APIs\BrandAPIController::class, 
+        'search'
+    ]);
+    Route::get('/bikes', [
+        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        'all'
+    ]);
+    Route::get('/bikes/search/{keyword}', [
+        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        'search'
     ]);
 });

@@ -10,10 +10,16 @@ use Illuminate\Http\Request;
 class BrandAPIController extends Controller
 {
     // TODO: make the index of brands a vue.js on load page (for searching).
+
+    /**
+     * Number of records per page.
+     * 
+     * @var int
+     */
     private $resultsPerPage = 10;
 
     /**
-     * API method - List out all brands.
+     * API method - List out all Brands.
      * 
      * @return \App\Http\Resources\BrandResource
      */
@@ -24,16 +30,15 @@ class BrandAPIController extends Controller
     }
 
     /**
-     * API method - Search a brand.
+     * API method - Search a Brand with a given keyword.
      * 
-     * @param string $keyword
+     * @param  string $keyword
      * @return \App\Http\Resources\BrandResource
      */
     public function search($keyword) {
         return BrandResource::collection(
-            Brand::where(
-                'brand_name', 'LIKE', '%' . $keyword . '%'
-            )->paginate($this->resultsPerPage)
+            Brand::where('brand_name', 'LIKE', '%' . $keyword . '%')
+                ->paginate($this->resultsPerPage)
         );
     }
 }

@@ -3,84 +3,41 @@
 namespace App\Http\Controllers\Bike\APIs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BikeResource;
 use App\Models\Bike;
+use App\Models\Brand;
 use Illuminate\Http\Request;
 
 class BikeAPIController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Number of records per page.
+     * 
+     * @var int
      */
-    public function index()
-    {
-        //
+    private $resultsPerPage = 10;
+
+    /**
+     * API method - List out all Bikes.
+     * 
+     * @return \App\Http\Resources\BikeResource
+     */
+    public function all() {
+        return BikeResource::collection(
+            Bike::paginate($this->resultsPerPage)
+        );
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * API method - Search a Bike with a given keyword.
+     * 
+     * @param  string $keyword
+     * @return \App\Http\Resources\BikeResource
      */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Bike  $bike
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Bike $bike)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Bike  $bike
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Bike $bike)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Bike  $bike
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Bike $bike)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Bike  $bike
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Bike $bike)
-    {
-        //
+    public function search($keyword) {
+        return BikeResource::collection(
+            Bike::where('bike_name', 'LIKE', '%' . $keyword . '%')
+                ->paginate($this->resultsPerPage)
+        );
     }
 }
