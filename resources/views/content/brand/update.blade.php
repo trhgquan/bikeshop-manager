@@ -10,7 +10,7 @@ Ten hang xe:<br/>
 Mo ta hang xe:<br/>
 <textarea name="brand_description" cols="30" rows="10">
 {{ $brand->brand_description }}
-</textarea>
+</textarea><br/>
 <button type="submit">Luu chinh sua</button>
 </form>
 

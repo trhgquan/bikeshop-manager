@@ -14,7 +14,10 @@ class CreateBikeRequest extends FormRequest
     private $validationRules = [
         'brand_id' => 'required|exists:brands,id',
         'bike_name' => 'required|min:6|max:20',
-        'bike_description' => 'required|min:20|max:100'
+        'bike_description' => 'required|min:20|max:100',
+        'stock' => 'required|numeric|integer|min:0',
+        'buy_price' => 'required|numeric|integer|min:0',
+        'sell_price' => 'required|numeric|integer|min:0'
     ];
 
     /**
@@ -23,10 +26,16 @@ class CreateBikeRequest extends FormRequest
      * @var array
      */
     private $validationMessages = [
+        'stock.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        'buy_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        'sell_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        
         'required' => 'O :attribute bi bo trong.',
         'exists' => 'Vui long chon :attribute hop le.',
-        'min' => 'O :attribute phai co toi thieu :min ky tu',
-        'max' => 'O :attribute phai co toi da :max ky tu'
+        'min' => 'O :attribute phai co toi thieu :min ky tu.',
+        'max' => 'O :attribute phai co toi da :max ky tu.',
+        'numeric' => 'O :attribute phai co gia tri la mot so nguyen.',
+        'integer' => 'O :attribute phai co gia tri la mot so nguyen.'
     ];
 
     /**
@@ -37,7 +46,10 @@ class CreateBikeRequest extends FormRequest
     private $validationAttributes = [
         'brand_id' => 'Ten hang',
         'bike_name' => 'Ten loai xe',
-        'bike_description' => 'Mo ta loai xe'
+        'bike_description' => 'Mo ta loai xe',
+        'stock' => 'So luong trong kho',
+        'buy_price' => 'Gia nhap',
+        'sell_price' => 'Gia ban'
     ];
 
     /**

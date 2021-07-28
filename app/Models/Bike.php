@@ -34,6 +34,20 @@ class Bike extends Model
     ];
 
     /**
+     * SoftDelete all (actually just one) Stocks referenced to this Bike.
+     * 
+     */
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($bike) {
+            $bike->stock->each(function($stock) {
+                $stock->delete();
+            });
+        });
+    }
+
+    /**
      * Get the Brand that owns the Bike
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -70,5 +84,14 @@ class Bike extends Model
             'updated_by_user',
             'id'
         );
+    }
+
+    /**
+     * Get the Bike's stock stat.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function stock() {
+        return $this->hasOne(Stock::class);
     }
 }

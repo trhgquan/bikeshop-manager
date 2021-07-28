@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBikeRequest;
 use App\Models\Brand;
 use App\Models\Bike;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -72,6 +73,13 @@ class BikeController extends Controller
             'updated_by_user' => Auth::id()
         ]);
 
+        $new_bike_stock = Stock::create([
+            'bike_id' => $new_bike->id,
+            'stock' => $validator['stock'],
+            'buy_price' => $validator['buy_price'],
+            'sell_price' => $validator['sell_price']
+        ]);
+
         return redirect()
             ->route('bikes.show', $new_bike)
             ->with('notify', $this->successMessages['create']);
@@ -84,7 +92,8 @@ class BikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Bike $bike) {
-        return view('content.bike.details', compact('bike'));
+        $stock = $bike->stock;
+        return view('content.bike.details', compact('bike', 'stock'));
     }
 
     /**
@@ -109,6 +118,8 @@ class BikeController extends Controller
         $validator = $request->validated();
 
         $bike->update($validator);
+
+        $bike->stock->first()->update($validator);
 
         $bike->updated_by_user = Auth::id();
 

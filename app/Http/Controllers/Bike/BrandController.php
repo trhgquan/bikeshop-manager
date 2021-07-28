@@ -84,6 +84,7 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Brand $brand) {
+        // TODO: reduce queries on this controller.
         $bikes = $brand->bikes()->paginate($this->resultsPerPage);
         return view('content.brand.details', compact('brand', 'bikes'));
     }

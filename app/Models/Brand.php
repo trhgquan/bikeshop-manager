@@ -33,6 +33,20 @@ class Brand extends Model
     ];
 
     /**
+     * SoftDelete any Bikes referenced to this Brand.
+     * 
+     */
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($brand) {
+            $brand->bikes->each(function($bike) {
+                $bike->delete();
+            });
+        });
+    }
+
+    /**
      * Get Bikes that belongs to this Brand.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

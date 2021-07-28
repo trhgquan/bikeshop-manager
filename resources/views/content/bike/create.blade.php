@@ -19,7 +19,13 @@ Ten loai xe:<br/>
 Mo ta loai xe:<br/>
 <textarea name="bike_description" cols="30" rows="10">
 {{ old('bike_description') }}
-</textarea>
+</textarea><br/>
+So luong nhap:
+<input type="number" name="stock" value="{{ old('stock') }}"/><br/>
+Gia nhap:
+<input type="number" name="buy_price" value="{{ old('buy_price') }}"><br/>
+Gia ban:
+<input type="number" name="sell_price" value="{{ old('sell_price') }}"><br/>
 <button type="submit">Them</button>
 </form>
 @endsection
