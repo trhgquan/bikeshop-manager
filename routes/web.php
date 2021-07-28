@@ -131,6 +131,14 @@ Route::prefix('api')->group(function () {
         App\Http\Controllers\Bike\APIs\BrandAPIController::class, 
         'search'
     ]);
+    Route::get('/brands/{brand}/bikes', [
+        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        'brand_bikes'
+    ]);
+    Route::get('/brands/{brand}/bikes/search/{keyword}', [
+        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        'brand_search'
+    ]);
     Route::get('/bikes', [
         App\Http\Controllers\Bike\APIs\BikeAPIController::class,
         'all'

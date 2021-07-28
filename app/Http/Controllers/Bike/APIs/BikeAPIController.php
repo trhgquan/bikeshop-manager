@@ -29,6 +29,33 @@ class BikeAPIController extends Controller
     }
 
     /**
+     * API method - Find all Bikes of a Brand.
+     * 
+     * @param  \App\Models\Brand $brand
+     * @return \App\Http\Resources\BikeResource
+     */
+    public function brand_bikes(Brand $brand) {
+        return BikeResource::collection(
+            $brand->bikes()->paginate($this->resultsPerPage)
+        );
+    }
+
+    /**
+     * API method - Search for a Bike belongs to a Brand.
+     * 
+     * @param  \App\Models\Brand $brand
+     * @param  string $bike_name
+     * @return \App\Http\Resources\BikeResource
+     */
+    public function brand_search(Brand $brand, $bike_name) {
+        return BikeResource::collection(
+            $brand->bikes()
+                ->where('bike_name', 'LIKE', '%' . $bike_name . '%')
+                ->paginate($this->resultsPerPage)
+        );
+    }
+
+    /**
      * API method - Search a Bike with a given keyword.
      * 
      * @param  string $keyword

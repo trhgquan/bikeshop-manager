@@ -16,8 +16,7 @@ class BrandResource extends JsonResource
     public function toArray($request) {
         return [
             'id' => $this->id,
-            'brand_name' => $this->brand_name,
-            'bikes' => BikeResource::collection($this->bikes)
+            'brand_name' => $this->brand_name
         ];
     }
 }
