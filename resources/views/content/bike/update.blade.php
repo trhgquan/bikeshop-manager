@@ -27,7 +27,7 @@ Xoa loai xe:<br/>
 <form action="{{ route('bikes.destroy', $bike->id) }}" method="POST">
 @csrf
 @method('DELETE')
-Nhan vao nut nay la ban se xoa hang xe {{ $bike->bike_name }}. Suy nghi ky chua?
-<button type="submit">Xoa</button>
+Nhan vao nut nay la ban se xoa loai xe {{ $bike->bike_name }}. Suy nghi ky chua?
+<button type="submit" onclick="return confirm('Xoa loai xe. Dong y?');">Xoa</button>
 </form>
 @endsection

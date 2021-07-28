@@ -95,7 +95,7 @@ class BikeController extends Controller
      */
     public function edit(Bike $bike) {
         $brands = Brand::all();
-        return view('content.bike.update', compact('bike'), compact('brands'));
+        return view('content.bike.update', compact('brands', 'bike'));
     }
 
     /**
@@ -126,8 +126,14 @@ class BikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Bike $bike) {
-        echo $bike->bike_name . " is going to be destroyed!";
+        $bike->updated_by_user = Auth::id();
 
-        // TODO: nah, later.
+        $bike->save();
+
+        $bike->delete();
+
+        return redirect()
+            ->route('bikes.index')
+            ->with('notify', $this->successMessages['destroy']);
     }
 }

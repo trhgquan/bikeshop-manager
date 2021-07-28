@@ -14,21 +14,16 @@ class CreateBrandsTable extends Migration
     public function up()
     {
         Schema::create('brands', function (Blueprint $table) {
+            // Creating table structures.
             $table->id();
             $table->string('brand_name');
             $table->string('brand_description');
             $table->unsignedBigInteger('created_by_user');
             $table->unsignedBigInteger('updated_by_user');
             $table->timestamps();
-        });
+            $table->softDeletes();
 
-        /**
-         * Adding foreign keys.
-         * 
-         * brands.created_by_user -> users.id
-         * brands.updated_by_user -> users.id
-         */
-        Schema::table('brands', function (Blueprint $table) {
+            // Creating foreign keys.
             $table->foreign('created_by_user')
                 ->references('id')
                 ->on('users');

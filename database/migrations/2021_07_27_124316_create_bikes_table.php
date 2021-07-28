@@ -13,8 +13,8 @@ class CreateBikesTable extends Migration
      */
     public function up()
     {
-        // Create the table.
         Schema::create('bikes', function (Blueprint $table) {
+            // Create the table structures.
             $table->id();
             $table->unsignedBigInteger('brand_id');
             $table->string('bike_name');
@@ -22,13 +22,13 @@ class CreateBikesTable extends Migration
             $table->unsignedBigInteger('created_by_user');
             $table->unsignedBigInteger('updated_by_user');
             $table->timestamps();
-        });
+            $table->softDeletes();
 
-        // Create foreign keys.
-        Schema::table('bikes', function (Blueprint $table) {
+            // Create foreign keys.
             $table->foreign('brand_id')
                 ->references('id')
-                ->on('brands');
+                ->on('brands')
+                ->onDelete('cascade');
 
             $table->foreign('created_by_user')
                 ->references('id')

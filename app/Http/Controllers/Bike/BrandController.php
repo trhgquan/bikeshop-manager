@@ -84,7 +84,8 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Brand $brand) {
-        return view('content.brand.details', compact('brand'));
+        $bikes = $brand->bikes()->paginate($this->resultsPerPage);
+        return view('content.brand.details', compact('brand', 'bikes'));
     }
 
     /**
@@ -130,15 +131,18 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Brand $brand) {
-        echo $brand->brand_name . ' is going to be deleted!';
+        // Update by user.
+        $brand->updated_by_user = Auth::id();
 
-        // Havent gone too far here, since this needs some
-        // changes on the database to remove relational records.
-        //
-        // To be more clear: I'll update the database and set up
-        // some foreign keys. These keys, with the inDelete trigger,
-        // will delete records in other tables if a brand is deleted.
-        //
-        // TODO: Add foreign keys and delete trigger.
+        // Save updated.
+        $brand->save();
+
+        // Soft-delete the branch.
+        $brand->delete();
+
+        // Redirect back, with destroy message.
+        return redirect()
+            ->route('brands.index')
+            ->with('notify', $this->successMessages['destroy']);
     }
 }

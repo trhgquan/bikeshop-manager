@@ -22,4 +22,4 @@
 @endforeach
 </table>
 
-{{-- {{ $bikes->links() }} --}}
+{{ $bikes->links() }}

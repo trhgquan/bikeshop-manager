@@ -10,8 +10,8 @@ Ngay tao: {{ $brand->created_at->format('d-m-Y') }}<br/>
 Ngay sua: {{ $brand->updated_at->format('d-m-Y') }}<br/>
 <a href="{{ route('brands.edit', $brand->id) }}">Chinh sua hang xe</a><br/>
 Danh sach loai xe thuoc hang {{ $brand->brand_name }}:<br/>
-@if ($brand->bikes->count() > 0)
-@include('table.bike-list', ['bikes' => $brand->bikes])
+@if ($bikes->count() > 0)
+@include('table.bike-list', ['bikes' => $bikes])
 @else
 Chua co loai xe nao!
 @endif

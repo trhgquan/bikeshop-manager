@@ -19,6 +19,6 @@ Xoa hang xe:<br/>
 @csrf
 @method('DELETE')
 Nhan vao nut nay la ban se xoa hang xe {{ $brand->brand_name }}. Suy nghi ky chua?
-<button type="submit">Xoa</button>
+<button type="submit" onclick="return confirm('Xoa brand va cac xe cua hang. Dong y?');">Xoa</button>
 </form>
 @endsection
