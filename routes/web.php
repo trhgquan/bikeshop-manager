@@ -113,9 +113,15 @@ Route::resource(
     App\Http\Controllers\Bike\BikeController::class
 )->middleware('auth');
 
-Route::prefix('/report')
-    ->middleware('auth')
-    ->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Report route.
+| 
+| These routes do Reports actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('/report')->middleware('auth')->group(function () {
     Route::get('/out-of-stock', [
         \App\Http\Controllers\ReportController::class,
         'out_of_stock'

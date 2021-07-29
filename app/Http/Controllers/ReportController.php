@@ -7,8 +7,18 @@ use App\Models\Bike;
 
 class ReportController extends Controller
 {
+    /**
+     * Number of records to display per page.
+     * 
+     * @var int
+     */
     private $resultsPerPage = 10;
 
+    /**
+     * Return list of out-of-stock items.
+     * 
+     * @return \Illuminate\Http\Response
+     */
     public function out_of_stock() {
         $bikes = Bike::whereHas('stock', function($query) {
             $query->where('stock', '<', 10);
