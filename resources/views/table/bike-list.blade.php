@@ -21,5 +21,4 @@
 </tr>
 @endforeach
 </table>
-
 {{ $bikes->links() }}

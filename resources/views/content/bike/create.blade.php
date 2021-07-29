@@ -10,7 +10,7 @@ Hang xe:<br/>
 @foreach ($brands as $brand)
 <option {{ old('brand_id') == $brand->id ? "selected" : ""}} 
   value="{{ $brand->id }}">
-  {{ $brand->brand_name }}
+  {{ $brand->idAndName() }}
 </option>
 @endforeach
 </select><br/>
@@ -21,11 +21,11 @@ Mo ta loai xe:<br/>
 {{ old('bike_description') }}
 </textarea><br/>
 So luong nhap:
-<input type="number" name="stock" value="{{ old('stock') }}"/><br/>
+<input type="number" name="bike_stock" value="{{ old('bike_stock') }}"/><br/>
 Gia nhap:
-<input type="number" name="buy_price" value="{{ old('buy_price') }}"><br/>
+<input type="number" name="bike_buy_price" value="{{ old('bike_buy_price') }}"><br/>
 Gia ban:
-<input type="number" name="sell_price" value="{{ old('sell_price') }}"><br/>
+<input type="number" name="bike_sell_price" value="{{ old('bike_sell_price') }}"><br/>
 <button type="submit">Them</button>
 </form>
 @endsection

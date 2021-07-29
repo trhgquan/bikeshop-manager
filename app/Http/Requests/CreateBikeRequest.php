@@ -15,9 +15,9 @@ class CreateBikeRequest extends FormRequest
         'brand_id' => 'required|exists:brands,id',
         'bike_name' => 'required|min:6|max:20',
         'bike_description' => 'required|min:20|max:100',
-        'stock' => 'required|numeric|integer|min:0',
-        'buy_price' => 'required|numeric|integer|min:0',
-        'sell_price' => 'required|numeric|integer|min:0'
+        'bike_stock' => 'required|numeric|integer|min:0',
+        'bike_buy_price' => 'required|numeric|integer|min:0',
+        'bike_sell_price' => 'required|numeric|integer|min:0'
     ];
 
     /**
@@ -26,9 +26,9 @@ class CreateBikeRequest extends FormRequest
      * @var array
      */
     private $validationMessages = [
-        'stock.min' => 'O :attribute phai co gia tri toi thieu la 0.',
-        'buy_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
-        'sell_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        'bike_stock.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        'bike_buy_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        'bike_sell_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
         
         'required' => 'O :attribute bi bo trong.',
         'exists' => 'Vui long chon :attribute hop le.',
@@ -47,9 +47,9 @@ class CreateBikeRequest extends FormRequest
         'brand_id' => 'Ten hang',
         'bike_name' => 'Ten loai xe',
         'bike_description' => 'Mo ta loai xe',
-        'stock' => 'So luong trong kho',
-        'buy_price' => 'Gia nhap',
-        'sell_price' => 'Gia ban'
+        'bike_stock' => 'So luong trong kho',
+        'bike_buy_price' => 'Gia nhap',
+        'bike_sell_price' => 'Gia ban'
     ];
 
     /**

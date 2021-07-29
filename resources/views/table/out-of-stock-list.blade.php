@@ -12,7 +12,7 @@
   <td>{{ $item->id }}</td>
   <td>{{ $item->brand->brand_name }}</td>
   <td>{{ $item->bike_name }}</td>
-  <td>{{ $item->stock->stock }}</td>
+  <td>{{ $item->bike_stock }}</td>
   <td>
     <a href="{{ route('bikes.show', $item->id) }}">
       Chi tiet

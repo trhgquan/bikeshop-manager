@@ -27,6 +27,11 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \App\Models\Brand::observe(
+            \App\Observers\BrandObserver::class
+        );
+        \App\Models\Bike::observe(
+            \App\Observers\BikeObserver::class
+        );
     }
 }

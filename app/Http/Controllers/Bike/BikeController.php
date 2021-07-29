@@ -65,20 +65,7 @@ class BikeController extends Controller
     public function store(CreateBikeRequest $request) {
         $validator = $request->validated();
 
-        $new_bike = Bike::create([
-            'brand_id' => $validator['brand_id'],
-            'bike_name' => $validator['bike_name'],
-            'bike_description' => $validator['bike_description'],
-            'created_by_user' => Auth::id(),
-            'updated_by_user' => Auth::id()
-        ]);
-
-        $new_bike_stock = Stock::create([
-            'bike_id' => $new_bike->id,
-            'stock' => $validator['stock'],
-            'buy_price' => $validator['buy_price'],
-            'sell_price' => $validator['sell_price']
-        ]);
+        $new_bike = Bike::create($validator);
 
         return redirect()
             ->route('bikes.show', $new_bike)
@@ -92,8 +79,7 @@ class BikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Bike $bike) {
-        $stock = $bike->stock;
-        return view('content.bike.details', compact('bike', 'stock'));
+        return view('content.bike.details', compact('bike'));
     }
 
     /**
@@ -117,25 +103,9 @@ class BikeController extends Controller
     public function update(CreateBikeRequest $request, Bike $bike) {
         $validator = $request->validated();
 
-        $bike->update([
-            'brand_id' => $validator['brand_id'],
-            'bike_name' => $validator['bike_name'],
-            'bike_description' => $validator['bike_description']
-        ]);
-
-        $bike->updated_by_user = Auth::id();
+        $bike->update($validator);
 
         $bike->save();
-
-        $bike_stock = Stock::find($bike->id);
-
-        $bike_stock->update([
-            'stock' => $validator['stock'],
-            'buy_price' => $validator['buy_price'],
-            'sell_price' => $validator['sell_price']
-        ]);
-
-        $bike_stock->save();
 
         return redirect()
             ->route('bikes.edit', $bike)
@@ -149,10 +119,6 @@ class BikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Bike $bike) {
-        $bike->updated_by_user = Auth::id();
-
-        $bike->save();
-
         $bike->delete();
 
         return redirect()

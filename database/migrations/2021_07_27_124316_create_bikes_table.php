@@ -19,6 +19,9 @@ class CreateBikesTable extends Migration
             $table->unsignedBigInteger('brand_id');
             $table->string('bike_name');
             $table->string('bike_description');
+            $table->unsignedBigInteger('bike_stock')->default(0);
+            $table->unsignedBigInteger('bike_buy_price')->default(0);
+            $table->unsignedBigInteger('bike_sell_price')->default(0);
             $table->unsignedBigInteger('created_by_user');
             $table->unsignedBigInteger('updated_by_user');
             $table->timestamps();

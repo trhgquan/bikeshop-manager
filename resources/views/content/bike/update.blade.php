@@ -10,7 +10,7 @@ Hang xe:<br/>
 <option value="0">-- Chon hang xe --</option>
 @foreach ($brands as $brand)
 <option value="{{ $brand->id }}" {{ $brand->id == $bike->brand->id ? "selected" : "" }}>
-  {{ $brand->brand_name }}
+  {{ $brand->idAndName() }}
 </option>
 @endforeach
 </select><br/>
@@ -20,9 +20,9 @@ Mo ta loai xe:<br/>
 <textarea name="bike_description" cols="30" rows="10">
 {{ $bike->bike_description }}
 </textarea><br/>
-So luong: <input type="number" name="stock" value="{{ $bike->stock->stock }}"/><br/>
-Gia nhap: <input type="number" name="buy_price" value="{{ $bike->stock->buy_price }}"/><br/>
-Gia ban: <input type="number" name="sell_price" value="{{ $bike->stock->sell_price }}"/><br/>
+So luong: <input type="number" name="bike_stock" value="{{ $bike->bike_stock }}"/><br/>
+Gia nhap: <input type="number" name="bike_buy_price" value="{{ $bike->bike_buy_price }}"/><br/>
+Gia ban: <input type="number" name="bike_sell_price" value="{{ $bike->bike_sell_price }}"/><br/>
 <button type="submit">Luu chinh sua</button>
 </form>
 

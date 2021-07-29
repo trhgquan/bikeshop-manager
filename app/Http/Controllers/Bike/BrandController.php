@@ -67,8 +67,6 @@ class BrandController extends Controller
         $new_brand = Brand::create([
             'brand_name' => $validator['brand_name'],
             'brand_description' => $validator['brand_description'],
-            'created_by_user' => Auth::id(),
-            'updated_by_user' => Auth::id()
         ]);
 
         // Return with a congratulation message!
@@ -112,12 +110,6 @@ class BrandController extends Controller
         // Update brand's information.
         $brand->update($validator);
 
-        // Update last_update_user.
-        $brand->updated_by_user = Auth::id();
-
-        // Save
-        $brand->save();
-
         // Return back with message.
         return redirect()
                 ->route('brands.edit', compact('brand'))
@@ -131,12 +123,6 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Brand $brand) {
-        // Update by user.
-        $brand->updated_by_user = Auth::id();
-
-        // Save updated.
-        $brand->save();
-
         // Soft-delete the branch.
         $brand->delete();
 

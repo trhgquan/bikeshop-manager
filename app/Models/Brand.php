@@ -33,17 +33,12 @@ class Brand extends Model
     ];
 
     /**
-     * SoftDelete any Bikes referenced to this Brand.
+     * Return id - name format.
      * 
+     * @return string
      */
-    public static function boot() {
-        parent::boot();
-
-        static::deleting(function($brand) {
-            $brand->bikes->each(function($bike) {
-                $bike->delete();
-            });
-        });
+    public function idAndName() {
+        return sprintf('%s - %s', $this->id, $this->brand_name);
     }
 
     /**
@@ -75,7 +70,7 @@ class Brand extends Model
      */
     public function updated_by() {
         return $this->belongsTo(
-            User::class, 
+            User::class,
             'updated_by_user', 
             'id'
         );
