@@ -14,7 +14,11 @@
   </li>
   <li>Quan ly don hang</li>
   <li>Bao cao</li>
-  <ol>Cac loai xe sap het</ol>
+  <ol>
+    <a href="{{ route('report.out_of_stock') }}">
+      Cac loai xe sap het
+    </a>
+  </ol>
   <ol>Cac loai xe ban chay</ol>
   <ol>Doanh so ban hang</ol>
 </ul>

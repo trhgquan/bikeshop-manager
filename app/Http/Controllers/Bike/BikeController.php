@@ -42,7 +42,7 @@ class BikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $bikes = Bike::paginate($this->resultsPerPage);
+        $bikes = Bike::with('brand')->paginate($this->resultsPerPage);
         return view('content.bike.dashboard', compact('bikes'));
     }
 
@@ -117,13 +117,25 @@ class BikeController extends Controller
     public function update(CreateBikeRequest $request, Bike $bike) {
         $validator = $request->validated();
 
-        $bike->update($validator);
-
-        $bike->stock->first()->update($validator);
+        $bike->update([
+            'brand_id' => $validator['brand_id'],
+            'bike_name' => $validator['bike_name'],
+            'bike_description' => $validator['bike_description']
+        ]);
 
         $bike->updated_by_user = Auth::id();
 
         $bike->save();
+
+        $bike_stock = Stock::find($bike->id);
+
+        $bike_stock->update([
+            'stock' => $validator['stock'],
+            'buy_price' => $validator['buy_price'],
+            'sell_price' => $validator['sell_price']
+        ]);
+
+        $bike_stock->save();
 
         return redirect()
             ->route('bikes.edit', $bike)

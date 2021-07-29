@@ -9,7 +9,7 @@
 <tr>
   <td>{{ $bike->id }}</td>
   <td>{{ $bike->bike_name }}</td>
-  <td>{{ $bike->brand->brand_name }}</td>
+  <td>{{ isset($brand) ? $brand->brand_name : $bike->brand->brand_name }}</td>
   <td>
     <a href="{{ route('bikes.show', $bike->id) }}">
       Chi tiet
