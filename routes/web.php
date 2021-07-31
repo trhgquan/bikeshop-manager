@@ -115,6 +115,19 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
+| Order route.
+| 
+| These routes do Orders actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'orders',
+    App\Http\Controllers\OrderController::class
+)->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
 | Report route.
 | 
 | These routes do Reports actions.

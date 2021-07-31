@@ -12,7 +12,11 @@
       Quan ly loai xe
     </a>
   </li>
-  <li>Quan ly don hang</li>
+  <li>
+    <a href="{{ route('orders.index') }}">
+      Quan ly don hang
+    </a>
+  </li>
   <li>Bao cao</li>
   <ol>
     <a href="{{ route('report.out_of_stock') }}">

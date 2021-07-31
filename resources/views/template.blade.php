@@ -15,3 +15,5 @@ logoutBtn.addEventListener('click', function() {
   logoutForm.submit();
 });
 </script>
+
+@yield('javascripts')
