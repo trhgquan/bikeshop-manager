@@ -17,13 +17,15 @@ Danh sach cac don hang tren he thong:
     <td>{{ $order->id }}</td>
     <td>{{ $order->customer_name }}</td>
     <td>{{ $order->customer_email }}</td>
-    <td>{{ $order->created_at->format('d-m-Y h:m:s') }}</td>
+    <td>{{ $order->created_at }}</td>
     <td>
-      {{ $order->getCheckedOut() ? $order->checkout_at->format('d-m-Y') : "Chua thanh toan" }}
+      {{ $order->getCheckedOut() ? $order->checkout_at : "Chua thanh toan" }}
     </td>
     <td>
       <a href="{{ route('orders.show', $order->id) }}">Chi tiet</a>
-      <a href="{{ route('orders.edit', $order->id) }}">Chinh sua</a>
+      @if (!$order->getCheckedOut())
+        <a href="{{ route('orders.edit', $order->id) }}">Chinh sua</a>
+      @endif
     </td>
   </tr>
   @endforeach

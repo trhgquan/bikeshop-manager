@@ -22,7 +22,7 @@ Email nguoi dat:<br/>
         @foreach ($bikes as $bike)
           <option value="{{ $bike->id }}">
             {{ $bike->id }} - {{ $bike->bike_name }} 
-            (gia ban: {{$bike->bike_sell_price }})
+            (gia ban: {{$bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
           </option>
         @endforeach
       </select>
@@ -42,7 +42,7 @@ Email nguoi dat:<br/>
           <option value="{{ $bike->id }}" 
             {{ $bike_id == $bike->id ? "selected" : "" }}>
             {{ $bike->id }} - {{ $bike->bike_name }} 
-            (gia ban: {{$bike->bike_sell_price }})
+            (gia ban: {{$bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
           </option>
         @endforeach
       </select>
@@ -56,51 +56,15 @@ Email nguoi dat:<br/>
   @endforeach
   @endif
 </table>
-
+Da thanh toan:
+<input type="checkbox" name="order_checkout"/><br/>
 <button id="addMoreItem" type="button" onclick="addItem(this);">
   Them loai xe
 </button>
-<button type="submit">Them</button>
+<button type="submit">Tao don hang</button>
 </form>
 @endsection
 
 @section('javascripts')
-<script type="text/javascript">
-const MIN_ITEM = 1;
-
-/**
- * Add a new Item to Order.
- */
-function addItem(e) {
-  // Clone item
-  let item = document
-      .getElementsByName('orderInfo')[0]
-      .cloneNode(true);
-  
-  // Set value to 1
-  item.children[1]
-      .children[0]
-      .value = 1;
-  
-  // Append to end of list.
-  let itemList = document
-      .getElementsByName('itemsList')[0]
-      .appendChild(item);
-}
-
-/**
- * Remove item from order.
- */
-function removeItem(e) {
-  // Get total items.
-  let items = document.getElementsByName('orderInfo');
-  
-  // If this is not the only item, then remove.
-  if (items.length > MIN_ITEM) {
-    let td = e.parentNode;
-    let tr = td.parentNode;
-    tr.parentNode.removeChild(tr);
-  }
-}
-</script>
+<script type="text/javascript" src="{{ asset('js/table-action.js') }}"></script>
 @endsection

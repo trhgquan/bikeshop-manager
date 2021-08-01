@@ -7,10 +7,16 @@
   </tr>
   @foreach ($detail as $line)
   <tr>
-    <td>{{ $line->bike_id }}</td>
+    <td>{{ $line->bike->bike_name }}</td>
     <td>{{ $line->order_value }}</td>
     <td>{{ $line->order_sell_price }}</td>
-    <td>{{ $line->order_value * $line->order_sell_price }}</td>
+    <td>{{ $line->income() }}</td>
   </tr>
   @endforeach
+  <tr>
+    <td>Tong cong</td>
+    <td>{{ $order->quantity() }}</td>
+    <td></td>
+    <td>{{ $order->income() }}</td>
+  </tr>
 </table>

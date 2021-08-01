@@ -1,24 +1,59 @@
-@extends('content.brand.layouts')
+@extends('content.orders.layouts')
 
 @section('page-form')
-Chinh sua hang xe:<br/>
-<form action="{{ route('brands.update', $brand->id) }}" method="POST">
+Chinh sua don hang:<br/>
+<form action="{{ route('orders.update', $order->id) }}" method="POST">
 @csrf
 @method('PUT')
-Ten hang xe:<br/>
-<input type="text" name="brand_name" value="{{ $brand->brand_name }}"/><br/>
-Mo ta hang xe:<br/>
-<textarea name="brand_description" cols="30" rows="10">
-{{ $brand->brand_description }}
-</textarea><br/>
+Ten khach hang:<br/>
+<input type="text" name="customer_name" value="{{ $order->customer_name }}"/><br/>
+Email khach hang:<br/>
+<input type="email" name="customer_email" value="{{ $order->customer_email }}"/><br/>
+<table name="itemsList">
+  <tr>
+    <td>loai xe</td>
+    <td>so luong</td>
+    <td></td>
+  </tr>
+  @foreach ($details as $detail)
+  <tr name="orderInfo">
+    <td>
+      <select name="bike_id[]">
+        <option value="0">-- chon mot loai xe --</option>
+        @foreach ($bikes as $bike)
+          <option value="{{ $bike->id }}" 
+            {{ $detail->bike_id == $bike->id ? "selected" : "" }}>
+            {{ $bike->id }} - {{ $bike->bike_name }} 
+            (gia ban: {{ $bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
+          </option>
+        @endforeach
+      </select>
+      <td>
+        <input type="number" name="order_value[]" 
+        value="{{ $detail->order_value }}"/>
+      </td>
+      <td><button type="button" onclick="removeItem(this);">Xoa</button></td>
+    </td>
+  </tr>
+  @endforeach
+</table>
+<button id="addMoreItem" type="button" onclick="addItem(this);">
+  Them loai xe
+</button><br/>
+Da thanh toan: 
+<input type="checkbox" name="order_checkout"/><br/>
 <button type="submit">Luu chinh sua</button>
 </form>
 
 Xoa hang xe:<br/>
-<form action="{{ route('brands.destroy', $brand->id) }}" method="POST">
+<form action="{{ route('orders.destroy', $order->id) }}" method="POST">
 @csrf
 @method('DELETE')
-Nhan vao nut nay la ban se xoa hang xe {{ $brand->brand_name }}. Suy nghi ky chua?
-<button type="submit" onclick="return confirm('Xoa brand va cac xe cua hang. Dong y?');">Xoa</button>
+Nhan vao nut nay la ban se xoa don hang {{ $order->id }}. Suy nghi ky chua?
+<button type="submit" onclick="return confirm('Xoa don hang. Dong y?');">Xoa</button>
 </form>
+@endsection
+
+@section('javascripts')
+<script type="text/javascript" src="{{ url('js/table-action.js') }}"></script>
 @endsection

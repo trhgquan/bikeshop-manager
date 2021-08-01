@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Bike;
 use App\Http\Requests\CreateOrderRequest;
+use App\Http\Requests\CreateOrderUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,8 +21,12 @@ class OrderController extends Controller
     ];
 
     private $successMessages = [
-        'create' => 'Tao don hang moi thanh cong.',
-        'destroy' => 'Huy don hang thanh cong.'
+        'create' => [
+            'success' => 'Tao don hang moi thanh cong.'
+        ],
+        'destroy' => [
+            'success' => 'Huy don hang thanh cong.'
+        ]
     ];
 
     private function getItemOutOfStockError(Bike $item) {
@@ -58,7 +63,8 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $orders = Order::orderBy('created_at')->paginate($this->resultsPerPage);
+        $orders = Order::orderBy('created_at', 'DESC')
+            ->paginate($this->resultsPerPage);
         return view('content.orders.dashboard', compact('orders'));
     }
 
@@ -93,6 +99,9 @@ class OrderController extends Controller
         $new_order = Order::create([
             'customer_name' => $validator['customer_name'],
             'customer_email' => $validator['customer_email'],
+            'checkout_at' => $request->has('order_checkout')
+                ? Carbon\Carbon::now()->toDateTimeString()
+                : NULL,
 
             // replace this with an Observer.
             'created_by_user' => Auth::id(),
@@ -110,11 +119,12 @@ class OrderController extends Controller
                 'order_sell_price' => $bike->bike_sell_price
             ]);
 
-            $bike->bike_stock -= $order_detail->order_value;
+                       $bike->bike_stock -= $order_detail->order_value;
+            $bike->save();
         }
 
         return redirect()
-            ->route('orders.details', $new_order->id)
+            ->route('orders.show', $new_order->id)
             ->with('notify', $this->successMessages['create']);
     }
 
@@ -136,18 +146,24 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(Order $order) {
-        //
+        $bikes = Bike::where('bike_stock', '>', 0)->get();
+        $details = $order->detail;
+
+        return view(
+            'content.orders.update', 
+            compact('order', 'details', 'bikes')
+        );
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\CreateOrderRequest  $request
+     * @param  \App\Http\Requests\CreateOrderUpdateRequest  $request
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(CreateOrderRequest $request, Order $order) {
-        //
+    public function update(CreateOrderUpdateRequest $request, Order $order) {
+        dd($request);
     }
 
     /**

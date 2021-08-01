@@ -15,6 +15,7 @@ class Order extends Model
     protected $fillable = [
         'customer_name',
         'customer_email',
+        'checkout_at',
         'created_by_user',
         'updated_by_user'
     ];
@@ -51,5 +52,15 @@ class Order extends Model
             'order_id',
             'id'
         );
+    }
+
+    public function quantity() {
+        return $this->detail->sum('order_value');
+    }
+
+    public function income() {
+        return $this->detail->sum(function ($detail) {
+            return $detail->income();
+        });
     }
 }

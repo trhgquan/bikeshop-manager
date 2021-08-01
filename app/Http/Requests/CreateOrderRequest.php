@@ -8,14 +8,14 @@ use App\Models\Bike;
 
 class CreateOrderRequest extends FormRequest
 {
-    private $validationRules = [
+    protected $validationRules = [
         'customer_name' => 'required',
         'customer_email' => 'required|email',
         'bike_id.*' => 'distinct|exists:bikes,id',
         'order_value.*' => 'required|numeric|min:1'
     ];
 
-    private $validationMessages = [
+    protected $validationMessages = [
         'distinct' => 'Gia tri cac o :attribute phai khac nhau',
         'required' => 'O :attribute dang bi de trong.',
         'exists' => 'Gia tri o :attribute khong hop le.',
@@ -24,7 +24,7 @@ class CreateOrderRequest extends FormRequest
         'email' => 'Gia tri o :attribute phai la mot dia chi email.'
     ];
 
-    private $validationAttributes = [
+    protected $validationAttributes = [
         'customer_name' => 'Ten khach hang',
         'customer_email' => 'Email khach hang',
         'bike_id.*' => 'Loai xe',

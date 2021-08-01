@@ -37,4 +37,13 @@ class OrderDetail extends Model
             'id'
         );
     }
+
+    public function income() {
+        return $this->order_value * $this->order_sell_price;
+    }
+
+    public function revenue() {
+        return ($this->order_sell_price - $this->order_buy_price) 
+            * $this->order_value;
+    }
 }
