@@ -3,15 +3,24 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\CreateOrderRequest;
-use App\Models\Bike;
 
 class CreateOrderUpdateRequest extends CreateOrderRequest
 {
+    /**
+     * Authorization messages for OrderController.
+     * 
+     * @var array
+     */
     private $authorizationMessages = [
         'checked-out' => 'Ban khong sua duoc don hang da thanh toan.',
         'unauthorized' => 'Ban khong co quyen sua don hang.',
     ];
 
+    /**
+     * Throw AuthorizationException if failed to authorize user.
+     * 
+     * @return \Illuminate\Auth\Access\AithorizationException
+     */
     protected function failedAuthorization() {
         throw new \Illuminate\Auth\Access\AuthorizationException(
             $this->authorizationMessages['checked-out']

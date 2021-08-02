@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderDetail;
 use App\Models\Bike;
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\CreateOrderUpdateRequest;
@@ -23,6 +22,9 @@ class OrderController extends Controller
     private $successMessages = [
         'create' => [
             'success' => 'Tao don hang moi thanh cong.'
+        ],
+        'update' => [
+            'success' => 'Chinh sua don hang thanh cong.'
         ],
         'destroy' => [
             'success' => 'Huy don hang thanh cong.'
@@ -111,15 +113,13 @@ class OrderController extends Controller
         foreach ($validator['bike_id'] as $index => $bike_id) {
             $bike = Bike::find($bike_id);
 
-            $order_detail = OrderDetail::create([
-                'order_id' => $new_order->id,
-                'bike_id' => $bike_id,
+            $new_order->bikes()->attach($bike_id, [
                 'order_value' => $validator['order_value'][$index],
                 'order_buy_price' => $bike->bike_buy_price,
                 'order_sell_price' => $bike->bike_sell_price
             ]);
 
-                       $bike->bike_stock -= $order_detail->order_value;
+            $bike->bike_stock -= (int)$validator['order_value'][$index];
             $bike->save();
         }
 
@@ -135,7 +135,7 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Order $order) {
-        $detail = $order->detail;
+        $detail = $order->bikes()->get();
         return view('content.orders.details', compact('order', 'detail'));
     }
 
@@ -147,7 +147,7 @@ class OrderController extends Controller
      */
     public function edit(Order $order) {
         $bikes = Bike::where('bike_stock', '>', 0)->get();
-        $details = $order->detail;
+        $details = $order->bikes()->get();
 
         return view(
             'content.orders.update', 
@@ -163,7 +163,58 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(CreateOrderUpdateRequest $request, Order $order) {
-        dd($request);
+        $validator = $request->validated();
+
+        $quantityErrors = $this->validateItemQuantity($validator);
+
+        if (count($quantityErrors) > 0) {
+            return redirect()
+                ->route('orders.update')
+                ->withInput()
+                ->withErrors($quantityErrors);
+        }
+
+        // Remove any non-chosen bike.
+        foreach ($order->bikes as $bike) {
+            if (! in_array($bike->id, $request->bike_id)) {
+                $bike->bike_stock += $bike->pivot->order_value;
+                $bike->save();
+            }
+        }
+
+        // Get new information of updated bikes.
+        $bikes_updated = array();
+
+        foreach ($validator['bike_id'] as $index => $bike_id) {
+            // Update bike stock.
+            $bike = Bike::find($bike_id);
+
+            $bike->bike_stock -=
+                (int)$validator['order_value'][$index]
+                - $order->orderValue($bike);
+            
+            $bike->save();
+
+            $bikes_updated[$bike_id] = [
+                'order_value' => $validator['order_value'][$index],
+                'order_buy_price' => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price
+            ];
+        }
+
+        $order->bikes()->sync($bikes_updated);
+        $order->customer_name = $validator['customer_name'];
+        $order->customer_email = $validator['customer_email'];
+
+        $order->checkout_at = $request->has('order_checkout')
+            ? \Carbon\Carbon::now()->toDateTimeString()
+            : NULL;
+
+        $order->save();
+
+        return redirect()
+            ->route('orders.show', $order->id)
+            ->with('notify', $this->successMessages['update']);
     }
 
     /**

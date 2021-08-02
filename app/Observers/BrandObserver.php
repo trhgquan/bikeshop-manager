@@ -14,8 +14,10 @@ class BrandObserver
      * @return void
      */
     public function creating(Brand $brand) {
-        $brand->created_by_user = Auth::id();
-        $brand->updated_by_user = Auth::id();
+        if (Auth::check()) {
+            $brand->created_by_user = Auth::id();
+            $brand->updated_by_user = Auth::id();
+        }
     }
 
     /**
@@ -25,7 +27,9 @@ class BrandObserver
      * @return void
      */
     public function updating(Brand $brand) {
-        $brand->updated_by_user = Auth::id();
+        if (Auth::check()) {
+            $brand->updated_by_user = Auth::id();
+        }
     }
 
     /**
@@ -35,9 +39,11 @@ class BrandObserver
      * @return void
      */
     public function deleted(Brand $brand) {
-        // Deleting also counted as updated.
-        $brand->updated_by_user = Auth::id();
-        $brand->save();
+        if (Auth::check()) {
+            // Deleting also counted as updated.
+            $brand->updated_by_user = Auth::id();
+            $brand->save();
+        }
 
         // Delete child Bike(s).
         $brand->bikes->each(function($bike) {

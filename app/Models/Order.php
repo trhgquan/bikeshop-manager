@@ -46,21 +46,42 @@ class Order extends Model
         );
     }
 
-    public function detail() {
-        return $this->hasMany(
-            OrderDetail::class,
-            'order_id',
-            'id'
-        );
+    public function bikes() {
+        return $this
+            ->belongsToMany(Bike::class, 'order_bike')
+            ->withPivot([
+                'order_value',
+                'order_buy_price',
+                'order_sell_price'
+            ]);
+    }
+
+    public function orderValue(Bike $bike) {
+        $ordered = $this
+            ->bikes()
+            ->where('bike_id', $bike->id);
+
+        return ($ordered->count() > 0)
+            ? $ordered->first()->pivot->order_value
+            : 0;
     }
 
     public function quantity() {
-        return $this->detail->sum('order_value');
+        return $this->bikes->sum('pivot.order_value');
     }
 
     public function income() {
-        return $this->detail->sum(function ($detail) {
-            return $detail->income();
+        return $this->bikes->sum(function($detail) {
+            return $detail->pivot->order_value
+                * $detail->pivot->order_sell_price;
+        });
+    }
+
+    public function revenue() {
+        return $this->bikes->sum(function ($detail) {
+            return $detail->pivot->order_value 
+                * ($detail->pivot->order_sell_price
+                - $detail->pivot->order_buy_price);
         });
     }
 }

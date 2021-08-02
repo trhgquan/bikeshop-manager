@@ -48,6 +48,10 @@ class Bike extends Model
             'id'
         );
     }
+
+    public function orders() {
+        return $this->belongsToMany(Order::class);
+    }
     
     /**
      * Get the User that created the Bike.

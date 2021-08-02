@@ -14,8 +14,10 @@ class BikeObserver
      * @return void
      */
     public function creating(Bike $bike) {
-        $bike->created_by_user = Auth::id();
-        $bike->updated_by_user = Auth::id();
+        if (Auth::check()) {
+            $bike->created_by_user = Auth::id();
+            $bike->updated_by_user = Auth::id();
+        }
     }
 
     /**
@@ -25,7 +27,9 @@ class BikeObserver
      * @return void
      */
     public function updating(Bike $bike) {
-        $bike->updated_by_user = Auth::id();
+        if (Auth::check()) {
+            $bike->updated_by_user = Auth::id();
+        }
     }
 
     /**
@@ -35,9 +39,12 @@ class BikeObserver
      * @return void
      */
     public function deleted(Bike $bike) {
-        $bike->updated_by_user = Auth::id();
-        $bike->save();
+        if (Auth::check()) {
+            $bike->updated_by_user = Auth::id();
+            $bike->save();
+        }
 
         // Adding relationships to delete here.
+        
     }
 }

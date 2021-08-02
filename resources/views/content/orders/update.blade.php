@@ -22,7 +22,7 @@ Email khach hang:<br/>
         <option value="0">-- chon mot loai xe --</option>
         @foreach ($bikes as $bike)
           <option value="{{ $bike->id }}" 
-            {{ $detail->bike_id == $bike->id ? "selected" : "" }}>
+            {{ $detail->id == $bike->id ? "selected" : "" }}>
             {{ $bike->id }} - {{ $bike->bike_name }} 
             (gia ban: {{ $bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
           </option>
@@ -30,7 +30,7 @@ Email khach hang:<br/>
       </select>
       <td>
         <input type="number" name="order_value[]" 
-        value="{{ $detail->order_value }}"/>
+        value="{{ $detail->pivot->order_value }}"/>
       </td>
       <td><button type="button" onclick="removeItem(this);">Xoa</button></td>
     </td>
@@ -45,7 +45,7 @@ Da thanh toan:
 <button type="submit">Luu chinh sua</button>
 </form>
 
-Xoa hang xe:<br/>
+Xoa don hang:<br/>
 <form action="{{ route('orders.destroy', $order->id) }}" method="POST">
 @csrf
 @method('DELETE')
