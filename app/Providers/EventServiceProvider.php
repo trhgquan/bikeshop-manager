@@ -33,5 +33,8 @@ class EventServiceProvider extends ServiceProvider
         \App\Models\Bike::observe(
             \App\Observers\BikeObserver::class
         );
+        \App\Models\Order::observe(
+            \App\Observers\OrderObserver::class
+        );
     }
 }

@@ -103,24 +103,20 @@ class OrderController extends Controller
             'customer_email' => $validator['customer_email'],
             'checkout_at' => $request->has('order_checkout')
                 ? Carbon\Carbon::now()->toDateTimeString()
-                : NULL,
-
-            // replace this with an Observer.
-            'created_by_user' => Auth::id(),
-            'updated_by_user' => Auth::id()
+                : NULL
         ]);
 
         foreach ($validator['bike_id'] as $index => $bike_id) {
             $bike = Bike::find($bike_id);
+
+            $bike->bike_stock -= (int)$validator['order_value'][$index];
+            $bike->save();
 
             $new_order->bikes()->attach($bike_id, [
                 'order_value' => $validator['order_value'][$index],
                 'order_buy_price' => $bike->bike_buy_price,
                 'order_sell_price' => $bike->bike_sell_price
             ]);
-
-            $bike->bike_stock -= (int)$validator['order_value'][$index];
-            $bike->save();
         }
 
         return redirect()

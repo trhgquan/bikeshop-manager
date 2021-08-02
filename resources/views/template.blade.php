@@ -17,3 +17,8 @@ logoutBtn.addEventListener('click', function() {
 </script>
 
 @yield('javascripts')
+
+<footer>
+  Code by Tran Hoang Quan - 19120338 <br>
+  <a href="https://github.com/trhgquan/bikeshop-manager">https://github.com/trhgquan/bikeshop-manager</a>
+</footer>

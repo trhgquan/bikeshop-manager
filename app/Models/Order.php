@@ -6,12 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\User;
-use App\Models\OrderDetail;
 
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     * 
+     * @var array
+     */
     protected $fillable = [
         'customer_name',
         'customer_email',
@@ -20,32 +24,57 @@ class Order extends Model
         'updated_by_user'
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     * 
+     * @var array
+     */
     protected $casts = [
         'checkout_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
 
+    /**
+     * Is this order checked out?
+     * 
+     * @return bool
+     */
     public function getCheckedOut() {
         return $this->checkout_at != NULL;
     }
 
+    /**
+     * The User that created this Order.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relationship\BelongsTo
+     */
     public function created_by() {
-        return $this->hasOne(
+        return $this->belongsTo(
             User::class,
-            'id',
-            'created_by_user'
+            'created_by_user',
+            'id'
         );
     }
 
+    /**
+     * The User that last updated this Order.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relationship\BelongsTo
+     */
     public function updated_by() {
-        return $this->hasOne(
+        return $this->belongsTo(
             User::class,
-            'id',
-            'updated_by_user'
+            'updated_by_user',
+            'id'
         );
     }
 
+    /**
+     * Bikes that ordered in this Order.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relationship\BelongsToMany
+     */
     public function bikes() {
         return $this
             ->belongsToMany(Bike::class, 'order_bike')
@@ -56,20 +85,35 @@ class Order extends Model
             ]);
     }
 
+    /**
+     * Order value of a Bike in this Order.
+     * 
+     * @return int
+     */
     public function orderValue(Bike $bike) {
-        $ordered = $this
+        $bikes_ordered = $this
             ->bikes()
             ->where('bike_id', $bike->id);
 
-        return ($ordered->count() > 0)
-            ? $ordered->first()->pivot->order_value
+        return ($bikes_ordered->count() > 0)
+            ? $bikes_ordered->first()->pivot->order_value
             : 0;
     }
 
+    /**
+     * Total bikes in this Order.
+     * 
+     * @return int
+     */
     public function quantity() {
         return $this->bikes->sum('pivot.order_value');
     }
 
+    /**
+     * Income gained by this Order.
+     * 
+     * @return int
+     */
     public function income() {
         return $this->bikes->sum(function($detail) {
             return $detail->pivot->order_value
@@ -77,6 +121,11 @@ class Order extends Model
         });
     }
 
+    /**
+     * Revenue gained by this Order.
+     * 
+     * @return int
+     */
     public function revenue() {
         return $this->bikes->sum(function ($detail) {
             return $detail->pivot->order_value 
