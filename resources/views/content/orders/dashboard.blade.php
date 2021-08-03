@@ -1,5 +1,7 @@
 @extends('content.orders.layouts')
 
+@section('title', 'Quan ly don hang')
+
 @section('page-table')
 Danh sach cac don hang tren he thong:
 @if ($orders->count() > 0)

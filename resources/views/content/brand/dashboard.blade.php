@@ -1,5 +1,7 @@
 @extends('content.brand.layouts')
 
+@section('title', 'Quan ly hang xe')
+
 @section('page-table')
 Danh sach cac hang xe hien co:
 @if ($brands->count() > 0)

@@ -131,7 +131,7 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Order $order) {
-        $detail = $order->bikes()->get();
+        $detail = $order->bikes;
         return view('content.orders.details', compact('order', 'detail'));
     }
 

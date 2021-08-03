@@ -1,5 +1,7 @@
 @extends('content.orders.layouts')
 
+@section('title', 'Tao don hang moi')
+
 @section('page-form')
 Tao mot don hang moi:<br/>
 <form action="{{ route('orders.store') }}" method="POST">

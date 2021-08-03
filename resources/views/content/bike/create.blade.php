@@ -1,7 +1,9 @@
 @extends('content.bike.layouts')
 
+@section('title', 'Them loai xe moi')
+
 @section('page-form')
-Them mot hang xe moi:<br/>
+Them mot loai xe moi:<br/>
 <form action="{{ route('bikes.store') }}" method="POST">
 @csrf
 Hang xe:<br/>

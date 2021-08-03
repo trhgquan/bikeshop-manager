@@ -1,5 +1,7 @@
 @extends('template')
 
+@section('title', 'Doi mat khau')
+
 @section('page-content')
 Doi mat khau cho tai khoan <b>{{ Auth::user()->nameAndUsername() }}</b>
 <form action="{{ route('auth.changepassword.handle') }}" method="post">

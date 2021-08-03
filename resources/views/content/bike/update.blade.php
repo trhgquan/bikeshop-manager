@@ -1,5 +1,7 @@
 @extends('content.bike.layouts')
 
+@section('title', 'Chinh sua loai xe ' . $bike->bike_name)
+
 @section('page-form')
 Chinh sua loai xe:<br/>
 <form action="{{ route('bikes.update', $bike->id) }}" method="POST">

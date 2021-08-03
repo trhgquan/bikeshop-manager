@@ -1,5 +1,7 @@
 @extends('template')
 
+@section('title', 'Dashboard')
+
 @section('page-content')
 <ul>
   <li>
@@ -23,7 +25,11 @@
       Cac loai xe sap het
     </a>
   </ol>
-  <ol>Cac loai xe ban chay</ol>
+  <ol>
+    <a href="{{ route('report.month_quantity_stat') }}">
+      Cac loai xe ban chay
+    </a>
+  </ol>
   <ol>Doanh so ban hang</ol>
 </ul>
 @endsection

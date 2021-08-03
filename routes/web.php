@@ -139,6 +139,11 @@ Route::prefix('/report')->middleware('auth')->group(function () {
         \App\Http\Controllers\ReportController::class,
         'out_of_stock'
     ])->name('report.out_of_stock');
+
+    Route::get('/month-quantity-stat', [
+        \App\Http\Controllers\ReportController::class,
+        'month_quantity_stat'
+    ])->name('report.month_quantity_stat');
 });
 
 /*
@@ -152,27 +157,27 @@ Route::prefix('/report')->middleware('auth')->group(function () {
 */
 Route::prefix('api')->group(function () {
     Route::get('/brands', [
-        App\Http\Controllers\Bike\APIs\BrandAPIController::class,
+        App\Http\Controllers\API\BrandAPIController::class,
         'all'
     ]);
     Route::get('/brands/search/{keyword}', [
-        App\Http\Controllers\Bike\APIs\BrandAPIController::class, 
+        App\Http\Controllers\API\BrandAPIController::class, 
         'search'
     ]);
     Route::get('/brands/{brand}/bikes', [
-        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        App\Http\Controllers\API\BikeAPIController::class,
         'brand_bikes'
     ]);
     Route::get('/brands/{brand}/bikes/search/{keyword}', [
-        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        App\Http\Controllers\API\BikeAPIController::class,
         'brand_search'
     ]);
     Route::get('/bikes', [
-        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        App\Http\Controllers\API\BikeAPIController::class,
         'all'
     ]);
     Route::get('/bikes/search/{keyword}', [
-        App\Http\Controllers\Bike\APIs\BikeAPIController::class,
+        App\Http\Controllers\API\BikeAPIController::class,
         'search'
     ]);
 });

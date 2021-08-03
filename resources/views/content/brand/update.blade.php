@@ -1,5 +1,7 @@
 @extends('content.brand.layouts')
 
+@section('title', 'Chinh sua hang ' . $brand->brand_name)
+
 @section('page-form')
 Chinh sua hang xe:<br/>
 <form action="{{ route('brands.update', $brand->id) }}" method="POST">

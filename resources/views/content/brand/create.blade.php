@@ -1,5 +1,7 @@
 @extends('content.brand.layouts')
 
+@section('title', 'Them hang xe moi')
+
 @section('page-form')
 Them mot hang xe moi:<br/>
 <form action="{{ route('brands.store') }}" method="POST">

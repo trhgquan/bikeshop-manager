@@ -1,5 +1,7 @@
 @extends('content.orders.layouts')
 
+@section('title', 'Chinh sua don hang')
+
 @section('page-form')
 Chinh sua don hang:<br/>
 <form action="{{ route('orders.update', $order->id) }}" method="POST">

@@ -1,5 +1,7 @@
 @extends('content.brand.layouts')
 
+@section('title', 'Hang xe ' . $brand->brand_name)
+
 @section('page-table')
 Hang xe: {{ $brand->brand_name }}<br/>
 Mo ta:<br/>

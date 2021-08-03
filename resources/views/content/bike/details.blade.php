@@ -1,6 +1,12 @@
 @extends('content.bike.layouts')
+
+@section('title', 'Loai xe ' . $bike->bike_name)
+
 @section('page-table')
-Hang xe: {{ $bike->brand->brand_name }}<br/>
+Hang xe: 
+<a href="{{ route('brands.show', $bike->brand->id)}}">
+  {{ $bike->brand->brand_name }}
+</a><br/>
 Loai xe: {{ $bike->bike_name }}<br/>
 Mo ta:<br/>
 {{ $bike->bike_description }}<br/>

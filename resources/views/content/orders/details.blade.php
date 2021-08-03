@@ -1,5 +1,7 @@
 @extends('content.orders.layouts')
 
+@section('title', 'Chi tiet don hang')
+
 @section('page-table')
 Chi tiet don hang:<br/>
 <table>

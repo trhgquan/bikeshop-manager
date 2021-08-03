@@ -1,5 +1,7 @@
 @extends('template')
 
+@section('title', 'Bao cao')
+
 @section('page-content')
 <b>Bao cao</b>
 

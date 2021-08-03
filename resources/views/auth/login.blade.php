@@ -1,10 +1,12 @@
-@include('popup.error')
+@extends('template')
 
-@include('popup.notify')
+@section('title', 'Dang nhap')
 
+@section('page-content')
 <form action="{{ route('auth.login.handle') }}" method="POST">
 Ten nguoi dung: <input type="text" name="username"/>
 Mat khau: <input type="password" name="password"/>
 @csrf
 <button type="submit">Dang nhap</button>
 </form>
+@endsection

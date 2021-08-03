@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Bike\APIs;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BrandResource;
@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 
 class BrandAPIController extends Controller
 {
-    // TODO: make the index of brands a vue.js on load page (for searching).
-
     /**
      * Number of records per page.
      * 
