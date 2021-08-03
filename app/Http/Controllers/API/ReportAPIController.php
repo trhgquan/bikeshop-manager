@@ -9,6 +9,13 @@ use Illuminate\Http\Request;
 
 class ReportAPIController extends Controller
 {
+    /**
+     * Get bike name and total sales in the range [startDate, endDate].
+     * 
+     * @param  \Carbon\Carbon $startDate
+     * @param  \Carbon\Carbon $endDate
+     * @return \Illuminate\Support\Facades\DB
+     */
     private function bikeQuantityInMonth($startDate, $endDate) {
         return DB::table('order_bike')
             ->join('orders', 'order_bike.order_id', '=', 'orders.id')
@@ -24,6 +31,12 @@ class ReportAPIController extends Controller
             ->get();
     }
 
+    /**
+     * API method: handling bike_quantity_month.
+     * 
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function bike_quantity_month(Request $request) {
         $validator = Validator::make($request->all(),[
             'month' => 'required|date'
@@ -37,13 +50,19 @@ class ReportAPIController extends Controller
                 ->json(['data' => ['error' => $validator->errors()]]);
         }
 
+        // Get the month we are querying for.
         $startDate = \Carbon\Carbon::parse($request->month)
             ->startOfMonth();
         $endDate = \Carbon\Carbon::parse($request->month)
             ->endOfMonth();
 
-        $data = $this->bikeQuantityInMonth($startDate, $endDate);
+        $quantity = $this->bikeQuantityInMonth($startDate, $endDate);
 
-        return response()->json(['data' => $data]);
+        return response()->json([
+            'data' => [
+                'detail' => $quantity,
+                'month' => $startDate->month
+            ]
+        ]);
     }
 }

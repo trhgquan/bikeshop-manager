@@ -17,7 +17,6 @@
     <th>so luong ban ra</th>
   </thead>
   <tbody id="month-stat-detail-body">
-
   </tbody>
 </table>
 
@@ -55,9 +54,9 @@ $(document).ready(function() {
       data: {
         month: month
       }
-    }).done(function(data) {
-      if (data.data.hasOwnProperty('error')) {
-        let error = data.data.error.month;
+    }).done(function(result) {
+      if (result.data.hasOwnProperty('error')) {
+        let error = result.data.error.month;
         $('#month_error').html(error);
       }
 
@@ -66,21 +65,25 @@ $(document).ready(function() {
           myChart.destroy();
         }
 
-        if (data.data.length == 0) {
+        if (result.data.detail.length == 0) {
           $('#introduction').html(
-            'Khong co du lieu nao!'
+            'Khong co du lieu nao trong thang ' + result.data.month
           );
         }
 
         else {
+          $('#introduction').html(
+            'So xe ban duoc trong thang ' + result.data.month
+          );
+
           // Draw the graph.
           $('#graph-wrap').show();
-          myChart = new customChart(ctx, data.data, 'bar');
+          myChart = new customChart(ctx, result.data.detail, 'bar');
           myChart.drawChart();
 
           // Fill table value.
           $('#month-stat-detail').show();
-          data.data.forEach(bike => {
+          result.data.detail.forEach(bike => {
             $('#month-stat-detail').append($('<tr>')
               .append($('<td>')
                 .text(bike.bike_name)
