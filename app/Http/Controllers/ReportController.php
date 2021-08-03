@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Bike;
-use App\Models\Order;
 
 class ReportController extends Controller
 {
@@ -28,10 +27,7 @@ class ReportController extends Controller
         return view('content.report.out-of-stock', ['items' => $bikes]);
     }
 
-    public function month_quantity_stat() {
-        // TODO: embed some quality code in here
-        // mostly in raw DB.
-
+    public function month_quantity_stat_index() {
         return view('content.report.month-quantity-stat');
     }
 }

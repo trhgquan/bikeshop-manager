@@ -21,8 +21,7 @@ Chi tiet don hang:<br/>
   @endforeach
   <tr>
     <td>Tong cong</td>
-    <td>{{ $order->quantity() }}</td>
-    <td></td>
+    <td colspan="2">{{ $order->quantity() }}</td>
     <td>{{ $order->income() }}</td>
   </tr>
 </table>

@@ -26,7 +26,7 @@
     </a>
   </ol>
   <ol>
-    <a href="{{ route('report.month_quantity_stat') }}">
+    <a href="{{ route('report.month_quantity_stat.index') }}">
       Cac loai xe ban chay
     </a>
   </ol>

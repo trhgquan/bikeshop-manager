@@ -142,8 +142,8 @@ Route::prefix('/report')->middleware('auth')->group(function () {
 
     Route::get('/month-quantity-stat', [
         \App\Http\Controllers\ReportController::class,
-        'month_quantity_stat'
-    ])->name('report.month_quantity_stat');
+        'month_quantity_stat_index'
+    ])->name('report.month_quantity_stat.index');
 });
 
 /*
@@ -180,4 +180,8 @@ Route::prefix('api')->group(function () {
         App\Http\Controllers\API\BikeAPIController::class,
         'search'
     ]);
+    Route::get('/month-quantity-stat/month-detail', [
+        App\Http\Controllers\API\ReportAPIController::class,
+        'bike_quantity_month'
+    ])->name('report.month-quantity-stat.detail');
 });

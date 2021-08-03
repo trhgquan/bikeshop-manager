@@ -8,7 +8,8 @@ Quản lý cửa hàng xe máy
 **GVHD:** Thầy Trần Duy Quang
 
 ## Công nghệ sử dụng
-- Laravel 8.x
+- [Laravel 8.x](https://laravel.com)
+- [Chart.js](https://www.chartjs.org) (vẽ biểu đồ)
 
 ## Cài đặt
 1. Tải xuống
