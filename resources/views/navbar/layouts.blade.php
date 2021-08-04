@@ -6,46 +6,46 @@
   </li>
   <li>
     <a href="{{ route('auth.changepassword.index') }}">
-      Doi mat khau
+      Đổi mật khẩu
     </a>
   </li>
   <li>
     <form id="logoutForm" action="{{ route('auth.logout') }}" method="POST">
       @csrf
-      <a type="submit" href="#" id="logoutBtn">Dang xuat</a>
+      <a type="submit" href="#" id="logoutBtn">Đăng xuất</a>
     </form>
   </li>
 </ul>
 <ul>
   <li>
     <a href="{{ route('brands.index') }}">
-      Quan ly hang xe
+      Quản lý hãng xe
     </a>
   </li>
   <li>
     <a href="{{ route('bikes.index') }}">
-      Quan ly loai xe
+      Quản lý loại xe
     </a>
   </li>
   <li>
     <a href="{{ route('orders.index') }}">
-      Quan ly don hang
+      Quản lý đơn hàng
     </a>
   </li>
-  <li>Bao cao</li>
+  <li>Báo cáo</li>
   <ol>
     <a href="{{ route('report.out_of_stock') }}">
-      Cac loai xe sap het
+      Các loại xe sắp hết
     </a>
   </ol>
   <ol>
     <a href="{{ route('report.month_quantity_stat.index') }}">
-      Cac loai xe ban chay
+      Các loại xe bán chạy
     </a>
   </ol>
   <ol>
     <a href="{{ route('report.month_revenue_stat.index') }}">
-      Doanh so ban hang
+      Doanh số bán hàng
     </a>
   </ol>
 </ul>

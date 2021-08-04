@@ -15,7 +15,7 @@ class LoginController extends Controller
      * @var array
      */
     private $authenticationMessage = [
-        'failed' => 'Thong tin dang nhap sai, vui long thu lai!'
+        'failed' => 'Thông tin đăng nhập sai, vui lòng thử lại!'
     ];
 
     /**
@@ -41,7 +41,9 @@ class LoginController extends Controller
         }
 
         // Log in failed.
-        return back()->withErrors($this->authenticationMessage);
+        return redirect()
+            ->route('auth.login.index')
+            ->withErrors($this->authenticationMessage);
     }
 
     /**

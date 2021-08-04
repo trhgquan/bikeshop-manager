@@ -1,12 +1,42 @@
 @extends('template')
 
-@section('title', 'Dang nhap')
+@section('title', 'Đăng nhập hệ thống')
+
+@section('extra-css')
+<style type="text/css">
+.form-login {
+  max-width: 500px;
+  margin: auto;
+}
+input[name="username"] {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+input[name="password"] {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+.alert {
+  max-width: 500px;
+  margin: auto;
+}
+</style>
+@endsection
 
 @section('page-content')
-<form action="{{ route('auth.login.handle') }}" method="POST">
-Ten nguoi dung: <input type="text" name="username"/>
-Mat khau: <input type="password" name="password"/>
-@csrf
-<button type="submit">Dang nhap</button>
-</form>
+<div class="text-center">
+  <h1 class="h3 mb-3 mt-4">
+    {{ config('app.name') }}
+  </h1>
+  <form class="form-login" action="{{ route('auth.login.handle') }}" method="POST">
+    <div class="mb-3">
+      <input class="form-control" placeholder="Tên người dùng" type="text" name="username" required/>
+      <input class="form-control" placeholder="Mật khẩu" type="password" name="password" required/>
+    </div>
+    @csrf
+    <div class="d-grid gap-2">
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Đăng nhập</button>
+    </div>
+  </form>
+</div>
 @endsection

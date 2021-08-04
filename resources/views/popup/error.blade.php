@@ -1,8 +1,7 @@
 @if ($errors->any())
-<b>Loi:</b>
-<ul>
-  @foreach ($errors->all() as $error)
-  <li>{{ $error }}</li>
-  @endforeach
-</ul>
+    @foreach ($errors->all() as $error)
+    <div class="alert alert-danger">
+      <b>Lỗi</b> {{ $error }}
+    </div>
+    @endforeach
 @endif
