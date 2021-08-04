@@ -21,9 +21,16 @@ Chi tiet don hang:<br/>
   </tr>
   @endforeach
   <tr>
+    <td>#</td>
+    <td>Tong so san pham</td>
+    <td>Tong doanh thu</td>
+    <td>Tong loi nhuan</td>
+  </tr>
+  <tr>
     <td>Tong cong</td>
-    <td colspan="2">{{ $order->quantity() }}</td>
-    <td>{{ $order->income() }}</td>
+    <td>{{ $order->quantity() }}</td>
+    <td>{{ $order->revenue() }}</td>
+    <td>{{ $order->profit() }}</td>
   </tr>
   </tbody>
 </table>

@@ -1,9 +1,7 @@
 @extends('template')
 
-@section('title', 'Bao cao')
-
 @section('page-content')
-<b>Bao cao</b>
+<b>Bao cao</b><br/>
 
 @yield('page-table')
 

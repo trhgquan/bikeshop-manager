@@ -30,4 +30,8 @@ class ReportController extends Controller
     public function month_quantity_stat_index() {
         return view('content.report.month-quantity-stat');
     }
+
+    public function month_revenue_stat_index() {
+        return view('content.report.month-revenue-stat');
+    }
 }

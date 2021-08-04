@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Order;
+use App\Http\Resources\OrderResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -29,6 +31,35 @@ class ReportAPIController extends Controller
             ->where('checkout_at', '<=', $endDate)
             ->groupBy('bikes.id', 'bikes.bike_name')
             ->orderBy('bike_order_value', 'DESC')
+            ->get();
+    }
+
+    /**
+     * Get Orders that checked out in range [startDate, endDate].
+     * 
+     * @param  \Carbon\Carbon $startDate
+     * @param  \Carbon\Carbon $endDate
+     * @return \Illuminate\Support\Facades\DB
+     */
+    private function getOrdersInRange($startDate, $endDate) {
+        return DB::table('order_bike')
+            ->join('orders', 'order_bike.order_id', '=', 'orders.id')
+            ->select(
+                'orders.id',
+                DB::raw('SUM(order_bike.order_value) AS quantity'),
+                DB::raw(
+                    'SUM(order_bike.order_value * 
+                        order_bike.order_sell_price) as revenue'
+                ),
+                DB::raw(
+                    'SUM(order_bike.order_value * 
+                        ( order_bike.order_sell_price - 
+                        order_bike.order_buy_price )) as profit'
+                ))
+            ->where('checkout_at', '>=', $startDate)
+            ->where('checkout_at', '<=', $endDate)
+            ->groupBy('orders.id')
+            ->orderBy('profit', 'DESC')
             ->get();
     }
 
@@ -62,8 +93,51 @@ class ReportAPIController extends Controller
         return response()->json([
             'data' => [
                 'detail' => $quantity,
+                'items' => count($quantity),
                 'month' => $startDate->format('m-Y')
             ]
         ]);
+    }
+
+    /**
+     * API method: Get orders and revenue in a month.
+     * 
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function order_revenue_month(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'month' => 'required|date'
+        ], [
+            'required' => 'Ngay thang dang bo trong.',
+            'date' => 'Ngay thang khong hop le.'
+        ]);
+
+        if ($validator->fails()) {
+            return response()
+                ->json(['data' => ['errors' => $validator->errors()]]);
+        }
+
+        $startDate = \Carbon\Carbon::parse($request->month)
+            ->firstOfMonth();
+        $endDate = \Carbon\Carbon::parse($request->month)
+            ->endOfMonth();
+
+        $ordersInRange = $this->getOrdersInRange($startDate, $endDate);
+        $ordersTotal = [
+            'quantity' => collect($ordersInRange)->sum('quantity'),
+            'revenue' => collect($ordersInRange)->sum('revenue'),
+            'profit' => collect($ordersInRange)->sum('profit'),
+        ];
+
+        return response()
+            ->json([
+                'data' => [
+                    'month' => $startDate->format('m-Y'),
+                    'items' => count($ordersInRange),
+                    'detail' => $ordersInRange,
+                    'total' => $ordersTotal
+                ],
+            ]);
     }
 }

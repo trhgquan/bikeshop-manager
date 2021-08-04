@@ -110,11 +110,11 @@ class Order extends Model
     }
 
     /**
-     * Income gained by this Order.
+     * Revenue gained by this Order.
      * 
      * @return int
      */
-    public function income() {
+    public function revenue() {
         return $this->bikes->sum(function($detail) {
             return $detail->pivot->order_value
                 * $detail->pivot->order_sell_price;
@@ -122,11 +122,11 @@ class Order extends Model
     }
 
     /**
-     * Revenue gained by this Order.
+     * Profit gained by this Order.
      * 
      * @return int
      */
-    public function revenue() {
+    public function profit() {
         return $this->bikes->sum(function ($detail) {
             return $detail->pivot->order_value 
                 * ($detail->pivot->order_sell_price

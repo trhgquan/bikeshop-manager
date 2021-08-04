@@ -33,4 +33,9 @@ Route::group(['as' => 'api.', 'middleware' => 'auth:api'], function () {
         App\Http\Controllers\API\ReportAPIController::class,
         'bike_quantity_month'
     ])->name('report.month-quantity-stat');
+
+    Route::get('/month-revenue-stat/month-detail', [
+        App\Http\Controllers\API\ReportAPIController::class,
+        'order_revenue_month'
+    ])->name('report.month-revenue-stat');
 });

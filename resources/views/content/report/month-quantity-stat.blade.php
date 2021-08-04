@@ -1,5 +1,7 @@
 @extends('content.report.layouts')
 
+@section('title', 'San pham ban ra - Bao cao')
+
 @section('extra-css')
 <style>
   .graph-wrap {
@@ -67,7 +69,7 @@ $(document).ready(function() {
           myChart.destroy();
         }
 
-        if (result.data.detail.length == 0) {
+        if (result.data.items == 0) {
           $('#introduction').html(
             'Khong co du lieu nao trong thang ' + result.data.month
           );

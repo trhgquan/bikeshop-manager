@@ -43,5 +43,9 @@
       Cac loai xe ban chay
     </a>
   </ol>
-  <ol>Doanh so ban hang</ol>
+  <ol>
+    <a href="{{ route('report.month_revenue_stat.index') }}">
+      Doanh so ban hang
+    </a>
+  </ol>
 </ul>

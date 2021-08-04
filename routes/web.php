@@ -15,7 +15,7 @@ use App\Http\Middleware;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
 });
 
 /**
@@ -134,14 +134,23 @@ Route::resource(
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('/report')->middleware('auth')->group(function () {
+Route::group([
+    'as' => 'report.',
+    'prefix' => 'report',
+    'middleware' => 'auth'
+], function () {
     Route::get('/out-of-stock', [
         \App\Http\Controllers\ReportController::class,
         'out_of_stock'
-    ])->name('report.out_of_stock');
+    ])->name('out_of_stock');
 
     Route::get('/month-quantity-stat', [
         \App\Http\Controllers\ReportController::class,
         'month_quantity_stat_index'
-    ])->name('report.month_quantity_stat.index');
+    ])->name('month_quantity_stat.index');
+
+    Route::get('/month-revenue-stat', [
+        \App\Http\Controllers\ReportController::class,
+        'month_revenue_stat_index'
+    ])->name('month_revenue_stat.index');
 });
