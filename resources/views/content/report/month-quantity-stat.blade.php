@@ -13,6 +13,7 @@
 <div id="introduction"></div>
 <table id="month-stat-detail" style="display: none;">
   <thead>
+    <th>id</th>
     <th>ten loai xe</th>
     <th>so luong ban ra</th>
   </thead>
@@ -41,7 +42,7 @@ let ctx = document.getElementById('myChart').getContext('2d');
 let myChart = null;
 
 $(document).ready(function() {
-  $('#loadMonthStat').on('submit', function(e) {
+  $('#loadMonthStat').on('submit', function(e) {  
     let month = $('#month').val();
     $('#graph-wrap').hide();
     $('#month-stat-detail').hide();
@@ -52,6 +53,7 @@ $(document).ready(function() {
     $.ajax({
       url: "{{ route('api.report.month-quantity-stat') }}",
       data: {
+        api_token: $('[name="api_token"]').attr('content'),
         month: month
       }
     }).done(function(result) {
@@ -78,7 +80,9 @@ $(document).ready(function() {
 
           // Draw the graph.
           $('#graph-wrap').show();
-          myChart = new customChart(ctx, result.data.detail, 'bar');
+          myChart = new customChart(ctx, result.data.detail, 'bar', 
+            'Số lượng bán ra trong tháng ' + result.data.month
+          );
           myChart.drawChart();
 
           // Fill table value.
@@ -86,6 +90,8 @@ $(document).ready(function() {
           result.data.detail.forEach(bike => {
             $('#month-stat-detail').append($('<tr>')
               .append($('<td>')
+                .text(bike.id)
+              ).append($('<td>')
                 .text(bike.bike_name)
               ).append($('<td>')
                 .text(bike.bike_order_value)

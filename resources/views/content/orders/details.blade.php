@@ -5,12 +5,13 @@
 @section('page-table')
 Chi tiet don hang:<br/>
 <table>
-  <tr>
-    <td>loai xe</td>
-    <td>so luong</td>
-    <td>don gia</td>
-    <td>thanh tien</td>
-  </tr>
+  <thead>
+    <th>loai xe</th>
+    <th>so luong</th>
+    <th>don gia</th>
+    <th>thanh tien</th>
+  </thead>
+  <tbody>
   @foreach ($detail as $line)
   <tr>
     <td>{{ $line->bike_name }}</td>
@@ -24,6 +25,7 @@ Chi tiet don hang:<br/>
     <td colspan="2">{{ $order->quantity() }}</td>
     <td>{{ $order->income() }}</td>
   </tr>
+  </tbody>
 </table>
 
 Ngay tao: {{ $order->created_at->format('d-m-Y') }}<br/>

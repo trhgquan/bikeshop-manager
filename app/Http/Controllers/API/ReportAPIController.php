@@ -16,17 +16,18 @@ class ReportAPIController extends Controller
      * @param  \Carbon\Carbon $endDate
      * @return \Illuminate\Support\Facades\DB
      */
-    private function bikeQuantityInMonth($startDate, $endDate) {
+    private function bikeQuantityInRange($startDate, $endDate) {
         return DB::table('order_bike')
             ->join('orders', 'order_bike.order_id', '=', 'orders.id')
             ->join('bikes', 'order_bike.bike_id', '=', 'bikes.id')
             ->select(
+                'bikes.id',
                 'bikes.bike_name', 
                 DB::raw('SUM(order_bike.order_value) AS bike_order_value')
             )
             ->where('checkout_at', '>=', $startDate)
             ->where('checkout_at', '<=', $endDate)
-            ->groupBy('bikes.bike_name')
+            ->groupBy('bikes.id', 'bikes.bike_name')
             ->orderBy('bike_order_value', 'DESC')
             ->get();
     }
@@ -56,7 +57,7 @@ class ReportAPIController extends Controller
         $endDate = \Carbon\Carbon::parse($request->month)
             ->endOfMonth();
 
-        $quantity = $this->bikeQuantityInMonth($startDate, $endDate);
+        $quantity = $this->bikeQuantityInRange($startDate, $endDate);
 
         return response()->json([
             'data' => [

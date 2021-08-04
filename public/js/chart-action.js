@@ -1,7 +1,7 @@
 class customChart {
   myChart = null;
 
-  constructor(ctx, raw, type) {
+  constructor(ctx, raw, type, chartLabel) {
     this.ctx = ctx;
     this.data = raw.map(a => parseInt(a.bike_order_value));
     this.labels = raw.map(a => a.bike_name);
@@ -10,6 +10,7 @@ class customChart {
       () => this.getRandomColor()
     );
     this.type = type;
+    this.chartLabel = chartLabel;
   }
 
   destroy() {
@@ -34,7 +35,7 @@ class customChart {
       data: {
         labels: this.labels,
         datasets: [{
-          label: 'So luong san pham da ban',
+          label: this.chartLabel,
           data: this.data,
           backgroundColor: this.colours,
           hoverOffset: 4

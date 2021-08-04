@@ -28,7 +28,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 | Supported search and get_all.
 |--------------------------------------------------------------------------
 */
-Route::group(['prefix' => 'api', 'as' => 'api.'], function () {
+Route::group(['as' => 'api.', 'middleware' => 'auth:api'], function () {
     Route::get('/month-quantity-stat/month-detail', [
         App\Http\Controllers\API\ReportAPIController::class,
         'bike_quantity_month'

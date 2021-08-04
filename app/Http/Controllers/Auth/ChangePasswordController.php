@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
@@ -47,6 +48,10 @@ class ChangePasswordController extends Controller
      */
     private function store(User $user, string $password) {
         $user->password = $password;
+
+        // Generate new API token.
+        $user->api_token = hash('sha256', Str::random(60));
+
         $user->save();
     }
 
