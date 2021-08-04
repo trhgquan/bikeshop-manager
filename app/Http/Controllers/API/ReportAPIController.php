@@ -61,7 +61,7 @@ class ReportAPIController extends Controller
         return response()->json([
             'data' => [
                 'detail' => $quantity,
-                'month' => $startDate->month
+                'month' => $startDate->format('m-Y')
             ]
         ]);
     }

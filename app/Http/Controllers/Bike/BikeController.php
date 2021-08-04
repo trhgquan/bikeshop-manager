@@ -42,7 +42,7 @@ class BikeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $bikes = Bike::with('brand')->paginate($this->resultsPerPage);
+        $bikes = Bike::with('brand')->get();
         return view('content.bike.dashboard', compact('bikes'));
     }
 

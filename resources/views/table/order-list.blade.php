@@ -1,12 +1,13 @@
-<table>
-  <tr>
-    <td>ma don hang</td>
-    <td>ten khach hang</td>
-    <td>email khach hang</td>
-    <td>ngay tao</td>
-    <td>trang thai thanh toan</td>
-    <td>hanh dong</td>
-  </tr>
+<table id="ordersTable">
+  <thead>
+    <th>ma don hang</th>
+    <th>ten khach hang</th>
+    <th>email khach hang</th>
+    <th>ngay tao</th>
+    <th>trang thai thanh toan</th>
+    <th>hanh dong</th>
+  </thead>
+  <tbody>
   @foreach ($orders as $order)
   <tr>
     <td>{{ $order->id }}</td>
@@ -24,6 +25,5 @@
     </td>
   </tr>
   @endforeach
+  </tbody>
 </table>
-
-{{ $orders->links() }}

@@ -10,6 +10,7 @@ Quản lý cửa hàng xe máy
 ## Công nghệ sử dụng
 - [Laravel 8.x](https://laravel.com)
 - [Chart.js](https://www.chartjs.org) (vẽ biểu đồ)
+- [DataTable.js](https://datatables.net) (tạo bảng với các chức năng sort, search, ..)
 
 ## Cài đặt
 1. Tải xuống

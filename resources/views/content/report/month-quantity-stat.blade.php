@@ -50,7 +50,7 @@ $(document).ready(function() {
     $('#month-stat-detail-body').empty();
 
     $.ajax({
-      url: "{{ route('report.month-quantity-stat.detail') }}",
+      url: "{{ route('api.report.month-quantity-stat') }}",
       data: {
         month: month
       }
@@ -73,7 +73,7 @@ $(document).ready(function() {
 
         else {
           $('#introduction').html(
-            'So xe ban duoc trong thang ' + result.data.month
+            'Cac loai xe ban chay trong thang ' + result.data.month
           );
 
           // Draw the graph.

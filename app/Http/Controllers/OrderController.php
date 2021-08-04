@@ -65,8 +65,7 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $orders = Order::orderBy('created_at', 'DESC')
-            ->paginate($this->resultsPerPage);
+        $orders = Order::orderBy('created_at', 'DESC')->get();
         return view('content.orders.dashboard', compact('orders'));
     }
 

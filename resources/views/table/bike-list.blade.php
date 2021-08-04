@@ -1,10 +1,11 @@
-<table>
-<tr>
-  <td>id</td>
-  <td>ten xe</td>
-  <td>hang xe</td>
-  <td>hanh dong</td>
-</tr>
+<table id="bikesTable">
+<thead>
+  <th>id</th>
+  <th>ten xe</th>
+  <th>hang xe</th>
+  <th>hanh dong</th>
+</thead>
+<tbody>
 @foreach ($bikes as $bike)
 <tr>
   <td>{{ $bike->id }}</td>
@@ -20,5 +21,5 @@
   </td>
 </tr>
 @endforeach
+</tbody>
 </table>
-{{ $bikes->links() }}

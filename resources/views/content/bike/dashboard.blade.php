@@ -10,3 +10,11 @@ Danh sach cac loai xe hien co:
 Hien tai khong co loai xe nao!
 @endif
 @endsection
+
+@section('javascripts')
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#bikesTable').DataTable()
+});
+</script>
+@endsection

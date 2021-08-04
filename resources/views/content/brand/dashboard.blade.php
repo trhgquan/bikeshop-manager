@@ -10,3 +10,11 @@ Danh sach cac hang xe hien co:
 Hien tai khong co hang xe nao!
 @endif
 @endsection
+
+@section('javascripts')
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#brandsTable').DataTable();
+});
+</script>
+@endsection

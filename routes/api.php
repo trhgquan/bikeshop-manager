@@ -17,3 +17,20 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| APIs.
+| 
+| These APIs don't have to get through the auth:api middleware.
+|
+| Supported search and get_all.
+|--------------------------------------------------------------------------
+*/
+Route::group(['prefix' => 'api', 'as' => 'api.'], function () {
+    Route::get('/month-quantity-stat/month-detail', [
+        App\Http\Controllers\API\ReportAPIController::class,
+        'bike_quantity_month'
+    ])->name('report.month-quantity-stat');
+});

@@ -10,3 +10,13 @@ Danh sach cac don hang tren he thong:
 Hien tai khong co don hang nao!
 @endif
 @endsection
+
+@section('javascripts')
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#ordersTable').DataTable({
+    'order': []
+  });
+});
+</script>
+@endsection

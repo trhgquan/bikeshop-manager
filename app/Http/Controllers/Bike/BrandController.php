@@ -40,7 +40,7 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $brands = Brand::paginate($this->resultsPerPage);
+        $brands = Brand::all();
         return view('content.brand.dashboard', compact('brands'));
     }
 
@@ -82,7 +82,7 @@ class BrandController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Brand $brand) {
-        $bikes = $brand->bikes()->paginate($this->resultsPerPage);
+        $bikes = $brand->bikes()->get();
         return view('content.brand.details', compact('brand', 'bikes'));
     }
 
