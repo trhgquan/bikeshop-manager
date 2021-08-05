@@ -1,6 +1,6 @@
 @extends('content.report.layouts')
 
-@section('title', 'San pham ban ra - Bao cao')
+@section('title', 'Sản phẩm bán chạy - Báo cáo')
 
 @section('extra-css')
 <style>
@@ -11,28 +11,45 @@
 </style>
 @endsection
 
+@section('small-title', 'Loại xe bán chạy trong tháng')
+
 @section('page-table')
 <div id="introduction"></div>
-<table id="month-stat-detail" style="display: none;">
-  <thead>
-    <th>id</th>
-    <th>ten loai xe</th>
-    <th>so luong ban ra</th>
-  </thead>
-  <tbody id="month-stat-detail-body">
-  </tbody>
-</table>
-
-<div class="graph-wrap" id="graph-wrap" style="display: none;">
-  <canvas id="myChart"></canvas>
+<div class="row">
+  <div class="col">
+    <div class="graph-wrap" id="graph-wrap" style="display: none;">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+  <div class="col">
+    <table class="table table-hover" id="month-stat-detail" style="display: none;">
+      <thead>
+        <th>ID</th>
+        <th>Tên loại xe</th>
+        <th>Số lượng bán ra</th>
+      </thead>
+      <tbody id="month-stat-detail-body">
+      </tbody>
+    </table>
+  </div>
 </div>
+
 
 <form id="loadMonthStat">
   @csrf
-  Chon mot thang de xem:
-  <input type="date" id="month"/>
-  <span id="month_error"></span>
-  <button type="submit">Xem</button>
+  <div class="row">
+    <div class="col">
+      <label for="month">Chọn tháng để xem:</label>
+    </div>
+    <div class="col">
+      <input type="date" class="form-control" id="month"/>
+    </div>
+    <div class="col">
+      <button class="btn btn-outline-primary" type="submit">Xem</button>
+    </div>
+  </div>
+
+  <span id="month_error" class="invalid-feedback"></span>
 </form>
 @endsection
 
@@ -48,7 +65,7 @@ $(document).ready(function() {
     let month = $('#month').val();
     $('#graph-wrap').hide();
     $('#month-stat-detail').hide();
-    $('#month_error').empty();
+    $('#month_error').empty().hide();
     $('#introduction').empty();
     $('#month-stat-detail-body').empty();
 
@@ -61,7 +78,7 @@ $(document).ready(function() {
     }).done(function(result) {
       if (result.data.hasOwnProperty('error')) {
         let error = result.data.error.month;
-        $('#month_error').html(error);
+        $('#month_error').html(error).show();
       }
 
       else {
@@ -71,13 +88,13 @@ $(document).ready(function() {
 
         if (result.data.items == 0) {
           $('#introduction').html(
-            'Khong co du lieu nao trong thang ' + result.data.month
+            'Không có dữ liệu tháng ' + result.data.month
           );
         }
 
         else {
           $('#introduction').html(
-            'Cac loai xe ban chay trong thang ' + result.data.month
+            'Các loại xe bán chạy trong tháng ' + result.data.month
           );
 
           // Draw the graph.

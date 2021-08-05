@@ -1,33 +1,42 @@
 @extends('content.report.layouts')
 
-@section('title', 'Doanh so ban hang - Bao cao')
+@section('title', 'Doanh số bán hàng - Báo cáo')
 
 @section('page-table')
+@section('small-title', 'Doanh số bán hàng theo tháng')
 <div id="introduction"></div>
-<table id="revenueTable" style="display: none;">
+<table class="table table-hover" id="revenueTable" style="display: none;">
   <thead>
-    <th>id don hang</th>
-    <th>so luong san pham</th>
-    <th>doanh thu</th>
-    <th>loi nhuan</th>
+    <th>ID đơn hàng</th>
+    <th>Số lượng sản phẩm bán ra</th>
+    <th>Doanh thu</th>
+    <th>Lợi nhuận</th>
   </thead>
   <tbody id="revenueTableContent"></tbody>
   <tfoot>
     <tr>
-      <td>Tong so don hang</td>
-      <td>Tong so san phan</td>
-      <td>Tong doanh thu</td>
-      <td>Tong loi nhuan</td>
+      <td>Tổng số đơn hàng</td>
+      <td>Tổng số sản phẩm bán ra</td>
+      <td>Tổng doanh thu</td>
+      <td>Tổng lợi nhuận</td>
     </tr>
     <tr id="revenueTableConclusion"></tr>
   </tfoot>
 </table>
 
 <form id="loadMonthStat">
-  Chon thang:
-  <input type="date" id="month"/>
-  <span id="month_error"></span>
-  <button type="submit">Xem</button>
+  <div class="row g-3">
+    <div class="col">
+      <label for="month">Chọn tháng:</label>
+    </div>
+    <div class="col">
+      <input class="form-control" type="date" id="month"/>
+    </div>
+    <div class="col">
+      <button class="btn btn-outline-primary" type="submit">Xem</button>
+    </div>
+  </div>
+  <span id="month_error" class="invalid-feedback"></span>
 </form>
 @endsection
 
@@ -38,7 +47,7 @@ $(document).ready(function() {
     let month = $('#month').val();
     $('#revenueTable').hide();
     $('#introduction').empty();
-    $('#month_error').empty();
+    $('#month_error').empty().hide();
     $('#revenueTableContent').empty();
     $('#revenueTableConclusion').empty();
 
@@ -50,19 +59,19 @@ $(document).ready(function() {
       }
     }).done(function(result) {
       if (result.data.hasOwnProperty('errors')) {
-        $('#month_error').html(result.data.errors.month);
+        $('#month_error').html(result.data.errors.month).show();
       }
 
       else {
         if (result.data.items == 0) {
           $('#introduction').html(
-            'Khong co bao cao trong thang ' + result.data.month
+            'Không có báo cáo trong tháng ' + result.data.month
           );
         }
 
         else {
           $('#introduction').html(
-            'Bao cao doanh thu thang ' + result.data.month
+            'Báo cáo doanh thu tháng ' + result.data.month
           );
 
           // Load table
