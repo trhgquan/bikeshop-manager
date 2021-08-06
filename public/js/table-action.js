@@ -9,11 +9,6 @@ function addItem(e) {
       .getElementsByName('orderInfo')[0]
       .cloneNode(true);
   
-  // Set value to 1
-  item.children[1]
-      .children[0]
-      .value = 1;
-  
   // Append to end of list.
   let itemList = document
       .getElementsByName('itemsList')[0]

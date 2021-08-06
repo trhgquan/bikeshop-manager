@@ -22,7 +22,7 @@
           </li>
           <li>
             <a href="{{ route('brands.index') }}" class="nav-link text-white {{ Request::routeIs('brands.index') ? 'active' : '' }}">
-            Danh sách
+            Danh sách hãng xe
             </a>
           </li>
         </ul>
@@ -41,16 +41,30 @@
           </li>
           <li>
             <a href="{{ route('bikes.index') }}" class="nav-link text-white {{ Request::routeIs('bikes.index') ? 'active' : '' }}">
-            Danh sách
+            Danh sách loại xe
             </a>
           </li>
         </ul>
       </div>
     </li>
     <li class="nav-item">
-      <a href="{{ route('orders.index') }}" class="nav-link text-white">
+      <a href="#" class="btn-toggle nav-link text-white collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
         Quản lý đơn hàng
       </a>
+      <div id="orders-collapse" class="collapse">
+        <ul class="btn-toggle-nav fw-normal pb-1 small">
+          <li>
+            <a href="{{ route('orders.create') }}" class="nav-link text-white {{ Request::routeIs('orders.create') ? 'active' : '' }}">
+            Tạo đơn hàng mới
+            </a>
+          </li>
+          <li>
+            <a href="{{ route('orders.index') }}" class="nav-link text-white {{ Request::routeIs('orders.index') ? 'active' : '' }}">
+            Danh sách đơn hàng
+            </a>
+          </li>
+        </ul>
+      </div>
     </li>
     <li class="nav-item">
       <a href="#" class="btn-toggle nav-link text-white collapsed" data-bs-toggle="collapse" data-bs-target="#report-collapse" aria-expanded="false">

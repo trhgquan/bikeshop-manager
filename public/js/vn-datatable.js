@@ -1,4 +1,4 @@
-const language = {
+var settings = {
   'language': {
     'emptyTable': 'Không có dữ liệu nào!',
     'info': 'Đang hiện các kết quả từ _START_ đến _END_ trong tổng số _TOTAL_ kết quả.',
@@ -6,7 +6,7 @@ const language = {
     'infoFiltered': '(đã lọc từ _MAX_ kết quả).',
     'infoPostfix': '',
     'thousands': ',',
-    'lengthMenu': 'Đang hiện _MENU_ kết quả.',
+    'lengthMenu': 'Hiện _MENU_ kết quả.',
     'loadingRecords': 'Đang tải...',
     'processing': 'Đang xử lý...',
     'search': 'Tìm',

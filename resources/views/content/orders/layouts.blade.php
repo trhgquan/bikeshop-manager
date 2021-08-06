@@ -2,8 +2,10 @@
 
 @section('page-content')
 
-<b>Quan ly don hang</b><br/>
-<a href="{{ route('orders.create') }}">Tao mot don hang moi</a><br/>
+@section('page-title')
+<h1 class="display-3">Quản lý đơn hàng</h1>
+@endsection
+
 @yield('page-form')
 
 @yield('page-table')

@@ -11,14 +11,29 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    /**
+     * Maximum records to display per page.
+     * 
+     * @var int
+     */
     private $resultsPerPage = 10;
 
+    /**
+     * Error messages.
+     * 
+     * @var array
+     */
     private $errorMessages = [
         'out-of-stock' => [
             'Mat hang :item khong du, chi con :stock trong kho.'
         ]
     ];
 
+    /**
+     * Success messages.
+     * 
+     * @var array
+     */
     private $successMessages = [
         'create' => [
             'success' => 'Tao don hang moi thanh cong.'
@@ -31,6 +46,12 @@ class OrderController extends Controller
         ]
     ];
 
+    /**
+     * Get error message telling that item is out of stock.
+     * 
+     * @param  \App\Models\Bike $bike
+     * @return string
+     */
     private function getItemOutOfStockError(Bike $item) {
         $itemError = str_replace(
             ':item', 
@@ -45,6 +66,13 @@ class OrderController extends Controller
         );
     }
 
+    /**
+     * Validate item quantity
+     * aka checking if that item is out of stock or not.
+     * 
+     * @param \Illuminate\Support\Facades\Validator $validator
+     * @return array
+     */
     private function validateItemQuantity($validator) {
         $errors = array();
 

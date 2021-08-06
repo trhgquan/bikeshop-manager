@@ -19,7 +19,7 @@
     Mật khẩu hiện tại
   </label>
   <div class="col-sm-10">
-    <input class="form-control" type="password" id="password"  name="password"/>
+    <input class="form-control" placeholder="Mật khẩu hiện tại" type="password" id="password"  name="password"/>
   </div>
 </div>
 <div class="row mb-3">
@@ -27,7 +27,7 @@
     Mật khẩu mới
   </label>
   <div class="col-sm-10">
-    <input class="form-control" type="password" id="new_password" name="new_password"/>
+    <input class="form-control" placeholder="Mật khẩu mới" type="password" id="new_password" name="new_password"/>
   </div>
 </div>
 <div class="row mb-3">
@@ -35,7 +35,7 @@
     Nhập lại mật khẩu mới
   </label>
   <div class="col-sm-10">
-    <input class="form-control" type="password" id="confirm_password" name="confirm_password"/>
+    <input class="form-control" placeholder="Nhập lại mật khẩu mới" type="password" id="confirm_password" name="confirm_password"/>
   </div>
 </div>
 

@@ -22,7 +22,7 @@ Không có loại xe nào sắp hết hàng!
 <script type="text/javascript" src="{{ asset('js/vn-datatable.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-  $('#outOfStockTable').DataTable(language);
+  $('#outOfStockTable').DataTable(settings);
 });
 </script>
 @endsection

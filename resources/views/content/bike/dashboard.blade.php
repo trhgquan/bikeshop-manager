@@ -19,7 +19,7 @@ Hiện tại không có loại xe nào!
 <script type="text/javascript" src="{{ asset('js/vn-datatable.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-  $('#bikesTable').DataTable(language);
+  $('#bikesTable').DataTable(settings);
 });
 </script>
 @endsection

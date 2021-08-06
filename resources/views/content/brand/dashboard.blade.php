@@ -19,7 +19,7 @@ Hiện tại không có hãng xe nào!
 <script type="text/javascript" src="{{ asset('js/vn-datatable.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-  $('#brandsTable').DataTable(language);
+  $('#brandsTable').DataTable(settings);
 });
 </script>
 @endsection
