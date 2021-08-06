@@ -23,6 +23,9 @@ input[name="password"] {
 #separator {
   display: none;
 }
+.content {
+  margin-left: 0px;
+}
 </style>
 @endsection
 

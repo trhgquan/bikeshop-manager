@@ -5,7 +5,7 @@
   <hr>
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-      <a href="{{ route('dashboard') }}" class="nav-link text-white">
+      <a href="{{ route('dashboard') }}" class="nav-link text-white {{ Request::routeIs('dashboard') ? 'active' : '' }}">
         Dashboard
       </a>
     </li>
@@ -21,12 +21,12 @@
       <div id="bikes-collapse" class="collapse">
         <ul class="btn-toggle-nav fw-normal pb-1 small">
           <li>
-            <a href="{{ route('bikes.create') }}" class="nav-link text-white">
+            <a href="{{ route('bikes.create') }}" class="nav-link text-white {{ Request::routeIs('bikes.create') ? 'active' : '' }}">
             Thêm loại xe mới
             </a>
           </li>
           <li>
-            <a href="{{ route('bikes.index') }}" class="nav-link text-white">
+            <a href="{{ route('bikes.index') }}" class="nav-link text-white {{ Request::routeIs('bikes.index') ? 'active' : '' }}">
             Danh sách
             </a>
           </li>

@@ -27,7 +27,7 @@ class ChangePasswordController extends Controller
      * @var array
      */
     private $failedMessage = [
-        'failed' => 'Doi mat khau that bai.'
+        'failed' => 'Đổi mật khẩu thất bại.'
     ];
 
     /**

@@ -23,10 +23,10 @@ class ChangePasswordRequest extends FormRequest
      * @var array
      */
     private $validationMessages = [
-        'required' => 'Ban chua dien o :attribute',
-        'current_password' => ':attribute khong khop',
-        'min' => 'Do dai o :attribute phai toi thieu :min ky tu',
-        'same' => 'O :attribute khong trung voi o :other'
+        'required' => 'Bạn chưa điền ô :attribute.',
+        'current_password' => ':attribute không khớp.',
+        'min' => 'Độ dài ô :attribute phải có độ dài tối thiểu :min ký tự',
+        'same' => 'Ô :attribute phải trùng với ô :other'
     ];
 
     /**
@@ -35,9 +35,9 @@ class ChangePasswordRequest extends FormRequest
      * @var array
      */
     private $validationAttributes = [
-        'password' => 'Mat khau hien tai',
-        'new_password' => 'Mat khau moi',
-        'confirm_password' => 'Nhap lai mat khau moi'
+        'password' => 'Mật khẩu hiện tại',
+        'new_password' => 'Mật khẩu mới',
+        'confirm_password' => 'Nhập lại mật khẩu mới'
     ];
 
     /**

@@ -13,6 +13,7 @@ body {
 }
 .content {
   height: 100%;
+  margin-left: 15em;
 }
 .sidebar {
   top: 0px;
@@ -34,4 +35,18 @@ footer {
   width: 100%;
   margin-top: auto;
   bottom: 0;
+}
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+  }
+  .position-fixed {
+    position: relative !important;
+  }
+  .container {
+    padding-left: 0px;
+  }
+  .content {
+    margin-left: 0px;
+  }
 }

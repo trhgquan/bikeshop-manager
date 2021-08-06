@@ -19,7 +19,7 @@
 @include('navbar.layouts')
 @endif
 
-<div class="ml-sm-auto px-4">
+<div class="ml-sm-auto px-4 content">
 <div class="container">
 @yield('page-title')
 
