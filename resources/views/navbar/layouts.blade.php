@@ -15,9 +15,23 @@
       </a>
     </li>
     <li class="nav-item">
-      <a href="{{ route('bikes.index') }}" class="nav-link text-white">
+      <a href="#" class="btn-toggle nav-link text-white collapsed" data-bs-toggle="collapse" data-bs-target="#bikes-collapse" aria-expanded="false">
         Quản lý loại xe
       </a>
+      <div id="bikes-collapse" class="collapse">
+        <ul class="btn-toggle-nav fw-normal pb-1 small">
+          <li>
+            <a href="{{ route('bikes.create') }}" class="nav-link text-white">
+            Thêm loại xe mới
+            </a>
+          </li>
+          <li>
+            <a href="{{ route('bikes.index') }}" class="nav-link text-white">
+            Danh sách
+            </a>
+          </li>
+        </ul>
+      </div>
     </li>
     <li class="nav-item">
       <a href="{{ route('orders.index') }}" class="nav-link text-white">

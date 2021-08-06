@@ -1,12 +1,12 @@
-<table>
-<tr>
-  <td>id</td>
-  <td>ten hang</td>
-  <td>ten san pham</td>
-  <td>so luong hien tai</td>
-  <td>hanh dong</td>
-</tr>
-
+<table id="outOfStockTable" class="table table-hover">
+<thead>
+  <th>ID loại xe</th>
+  <th>Tên hãng xe</th>
+  <th>Tên loại xe</th>
+  <th>Số lượng trong kho</th>
+  <th>Hành động</th>
+</thead>
+<tbody>
 @foreach ($items as $item)
 <tr>
   <td>{{ $item->id }}</td>
@@ -14,15 +14,14 @@
   <td>{{ $item->bike_name }}</td>
   <td>{{ $item->bike_stock }}</td>
   <td>
-    <a href="{{ route('bikes.show', $item->id) }}">
-      Chi tiet
+    <a class="btn btn-info" href="{{ route('bikes.show', $item->id) }}">
+      Chi tiết
     </a>
-    <a href="{{ route('bikes.edit', $item->id) }}">
-      Chinh sua
+    <a class="btn btn-warning" href="{{ route('bikes.edit', $item->id) }}">
+      Chỉnh sửa
     </a>
   </td>
 </tr>
 @endforeach
+</tbody>
 </table>
-
-{{ $items->links() }}

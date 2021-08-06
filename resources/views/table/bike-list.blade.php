@@ -1,9 +1,9 @@
-<table id="bikesTable">
+<table class="table table-hover" id="bikesTable">
 <thead>
-  <th>id</th>
-  <th>ten xe</th>
-  <th>hang xe</th>
-  <th>hanh dong</th>
+  <th>ID</th>
+  <th>Tên loại xe</th>
+  <th>Tên hãng xe</th>
+  <th>Hành động</th>
 </thead>
 <tbody>
 @foreach ($bikes as $bike)
@@ -12,11 +12,11 @@
   <td>{{ $bike->bike_name }}</td>
   <td>{{ isset($brand) ? $brand->brand_name : $bike->brand->brand_name }}</td>
   <td>
-    <a href="{{ route('bikes.show', $bike->id) }}">
-      Chi tiet
+    <a class="btn btn-info" href="{{ route('bikes.show', $bike->id) }}">
+      Chi tiết
     </a>
-    <a href="{{ route('bikes.edit', $bike->id) }}">
-      Chinh sua
+    <a class="btn btn-warning" href="{{ route('bikes.edit', $bike->id) }}">
+      Chỉnh sửa
     </a>
   </td>
 </tr>

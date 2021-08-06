@@ -26,16 +26,16 @@ class CreateBikeRequest extends FormRequest
      * @var array
      */
     private $validationMessages = [
-        'bike_stock.min' => 'O :attribute phai co gia tri toi thieu la 0.',
-        'bike_buy_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
-        'bike_sell_price.min' => 'O :attribute phai co gia tri toi thieu la 0.',
+        'bike_stock.min' => 'Ô :attribute phải có giá trị tối thiểu là 0.',
+        'bike_buy_price.min' => 'Ô :attribute phải có giá trị tối thiểu là 0.',
+        'bike_sell_price.min' => 'Ô :attribute phải có giá trị tối thiểu là 0.',
         
-        'required' => 'O :attribute bi bo trong.',
-        'exists' => 'Vui long chon :attribute hop le.',
-        'min' => 'O :attribute phai co toi thieu :min ky tu.',
-        'max' => 'O :attribute phai co toi da :max ky tu.',
-        'numeric' => 'O :attribute phai co gia tri la mot so nguyen.',
-        'integer' => 'O :attribute phai co gia tri la mot so nguyen.'
+        'required' => 'Ô :attribute bị bỏ trống.',
+        'exists' => 'Vui lòng chọn :attribute hợp lệ.',
+        'min' => 'Ô :attribute phải có tối thiểu :min ký tự.',
+        'max' => 'Ô :attribute phải có tối đa :max ký tự.',
+        'numeric' => 'Ô :attribute phải có giá trị là một số nguyên.',
+        'integer' => 'Ô :attribute phải có giá trị là một số nguyên.'
     ];
 
     /**
@@ -44,12 +44,12 @@ class CreateBikeRequest extends FormRequest
      * @var array
      */
     private $validationAttributes = [
-        'brand_id' => 'Ten hang',
-        'bike_name' => 'Ten loai xe',
-        'bike_description' => 'Mo ta loai xe',
-        'bike_stock' => 'So luong trong kho',
-        'bike_buy_price' => 'Gia nhap',
-        'bike_sell_price' => 'Gia ban'
+        'brand_id' => 'Tên hãng',
+        'bike_name' => 'Tên loại xe',
+        'bike_description' => 'Mô tả loại xe',
+        'bike_stock' => 'Số lượng',
+        'bike_buy_price' => 'Giá nhập',
+        'bike_sell_price' => 'Giá bán'
     ];
 
     /**

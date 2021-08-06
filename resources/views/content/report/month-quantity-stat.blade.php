@@ -11,9 +11,27 @@
 </style>
 @endsection
 
-@section('small-title', 'Loại xe bán chạy trong tháng')
+@section('page-small-title')
+<small class="lead">Loại xe bán chạy trong tháng</small>
+@endsection
 
 @section('page-table')
+<form id="loadMonthStat">
+  @csrf
+  <div class="row">
+    <div class="col">
+      <label for="month">Chọn tháng để xem:</label>
+    </div>
+    <div class="col">
+      <input type="date" class="form-control" id="month"/>
+    </div>
+    <div class="col">
+      <button class="btn btn-outline-primary" type="submit">Xem</button>
+    </div>
+  </div>
+  <span id="month_error" class="invalid-feedback"></span>
+</form>
+
 <div id="introduction"></div>
 <div class="row">
   <div class="col">
@@ -33,24 +51,6 @@
     </table>
   </div>
 </div>
-
-
-<form id="loadMonthStat">
-  @csrf
-  <div class="row">
-    <div class="col">
-      <label for="month">Chọn tháng để xem:</label>
-    </div>
-    <div class="col">
-      <input type="date" class="form-control" id="month"/>
-    </div>
-    <div class="col">
-      <button class="btn btn-outline-primary" type="submit">Xem</button>
-    </div>
-  </div>
-
-  <span id="month_error" class="invalid-feedback"></span>
-</form>
 @endsection
 
 @section('javascripts')

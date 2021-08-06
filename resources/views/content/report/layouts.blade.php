@@ -1,11 +1,13 @@
 @extends('template')
 
-@section('page-content')
-<h1 class="page-title">
+@section('page-title')
+<h1 class="display-3">
   Báo cáo
 </h1>
-<small class="text-muted">@yield('small-title')</small>
-<hr>
+@endsection
+
+@section('page-content')
+
 @yield('page-table')
 
 @yield('page-stats')

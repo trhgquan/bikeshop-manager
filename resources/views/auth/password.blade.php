@@ -5,7 +5,7 @@
 @section('page-content')
 <h1 class="page-title">Đổi mật khẩu</h1>
 
-<form class="form-inline" action="{{ route('auth.changepassword.handle') }}" method="post">
+<form action="{{ route('auth.changepassword.handle') }}" method="post">
 @csrf
 <label for="password" class="control-label">
   Mật khẩu hiện tại

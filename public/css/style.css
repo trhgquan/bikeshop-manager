@@ -9,6 +9,7 @@ body {
 .container {
   padding-top: 75px;
   padding-left: 75px;
+  padding-bottom: 75px;
 }
 .content {
   height: 100%;

@@ -18,9 +18,13 @@
 @if (Auth::check())
 @include('navbar.layouts')
 @endif
-<div class="separate"></div>
+
 <div class="ml-sm-auto px-4">
 <div class="container">
+@yield('page-title')
+
+@yield('page-small-title')
+<hr id="separator">
 @include('popup.error')
 
 @include('popup.notify')

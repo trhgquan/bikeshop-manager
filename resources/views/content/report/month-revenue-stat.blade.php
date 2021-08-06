@@ -2,8 +2,26 @@
 
 @section('title', 'Doanh số bán hàng - Báo cáo')
 
+@section('page-small-title')
+<small class="lead">Doanh số bán hàng theo tháng</small>
+@endsection
+
 @section('page-table')
-@section('small-title', 'Doanh số bán hàng theo tháng')
+<form id="loadMonthStat">
+  <div class="row g-3">
+    <div class="col">
+      <label for="month">Chọn tháng:</label>
+    </div>
+    <div class="col">
+      <input class="form-control" type="date" id="month"/>
+    </div>
+    <div class="col">
+      <button class="btn btn-outline-primary" type="submit">Xem</button>
+    </div>
+  </div>
+  <span id="month_error" class="invalid-feedback"></span>
+</form>
+
 <div id="introduction"></div>
 <table class="table table-hover" id="revenueTable" style="display: none;">
   <thead>
@@ -23,21 +41,6 @@
     <tr id="revenueTableConclusion"></tr>
   </tfoot>
 </table>
-
-<form id="loadMonthStat">
-  <div class="row g-3">
-    <div class="col">
-      <label for="month">Chọn tháng:</label>
-    </div>
-    <div class="col">
-      <input class="form-control" type="date" id="month"/>
-    </div>
-    <div class="col">
-      <button class="btn btn-outline-primary" type="submit">Xem</button>
-    </div>
-  </div>
-  <span id="month_error" class="invalid-feedback"></span>
-</form>
 @endsection
 
 @section('javascripts')
@@ -65,13 +68,13 @@ $(document).ready(function() {
       else {
         if (result.data.items == 0) {
           $('#introduction').html(
-            'Không có báo cáo trong tháng ' + result.data.month
+            'Không có số liệu trong tháng ' + result.data.month
           );
         }
 
         else {
           $('#introduction').html(
-            'Báo cáo doanh thu tháng ' + result.data.month
+            'Báo cáo doanh số tháng ' + result.data.month
           );
 
           // Load table

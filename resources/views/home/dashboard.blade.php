@@ -2,10 +2,19 @@
 
 @section('title', 'Dashboard')
 
+@section('page-title')
+<h1 class="display-3">Dashboard</h3>
+@endsection
+
 @section('page-content')
-Ban muon lam gi hom nay?
-<a href="{{ route('brands.index') }}">Tao hang xe moi</a>
-<a href="{{ route('bikes.index') }}">Them loai xe moi</a>
-<a href="{{ route('orders.index') }}">Tao don hang moi</a>
-<a href="{{ route('report.month_revenue_stat.index') }}">Xem doanh so</a>
+<div class="dropdown">
+  <button class="btn btn-success dropdown-toggle" id="addMenuDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+    Thêm mới
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="addMenuDropdownBtn">
+    <li><a class="dropdown-item" href="{{ route('brands.create') }}">Hãng xe</a></li>
+    <li><a class="dropdown-item" href="{{ route('bikes.create') }}">Loại xe</a></li>
+    <li><a class="dropdown-item" href="{{ route('orders.create') }}">Đơn hàng</a></li>
+  </ul>
+</div>
 @endsection

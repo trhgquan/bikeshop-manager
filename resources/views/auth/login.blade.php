@@ -20,14 +20,18 @@ input[name="password"] {
   max-width: 500px;
   margin: auto;
 }
+#separator {
+  display: none;
+}
 </style>
+@endsection
+
+@section('page-title')
+<h1 class="page-title text-center">{{ config('app.name') }}</h1>
 @endsection
 
 @section('page-content')
 <div class="text-center">
-  <h1 class="h3 mb-3 mt-4">
-    {{ config('app.name') }}
-  </h1>
   <form class="form-login" action="{{ route('auth.login.handle') }}" method="POST">
     <div class="mb-3">
       <input class="form-control" placeholder="Tên người dùng" type="text" name="username" required/>

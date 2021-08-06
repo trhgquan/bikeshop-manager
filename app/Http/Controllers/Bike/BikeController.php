@@ -19,13 +19,13 @@ class BikeController extends Controller
      */
     private $successMessages = [
         'create' => [
-            'success' => 'Tao loai xe moi thanh cong.'
+            'success' => 'Tạo loại xe thành công.'
         ],
         'update' => [
-            'success' => 'Sua loai xe thanh cong.'
+            'success' => 'Sửa loại xe thành công.'
         ],
         'destroy' => [
-            'success' => 'Xoa loai xe thanh cong.'
+            'success' => 'Xóa loại xe thành công.'
         ]
     ];
 

@@ -22,7 +22,7 @@ class ReportController extends Controller
     public function out_of_stock() {
         $bikes = Bike::where('bike_stock', '<', 10)
             ->with('brand')
-            ->paginate($this->resultsPerPage);
+            ->get();
 
         return view('content.report.out-of-stock', ['items' => $bikes]);
     }

@@ -1,11 +1,11 @@
 @extends('template')
 
-@section('page-content')
+@section('page-title')
+<h1 class="display-3">Quản lý loại xe</h1>
+@endsection
 
-<b>Quan ly loai xe</b><br/>
-<a href="{{ route('bikes.create') }}">Them loai xe</a><br/>
+@section('page-content')
 @yield('page-form')
 
 @yield('page-table')
-
 @endsection

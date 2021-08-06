@@ -1,38 +1,86 @@
 @extends('content.bike.layouts')
 
-@section('title', 'Chinh sua loai xe ' . $bike->bike_name)
+@section('title', 'Chỉnh sửa loại xe ' . $bike->bike_name)
+
+@section('page-small-title')
+<small class="lead">Chỉnh sửa loại xe <a href="{{ route('bikes.show', $bike->id) }}">{{ $bike->bike_name }}</a></small>
+@endsection
 
 @section('page-form')
-Chinh sua loai xe:<br/>
 <form action="{{ route('bikes.update', $bike->id) }}" method="POST">
 @csrf
 @method('PUT')
-Hang xe:<br/>
-<select name="brand_id">
-<option value="0">-- Chon hang xe --</option>
-@foreach ($brands as $brand)
-<option value="{{ $brand->id }}" {{ $brand->id == $bike->brand->id ? "selected" : "" }}>
-  {{ $brand->idAndName() }}
-</option>
-@endforeach
-</select><br/>
-Ten loai xe:<br/>
-<input type="text" name="bike_name" value="{{ $bike->bike_name }}"/><br/>
-Mo ta loai xe:<br/>
-<textarea name="bike_description" cols="30" rows="10">
-{{ $bike->bike_description }}
-</textarea><br/>
-So luong: <input type="number" name="bike_stock" value="{{ $bike->bike_stock }}"/><br/>
-Gia nhap: <input type="number" name="bike_buy_price" value="{{ $bike->bike_buy_price }}"/><br/>
-Gia ban: <input type="number" name="bike_sell_price" value="{{ $bike->bike_sell_price }}"/><br/>
-<button type="submit">Luu chinh sua</button>
+<div class="row mb-3">
+  <label for="brand_id" class="col-sm-2 col-form-label">Hãng xe</label>
+  <div class="col-sm-10">
+    <select id="brand_id" class="form-select" name="brand_id">
+      @foreach ($brands as $brand)
+      <option {{ $bike->id == $brand->id ? "selected" : ""}} 
+        value="{{ $brand->id }}">
+        {{ $brand->idAndName() }}
+      </option>
+      @endforeach
+    </select>
+  </div>
+</div>
+<div class="row mb-3">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-10">
+    Không có hãng? <a class="btn btn-success" href="{{ route('brands.create') }}">Tạo mới!</a>
+  </div>
+</div>
+<div class="row mb-3">
+  <label for="bike_name" class="col-sm-2 col-form-label">
+    Tên loại xe
+  </label>
+  <div class="col-sm-10">
+    <input type="text" placeholder="Tên loại xe" class="form-control" id="bike_name" name="bike_name" value="{{ $bike->bike_name }}"/>
+  </div>
+</div>
+<div class="row mb-3">
+  <label for="bike_description" class="col-sm-2 col-form-label">
+    Mô tả loại xe
+  </label>
+  <div class="col-sm-10">
+    <textarea placeholder="Mô tả loại xe" class="form-control" id="bike_description" name="bike_description" cols="5" rows="5">{{ $bike->bike_description }}</textarea>
+  </div>
+</div>
+<div class="row mb-3">
+  <label for="bike_stock" class="col-sm-2 col-form-label">
+    Số lượng
+  </label>
+  <div class="col-sm-10">
+    <input placeholder="Số lượng" class="form-control" type="number" id="bike_stock" name="bike_stock" value="{{ $bike->bike_stock }}"/>
+  </div>
+</div>
+<div class="row mb-3">
+  <label for="bike_buy_price" class="col-sm-2 col-form-label">
+    Giá nhập
+  </label>
+  <div class="col-sm-10">
+    <input placeholder="Giá nhập" class="form-control" type="number" id="bike_buy_price" name="bike_buy_price" value="{{ $bike->bike_buy_price }}"/>
+  </div>
+</div>
+<div class="row mb-3">
+  <label for="bike_sell_price" class="col-sm-2 col-form-label">
+    Giá bán
+  </label>
+  <div class="col-sm-10">
+    <input placeholder="Giá bán" class="form-control" type="number" id="bike_sell_price" name="bike_sell_price" value="{{ $bike->bike_sell_price }}"/>
+  </div>
+</div>
+<button class="btn btn-primary" type="submit">Lưu chỉnh sửa</button>
 </form>
 
-Xoa loai xe:<br/>
+<hr>
+
 <form action="{{ route('bikes.destroy', $bike->id) }}" method="POST">
 @csrf
 @method('DELETE')
-Nhan vao nut nay la ban se xoa loai xe {{ $bike->bike_name }}. Suy nghi ky chua?
-<button type="submit" onclick="return confirm('Xoa loai xe. Dong y?');">Xoa</button>
+<p class="text-danger">
+  Nhấn vào nút này là bạn sẽ xóa loại xe {{ $bike->bike_name }}. Suy nghĩ kỹ chưa?
+</p>
+
+<button class="btn btn-danger" type="submit" onclick="return confirm('Thật sự có ý chí và nguyện vọng muốn xóa?');">sudo rm -r -f</button>
 </form>
 @endsection

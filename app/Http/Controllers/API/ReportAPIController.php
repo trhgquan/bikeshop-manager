@@ -12,6 +12,18 @@ use Illuminate\Http\Request;
 class ReportAPIController extends Controller
 {
     /**
+     * Validator message for ReportAPIController.
+     * (same validator for 2 controller, should declare as array in array
+     * if have more.)
+     * 
+     * @var array
+     */
+    private $validatorMessage = [
+        'required' => 'Ngày tháng đang bỏ trống.',
+        'date' => 'Ngày tháng không hợp lệ.'
+    ];
+
+    /**
      * Get bike name and total sales in the range [startDate, endDate].
      * 
      * @param  \Carbon\Carbon $startDate
@@ -29,6 +41,7 @@ class ReportAPIController extends Controller
             )
             ->where('checkout_at', '>=', $startDate)
             ->where('checkout_at', '<=', $endDate)
+            ->where('bikes.deleted_at', '=', NULL)
             ->groupBy('bikes.id', 'bikes.bike_name')
             ->orderBy('bike_order_value', 'DESC')
             ->get();
@@ -44,6 +57,7 @@ class ReportAPIController extends Controller
     private function getOrdersInRange($startDate, $endDate) {
         return DB::table('order_bike')
             ->join('orders', 'order_bike.order_id', '=', 'orders.id')
+            ->join('bikes', 'order_bike.bike_id', '=', 'bikes.id')
             ->select(
                 'orders.id',
                 DB::raw('SUM(order_bike.order_value) AS quantity'),
@@ -58,6 +72,7 @@ class ReportAPIController extends Controller
                 ))
             ->where('checkout_at', '>=', $startDate)
             ->where('checkout_at', '<=', $endDate)
+            ->where('bikes.deleted_at', '=', NULL)
             ->groupBy('orders.id')
             ->orderBy('profit', 'DESC')
             ->get();
@@ -72,10 +87,7 @@ class ReportAPIController extends Controller
     public function bike_quantity_month(Request $request) {
         $validator = Validator::make($request->all(),[
             'month' => 'required|date'
-        ],[
-            'required' => 'Ngay thang dang bo trong.',
-            'date' => 'Ngay thang khong hop le.'
-        ]);
+        ], $this->validatorMessage);
 
         if ($validator->fails()) {
             return response()
@@ -108,10 +120,7 @@ class ReportAPIController extends Controller
     public function order_revenue_month(Request $request) {
         $validator = Validator::make($request->all(), [
             'month' => 'required|date'
-        ], [
-            'required' => 'Ngay thang dang bo trong.',
-            'date' => 'Ngay thang khong hop le.'
-        ]);
+        ], $this->validatorMessage);
 
         if ($validator->fails()) {
             return response()
