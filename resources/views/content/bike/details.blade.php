@@ -1,9 +1,9 @@
 @extends('content.bike.layouts')
 
-@section('title', 'Chi tiết loại xe ' . $bike->bike_name)
+@section('title', 'Thông tin loại xe ' . $bike->bike_name)
 
 @section('page-small-title')
-<small class="lead">Chi tiết loại xe {{ $bike->bike_name }}</small>
+<small class="lead">Thông tin loại xe {{ $bike->bike_name }}</small>
 @endsection
 
 @section('page-table')
@@ -57,5 +57,5 @@
     </dl>
   </div>
 </div>
-<a class="btn btn-warning" href="{{ route('bikes.edit', $bike->id) }}">Chỉnh sửa loại xe</a> 
+<a class="btn btn-warning" href="{{ route('bikes.edit', $bike->id) }}">Chỉnh sửa loại xe {{ $bike->bike_name }}</a> 
 @endsection

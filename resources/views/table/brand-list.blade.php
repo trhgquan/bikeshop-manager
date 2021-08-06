@@ -1,8 +1,8 @@
-<table id="brandsTable">
+<table id="brandsTable" class="table table-hover">
 <thead>
-  <th>id</th>
-  <th>ten hang</th>
-  <th>hanh dong</th>
+  <th>ID</th>
+  <th>Tên hãng</th>
+  <th>Hành động</th>
 </thead>
 <tbody>
 @foreach ($brands as $brand)
@@ -10,11 +10,11 @@
   <td>{{ $brand->id }}</td>
   <td>{{ $brand->brand_name }}</td>
   <td>
-    <a href="{{ route('brands.show', $brand->id) }}">
-      Chi tiet
+    <a class="btn btn-info" href="{{ route('brands.show', $brand->id) }}">
+      Chi tiết
     </a>
-    <a href="{{ route('brands.edit', $brand->id) }}">
-      Chinh sua
+    <a class="btn btn-warning" href="{{ route('brands.edit', $brand->id) }}">
+      Chỉnh sửa
     </a>
   </td>
 </tr>

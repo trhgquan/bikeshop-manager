@@ -2,8 +2,10 @@
 
 @section('page-content')
 
-<b>Quan ly hang xe</b><br/>
-<a href="{{ route('brands.create') }}">Them hang xe</a><br/>
+@section('page-title')
+<h1 class="display-3">Quản lý hãng xe</h1>
+@endsection
+
 @yield('page-form')
 
 @yield('page-table')

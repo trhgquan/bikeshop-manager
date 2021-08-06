@@ -10,9 +10,23 @@
       </a>
     </li>
     <li class="nav-item">
-      <a href="{{ route('brands.index') }}" class="nav-link text-white">
+      <a href="#" class="btn-toggle nav-link text-white collapsed" data-bs-toggle="collapse" data-bs-target="#brands-collapse" aria-expanded="false">
         Quản lý hãng xe
       </a>
+      <div id="brands-collapse" class="collapse">
+        <ul class="btn-toggle-nav fw-normal pb-1 small">
+          <li>
+            <a href="{{ route('brands.create') }}" class="nav-link text-white {{ Request::routeIs('brands.create') ? 'active' : '' }}">
+            Thêm hãng xe mới
+            </a>
+          </li>
+          <li>
+            <a href="{{ route('brands.index') }}" class="nav-link text-white {{ Request::routeIs('brands.index') ? 'active' : '' }}">
+            Danh sách
+            </a>
+          </li>
+        </ul>
+      </div>
     </li>
     <li class="nav-item">
       <a href="#" class="btn-toggle nav-link text-white collapsed" data-bs-toggle="collapse" data-bs-target="#bikes-collapse" aria-expanded="false">

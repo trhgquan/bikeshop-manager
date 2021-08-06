@@ -69,7 +69,12 @@
     <input placeholder="Giá bán" class="form-control" type="number" id="bike_sell_price" name="bike_sell_price" value="{{ old('bike_sell_price') }}"/>
   </div>
 </div>
+<div class="row mb-3">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-10">
+    <button class="btn btn-primary" type="submit">Thêm loại xe</button>
+  </div>
+</div>
 
-<button class="btn btn-primary" type="submit">Thêm</button>
 </form>
 @endsection

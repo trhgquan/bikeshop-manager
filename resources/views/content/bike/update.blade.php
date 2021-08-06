@@ -69,17 +69,20 @@
     <input placeholder="Giá bán" class="form-control" type="number" id="bike_sell_price" name="bike_sell_price" value="{{ $bike->bike_sell_price }}"/>
   </div>
 </div>
-<button class="btn btn-primary" type="submit">Lưu chỉnh sửa</button>
+<div class="row mb-3">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-10">
+    <button class="btn btn-primary" type="submit">Lưu chỉnh sửa</button>
+  </div>
+</div>
 </form>
 
 <hr>
-
+<small class="lead">Xóa loại xe {{ $bike->bike_name }}</small>
 <form action="{{ route('bikes.destroy', $bike->id) }}" method="POST">
 @csrf
 @method('DELETE')
-<p class="text-danger">
-  Nhấn vào nút này là bạn sẽ xóa loại xe {{ $bike->bike_name }}. Suy nghĩ kỹ chưa?
-</p>
+<p class="text-danger">Nhấn vào nút này là bạn sẽ xóa loại xe {{ $bike->bike_name }}. Suy nghĩ kỹ chưa?</p>
 
 <button class="btn btn-danger" type="submit" onclick="return confirm('Thật sự có ý chí và nguyện vọng muốn xóa?');">sudo rm -r -f</button>
 </form>
