@@ -22,9 +22,9 @@ class CreateBrandRequest extends FormRequest
      * @var array
      */
     private $validationMessages = [
-        'required' => 'O :attribute bi bo trong.',
-        'min' => 'O :attribute phai co toi thieu :min ky tu.',
-        'max' => 'O :attribute phai co toi da :max ky tu.'
+        'required' => 'Ô :attribute bị bỏ trống.',
+        'min' => 'Ô :attribute phải có tối thiểu :min ký tự.',
+        'max' => 'Ô :attribute phải có tối đa :max ký tự.'
     ];
 
     /**
@@ -33,8 +33,8 @@ class CreateBrandRequest extends FormRequest
      * @var array
      */
     private $validationAttributes = [
-        'brand_name' => 'Ten hang xe',
-        'brand_description' => 'Mo ta hang xe'
+        'brand_name' => 'Tên hãng xe',
+        'brand_description' => 'Mô tả hãng xe'
     ];
 
     /**

@@ -14,7 +14,7 @@ class LogoutController extends Controller
      * @var array
      */
     private $logoutMessage = [
-        'success' => 'Dang xuat thanh cong'
+        'success' => 'Đăng xuất thành công.'
     ];
 
     /**
