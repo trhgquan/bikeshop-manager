@@ -21,6 +21,7 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'api_token',
     ];
 
     /**
@@ -31,6 +32,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'api_token'
     ];
 
     /**
@@ -41,4 +43,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Return name(username) format.
+     * 
+     * @return string
+     */
+    public function nameAndUsername() {
+        return sprintf(
+            '%s (%s)',
+            $this->name,
+            $this->username
+        );
+    }
 }

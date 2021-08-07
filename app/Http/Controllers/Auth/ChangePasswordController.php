@@ -3,37 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User;
 
 class ChangePasswordController extends Controller
 {
-    /**
-     * Validation rules for ChangePasswordController.
-     * 
-     * @var array
-     */
-    private $validationRules = [
-        'password' => 'required|current_password',
-        'new_password' => 'required|min:8',
-        'confirm_password' => 'required|same:new_password'
-    ];
-
-    /**
-     * Validation message when fails.
-     * 
-     * @var array
-     */
-    private $validationMessages = [
-        'required' => 'Ban chua dien o :attribute',
-        'current_password' => 'Mat khau hien tai khong khop',
-        'min' => 'Do dai o :attribute phai toi thieu :min ky tu',
-        'same' => 'O :attribute khong trung voi o :other'
-    ];
-
     /**
      * Message when success.
      * 
@@ -49,7 +27,7 @@ class ChangePasswordController extends Controller
      * @var array
      */
     private $failedMessage = [
-        'failed' => 'Doi mat khau that bai.'
+        'failed' => 'Đổi mật khẩu thất bại.'
     ];
 
     /**
@@ -58,19 +36,21 @@ class ChangePasswordController extends Controller
      * @param  string $password
      * @return bool
      */
-    private function confirmChangeSuccess($password) {
+    private function confirmChangeSuccess(string $password) {
         return User::find(Auth::id())->password == $password;
     }
 
     /**
-     * Update user's password.
+     * Save new password to the database.
      * 
+     * @param  \App\Models\User $user
      * @param  string $password
      */
-    private function update($password) {
-        $user = User::find(Auth::user()->id);
-
+    private function store(User $user, string $password) {
         $user->password = $password;
+
+        // Generate new API token.
+        $user->api_token = hash('sha256', Str::random(60));
 
         $user->save();
     }
@@ -78,25 +58,18 @@ class ChangePasswordController extends Controller
     /**
      * Invoke change password procedure.
      * 
-     * @param  \Illuminate\Http\Request $request
+     * @param  \App\Http\Requests\ChangePasswordRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function handle(Request $request) {
-        $validator = Validator::make(
-            $request->all(), 
-            $this->validationRules, 
-            $this->validationMessages
-        );
-        
-        if ($validator->fails()) {
-            return back()->withErrors($validator);
-        }
+    public function handle(ChangePasswordRequest $request) {
+        // Get validated data.
+        $validated = $request->validated();
 
-        // Create new password hash.
-        $new_password = Hash::make($request->new_password);
+        // Generate hash value for new password.
+        $new_password = Hash::make($validated['new_password']);
 
         // Update new password.
-        $this->update($new_password);
+        $this->store(Auth::user(), $new_password);
 
         // Confirm password change success, then send notification.
         if ($this->confirmChangeSuccess($new_password)) {
@@ -110,7 +83,7 @@ class ChangePasswordController extends Controller
      * 
      * @return \Illuminate\View\View
      */
-    public function view() {
+    public function index() {
         return view('auth.password');
     }
 }

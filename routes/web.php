@@ -15,7 +15,7 @@ use App\Http\Middleware;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
 });
 
 /**
@@ -38,46 +38,119 @@ Route::get('/dashboard', function() {
 /**
  * Log user in the system.
  * 
- * 
+ * User should NOT be logged in before acccesing this route.
  */
-
-use App\Http\Controllers\Auth\LoginController;
 
 Route::middleware(['guest'])->group(function () {   
     Route::get('/login', [
-        LoginController::class, 'view'
-    ])->name('auth.login.view');
+        App\Http\Controllers\Auth\LoginController::class,
+        'index'
+    ])->name('auth.login.index');
 
     Route::post('/login', [
-        LoginController::class, 'handle'
+        App\Http\Controllers\Auth\LoginController::class,
+        'handle'
     ])->name('auth.login.handle'); 
 });
 
 /**
  * Log user out of the system
  * 
- * 
+ * User should logged in before access this route.
  */
 
-use App\Http\Controllers\Auth\LogoutController;
+Route::post('/logout', [
+    App\Http\Controllers\Auth\LogoutController::class,
+    'handle'
+])->middleware('auth')->name('auth.logout');
 
-Route::post('/logout', LogoutController::class)
-    ->middleware('auth')->name('auth.logout');
+Route::get('/logout', [
+    App\Http\Controllers\Auth\LogoutController::class,
+    'index'
+]);
 
 /**
  * Change user's password.
  * 
- * 
+ * User should logged in before access this route.
  */
-
-use App\Http\Controllers\Auth\ChangePasswordController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/changepassword', [
-        ChangePasswordController::class, 'view'
-    ])->name('auth.changepassword.view');
+        App\Http\Controllers\Auth\ChangePasswordController::class,
+        'index'
+    ])->name('auth.changepassword.index');
 
     Route::post('/changepassword', [
-        ChangePasswordController::class, 'handle'
+        App\Http\Controllers\Auth\ChangePasswordController::class,
+        'handle'
     ])->name('auth.changepassword.handle');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Bike Brand route.
+| 
+| These routes do Bike Brand actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'brands', 
+    App\Http\Controllers\Bike\BrandController::class
+)->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
+| Bikes route.
+| 
+| These routes do Bikes actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'bikes',
+    App\Http\Controllers\Bike\BikeController::class
+)->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
+| Order route.
+| 
+| These routes do Orders actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'orders',
+    App\Http\Controllers\OrderController::class
+)->middleware('auth');
+
+/*
+|--------------------------------------------------------------------------
+| Report route.
+| 
+| These routes do Reports actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::group([
+    'as' => 'report.',
+    'prefix' => 'report',
+    'middleware' => 'auth'
+], function () {
+    Route::get('/out-of-stock', [
+        \App\Http\Controllers\ReportController::class,
+        'out_of_stock'
+    ])->name('out_of_stock');
+
+    Route::get('/month-quantity-stat', [
+        \App\Http\Controllers\ReportController::class,
+        'month_quantity_stat_index'
+    ])->name('month_quantity_stat.index');
+
+    Route::get('/month-revenue-stat', [
+        \App\Http\Controllers\ReportController::class,
+        'month_revenue_stat_index'
+    ])->name('month_revenue_stat.index');
 });
