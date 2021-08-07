@@ -7,7 +7,7 @@
 <tbody>
 @foreach ($brands as $brand)
 <tr>
-  <td>{{ $brand->id }}</td>
+  <td>HX-{{ $brand->id }}</td>
   <td>{{ $brand->brand_name }}</td>
   <td>
     <a class="btn btn-info" href="{{ route('brands.show', $brand->id) }}">

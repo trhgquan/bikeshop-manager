@@ -73,22 +73,34 @@
       <div id="report-collapse" class="collapse">
         <ul class="btn-toggle-nav fw-normal pb-1 small">
           <li>
-            <a href="{{ route('report.out_of_stock') }}" class="nav-link text-white">
+            <a href="{{ route('report.out_of_stock') }}" class="nav-link text-white {{ Request::routeIs('report.out_of_stock') ? 'active' : '' }}">
             Loại xe sắp hết
             </a>
           </li>
           <li>
-            <a href="{{ route('report.month_quantity_stat.index') }}" class="nav-link text-white">
+            <a href="{{ route('report.month_quantity_stat.index') }}" class="nav-link text-white {{ Request::routeIs('report.month_quantity_stat.index') ? 'active' : '' }}">
             Loại xe bán chạy trong tháng
             </a>
           </li>
           <li>
-            <a href="{{ route('report.month_revenue_stat.index') }}" class="nav-link text-white">
+            <a href="{{ route('report.month_revenue_stat.index') }}" class="nav-link text-white {{ Request::routeIs('report.month_revenue_stat.index') ? 'active' : '' }}">
             Doanh số theo tháng
             </a>
           </li>
         </ul>
       </div>
+    </li>
+  </ul>
+  <hr>
+  {{-- Please add authorization here --}}
+  <ul class="nav nav-pills flex-column mb-auto">
+    <span class="navbar-text text-secondary">
+      Phần dành cho quản lý
+    </span>
+    <li class="nav-item">
+      <a href="{{ route('users.index') }}" class="nav-link text-white">
+        Quản lý người dùng
+      </a>
     </li>
   </ul>
   <hr>
