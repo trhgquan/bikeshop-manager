@@ -25,7 +25,7 @@ class OrderController extends Controller
      */
     private $errorMessages = [
         'out-of-stock' => [
-            'Mat hang :item khong du, chi con :stock trong kho.'
+            'Mặt hàng :item không đủ, chỉ còn :stock trong kho.'
         ]
     ];
 
@@ -36,13 +36,13 @@ class OrderController extends Controller
      */
     private $successMessages = [
         'create' => [
-            'success' => 'Tao don hang moi thanh cong.'
+            'success' => 'Tạo đơn hàng mới thành công.'
         ],
         'update' => [
-            'success' => 'Chinh sua don hang thanh cong.'
+            'success' => 'Chỉnh sửa đơn hàng thành công.'
         ],
         'destroy' => [
-            'success' => 'Huy don hang thanh cong.'
+            'success' => 'Hủy đơn hàng thành công.'
         ]
     ];
 
@@ -206,7 +206,7 @@ class OrderController extends Controller
         }
 
         // Get new information of updated bikes.
-        $bikes_updated = array();
+        $bikes_updated = [];
 
         foreach ($validator['bike_id'] as $index => $bike_id) {
             // Update bike stock.

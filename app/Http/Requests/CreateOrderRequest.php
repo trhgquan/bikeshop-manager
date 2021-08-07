@@ -26,13 +26,13 @@ class CreateOrderRequest extends FormRequest
      * @var array
      */
     protected $validationMessages = [
-        'distinct' => 'Gia tri cac o :attribute phai khac nhau',
-        'required' => 'O :attribute dang bi de trong.',
-        'exists' => 'Gia tri o :attribute khong hop le.',
-        'min' => 'Gia tri o :attribute toi thieu phai la :min',
-        'numeric' => 'Gia tri o :attribute phai la mot so nguyen.',
-        'integer' => 'Gia tri o :attribute phai la mot so nguyen.',
-        'email' => 'Gia tri o :attribute phai la mot dia chi email.'
+        'distinct' => 'Giá trị các ô :attribute phải khác nhau',
+        'required' => 'Ô :attribute đang bị để trống.',
+        'exists' => 'Giá trị ô :attribute không hợp lệ.',
+        'min' => 'Giá trị ô :attribute tối thiểu phải là :min',
+        'numeric' => 'Giá trị ô :attribute phải là một số nguyên.',
+        'integer' => 'Giá trị ô :attribute phải là một số nguyên.',
+        'email' => 'Giá trị ô :attribute phải là một địa chỉ email.'
     ];
 
     /**
@@ -41,10 +41,10 @@ class CreateOrderRequest extends FormRequest
      * @var array
      */
     protected $validationAttributes = [
-        'customer_name' => 'Ten khach hang',
-        'customer_email' => 'Email khach hang',
-        'bike_id.*' => 'Loai xe',
-        'order_value.*' => 'So luong'
+        'customer_name' => 'Tên khách hàng',
+        'customer_email' => 'Email khách hàng',
+        'bike_id.*' => 'Loại xe',
+        'order_value.*' => 'Số lượng'
     ];
 
     /**

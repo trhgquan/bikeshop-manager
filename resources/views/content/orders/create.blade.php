@@ -53,7 +53,7 @@
               <option value="{{ $bike->id }}" 
                 {{ $bike_id == $bike->id ? "selected" : "" }}>
                 {{ $bike->id }} - {{ $bike->bike_name }} 
-                (gia ban: {{$bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
+                (giá bán: {{$bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
               </option>
               @endforeach
             </select>

@@ -21,11 +21,9 @@
       <a class="btn btn-info" href="{{ route('orders.show', $order->id) }}">
         Chi tiết
       </a>
-      @if (!$order->getCheckedOut())
-        <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">
-          Chỉnh sửa
-        </a>
-      @endif
+      <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">
+        Chỉnh sửa
+      </a>
     </td>
   </tr>
   @endforeach

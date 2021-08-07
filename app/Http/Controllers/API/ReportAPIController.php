@@ -42,6 +42,7 @@ class ReportAPIController extends Controller
             ->where('checkout_at', '>=', $startDate)
             ->where('checkout_at', '<=', $endDate)
             ->where('bikes.deleted_at', '=', NULL)
+            ->where('orders.deleted_at', '=', NULL)
             ->groupBy('bikes.id', 'bikes.bike_name')
             ->orderBy('bike_order_value', 'DESC')
             ->get();
@@ -73,6 +74,7 @@ class ReportAPIController extends Controller
             ->where('checkout_at', '>=', $startDate)
             ->where('checkout_at', '<=', $endDate)
             ->where('bikes.deleted_at', '=', NULL)
+            ->where('orders.deleted_at', '=', NULL)
             ->groupBy('orders.id')
             ->orderBy('profit', 'DESC')
             ->get();

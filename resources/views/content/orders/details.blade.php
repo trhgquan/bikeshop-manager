@@ -1,49 +1,42 @@
 @extends('content.orders.layouts')
 
-@section('title', 'Chi tiet don hang')
+@section('title', 'Chi tiết đơn hàng')
+
+@section('page-small-title')
+<small class="lead">Chi tiết đơn hàng</small>
+@endsection
 
 @section('page-table')
-Chi tiet don hang:<br/>
-<table>
-  <thead>
-    <th>loai xe</th>
-    <th>so luong</th>
-    <th>don gia</th>
-    <th>thanh tien</th>
-  </thead>
-  <tbody>
-  @foreach ($detail as $line)
-  <tr>
-    <td>{{ $line->bike_name }}</td>
-    <td>{{ $line->pivot->order_value }}</td>
-    <td>{{ $line->pivot->order_sell_price }}</td>
-    <td>{{ $line->pivot->order_value * $line->pivot->order_sell_price }}</td>
-  </tr>
-  @endforeach
-  <tr>
-    <td>#</td>
-    <td>Tong so san pham</td>
-    <td>Tong doanh thu</td>
-    <td>Tong loi nhuan</td>
-  </tr>
-  <tr>
-    <td>Tong cong</td>
-    <td>{{ $order->quantity() }}</td>
-    <td>{{ $order->revenue() }}</td>
-    <td>{{ $order->profit() }}</td>
-  </tr>
-  </tbody>
-</table>
-
-Ngay tao: {{ $order->created_at->format('d-m-Y') }}<br/>
-Ngay sua: {{ $order->updated_at->format('d-m-Y') }}<br/>
-Nguoi tao: {{ $order->created_by->nameAndUsername() }}<br/>
-Nguoi sua: {{ $order->updated_by->nameAndUsername() }}<br/>
-Ngay thanh toan: 
-{{ $order->getCheckedOut() ? $order->checkout_at->format('d-m-Y') : "Chua thanh toan" }}
-<br/>
-
-@if (!$order->getCheckedOut())
-<a href="{{ route('orders.edit', $order->id) }}">Chinh sua don hang</a>
-@endif
+<div class="row">
+  <div class="col-sm">
+    <dl class="row">
+      <dt class="col-sm-3">Tên khách hàng</dt>
+      <dl class="col-sm-9">{{ $order->customer_name }}</dl>
+    </dl>
+    <dl class="row">
+      <dt class="col-sm-3">Email khách hàng</dt>
+      <dl class="col-sm-9">{{ $order->customer_email }}</dl>
+    </dl>
+    <dl class="row">
+      <dt class="col-sm-3">Tạo bởi</dt>
+      <dd class="col-sm-9">{{ $order->created_by->nameAndUsername() }}</dd>
+    </dl> 
+    <dl class="row">
+      <dt class="col-sm-3">Ngày tạo</dt>
+      <dd class="col-sm-9">{{ $order->created_at }}</dd>
+    </dl>
+    <dl class="row">
+      <dt class="col-sm-3">Sửa lần cuối</dt>
+      <dd class="col-sm-9">{{ $order->updated_by->nameAndUsername() }}</dd>
+    </dl> 
+    <dl class="row">
+      <dt class="col-sm-3">Ngày sửa</dt>
+      <dd class="col-sm-9">{{ $order->updated_at }}</dd>
+    </dl>
+    <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">Chỉnh sửa đơn hàng</a>
+  </div>
+  <div class="col-sm">
+    @include('table.invoice-list', compact('detail', 'order'))
+  </div>
+</div>
 @endsection

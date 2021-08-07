@@ -25,7 +25,7 @@
 <div id="introduction"></div>
 <table class="table table-hover" id="revenueTable" style="display: none;">
   <thead>
-    <th>ID đơn hàng</th>
+    <th>Mã đơn hàng</th>
     <th>Số lượng sản phẩm bán ra</th>
     <th>Doanh thu</th>
     <th>Lợi nhuận</th>
@@ -33,10 +33,10 @@
   <tbody id="revenueTableContent"></tbody>
   <tfoot>
     <tr>
-      <td>Tổng số đơn hàng</td>
-      <td>Tổng số sản phẩm bán ra</td>
-      <td>Tổng doanh thu</td>
-      <td>Tổng lợi nhuận</td>
+      <th>Tổng số đơn hàng</th>
+      <th>Tổng số sản phẩm bán ra</th>
+      <th>Tổng doanh thu</th>
+      <th>Tổng lợi nhuận</th>
     </tr>
     <tr id="revenueTableConclusion"></tr>
   </tfoot>

@@ -12,8 +12,8 @@ class CreateOrderUpdateRequest extends CreateOrderRequest
      * @var array
      */
     private $authorizationMessages = [
-        'checked-out' => 'Ban khong sua duoc don hang da thanh toan.',
-        'unauthorized' => 'Ban khong co quyen sua don hang.',
+        'checked-out' => 'Bạn không được sửa đơn hàng đã thanh toán.',
+        'unauthorized' => 'Bạn không có quyền sửa đơn hàng.',
     ];
 
     /**
