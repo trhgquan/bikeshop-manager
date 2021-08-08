@@ -92,7 +92,7 @@
     </li>
   </ul>
   <hr>
-  {{-- Please add authorization here --}}
+  @can('viewAny', \App\Models\User::class)
   <ul class="nav nav-pills flex-column mb-auto">
     <span class="navbar-text text-secondary">
       Phần dành cho quản lý
@@ -104,6 +104,7 @@
     </li>
   </ul>
   <hr>
+  @endif
   <div class="dropdown">
     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
       <strong>{{ Auth::user()->nameAndUsername() }}</strong>

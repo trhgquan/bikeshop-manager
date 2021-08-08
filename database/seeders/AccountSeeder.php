@@ -22,6 +22,7 @@ class AccountSeeder extends Seeder
             'username' => 'thquan',
             'email' => 'thquan@fit.hcmus.edu.vn',
             'password' => Hash::make('thquan@fit.hcmus.edu.vn'),
+            'role' => \App\Models\Role::ROLE_ADMIN
         ]);
 
         \App\Models\User::create([
@@ -29,6 +30,7 @@ class AccountSeeder extends Seeder
             'username' => 'tlxuong',
             'email' => 'tlxuong@fit.hcmus.edu.vn',
             'password' => Hash::make('tlxuong@fit.hcmus.edu.vn'),
+            'role' => \App\Models\Role::ROLE_MANAGER,
         ]);
     }
 }

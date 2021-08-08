@@ -7,7 +7,7 @@
 @section('page-content')
 
 @if (! Request::routeIs('users.create'))
-<a class="btn btn-success" href="{{ route('users.create') }}">Thêm người dùng mới</a>
+<a style="margin-bottom: 20px;" class="btn btn-success" href="{{ route('users.create') }}">Thêm người dùng mới</a>
 @endif
 
 @yield('page-form')

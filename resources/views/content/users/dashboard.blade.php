@@ -19,9 +19,11 @@
     <tr>
       <td>NV-{{ $user->id }}</td>
       <td>{{ $user->username }}</td>
-      <td>sudo</td>
+      <td>{{ $user->roles->role_name }}</td>
       <td>
-        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">Chỉnh sửa</a>
+        @can('update', $user)
+          <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">Chỉnh sửa</a>
+        @endcan
       </td>
     </tr>
     @endforeach

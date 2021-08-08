@@ -50,13 +50,14 @@
   </div>
 </div>
 <div class="row mb-3">
-  <label for="user_role" class="col-sm-2 col-form-label">
+  <label for="role" class="col-sm-2 col-form-label">
     Quyền
   </label>
   <div class="col-sm-10">
-    <select name="user_role" id="user_role" class="form-select">
-      <option value="1">Quản lý</option>
-      <option value="2" selected>Nhân viên</option>
+    <select name="role" id="role" class="form-select">
+      @foreach ($roles as $role)
+        <option value="{{ $role->id }}">{{ $role->role_name }}</option>
+      @endforeach
     </select>
   </div>
 </div>
