@@ -38,6 +38,6 @@
 @csrf
 @method('DELETE')
 <p class="text-danger">Nhấn nút này sẽ xóa tài khoản {{ $user->nameAndUsername() }}. Đồng ý?</p>
-<button type="submit" class="btn btn-danger">sudo rm -r -f</button>
+<button type="submit" class="btn btn-danger" onclick="return confirm('Xóa tài khoản khỏi hệ thống?');">sudo rm -r -f</button>
 </form>
 @endsection

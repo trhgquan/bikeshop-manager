@@ -10,7 +10,9 @@
 <table class="table table-hover" id="usersList">
   <thead>
     <th>ID người dùng</th>
+    <th>Họ và tên</th>
     <th>Tên tài khoản</th>
+    <th>Email</th>
     <th>Quyền</th>
     <th>Hành động</th>
   </thead>
@@ -18,7 +20,9 @@
     @foreach ($users as $user)
     <tr>
       <td>NV-{{ $user->id }}</td>
+      <td>{{ $user->name }}</td>
       <td>{{ $user->username }}</td>
+      <td>{{ $user->email }}</td>
       <td>{{ $user->roles->role_name }}</td>
       <td>
         @can('update', $user)

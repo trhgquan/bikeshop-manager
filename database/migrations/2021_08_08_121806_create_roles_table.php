@@ -17,6 +17,13 @@ class CreateRolesTable extends Migration
             $table->id();
             $table->string('role_name')->unique();
         });
+
+        // Add foreign key to `users`.
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('role')
+                ->references('id')
+                ->on('roles');
+        });
     }
 
     /**

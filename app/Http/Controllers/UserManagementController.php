@@ -13,6 +13,11 @@ use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
 {
+    /**
+     * Success messages for UserManagementController
+     * 
+     * @var array
+     */
     private $successMessages = [
         'create' => [
             'success' => 'Thêm người dùng mới thành công!'
@@ -25,6 +30,11 @@ class UserManagementController extends Controller
         ],
     ];
 
+    /**
+     * Failed messages for UserManagementController
+     * 
+     * @var array
+     */
     private $failedMessages = [
         'update' => 'Vui lòng chọn quyền hợp lệ!',
     ];
