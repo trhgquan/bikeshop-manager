@@ -3,10 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserManagementController extends Controller
 {
+    private $successMessages = [
+        'create' => [
+            'success' => 'Thêm người dùng mới thành công!'
+        ],
+        'update' => [
+            'success' => 'Chỉnh sửa người dùng thành công!'
+        ],
+        'destroy' => [
+            'success' => 'Xóa người dùng thành công!'
+        ],
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -29,11 +43,24 @@ class UserManagementController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\CreateUserRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request) {
-        //
+    public function store(CreateUserRequest $request) {
+        $validator = $request->validated();
+
+        $user = User::create([
+            'username' => $validator['username'],
+            'password' => Hash::make($validator['password']),
+            'email' => $validator['email'],
+            'name' => $validator['name'],
+
+            // ADD ROLE!
+        ]);
+
+        return redirect()
+            ->route('users.index')
+            ->with('notify', $this->successMessages['create']);
     }
 
     /**

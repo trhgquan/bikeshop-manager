@@ -1,6 +1,6 @@
 @extends('template')
 
-@section('title', 'Doi mat khau')
+@section('title', 'Đổi mật khẩu')
 
 @section('page-content')
 

@@ -9,13 +9,12 @@
 @section('page-form')
 <form action="{{ route('users.store') }}" method="POST">
 @csrf
-@method('PUT')
 <div class="row mb-3">
   <label for="name" class="col-sm-2 col-form-label">
     Họ và tên
   </label>
   <div class="col-sm-10">
-    <input class="form-control" placeholder="Họ và tên" type="text" id="name" name="name"/>
+    <input class="form-control" placeholder="Họ và tên" value="{{ old('name') }}" type="text" id="name" name="name"/>
   </div>
 </div>
 <div class="row mb-3">
@@ -23,7 +22,7 @@
     Email
   </label>
   <div class="col-sm-10">
-    <input class="form-control" placeholder="Email" type="email" id="email" name="email"/>
+    <input class="form-control" placeholder="Email" value="{{ old('email') }}" type="email" id="email" name="email"/>
   </div>
 </div>
 <div class="row mb-3">
@@ -31,7 +30,7 @@
     Tên người dùng
   </label>
   <div class="col-sm-10">
-    <input class="form-control" placeholder="Tên người dùng" type="text" id="username" name="username"/>
+    <input class="form-control" placeholder="Tên người dùng" value="{{ old('username') }}" type="text" id="username" name="username"/>
   </div>
 </div>
 <div class="row mb-3">
@@ -56,9 +55,8 @@
   </label>
   <div class="col-sm-10">
     <select name="user_role" id="user_role" class="form-select">
-      <option value="">Admin</option>
-      <option value="">Quản lý</option>
-      <option value="" selected>Nhân viên</option>
+      <option value="1">Quản lý</option>
+      <option value="2" selected>Nhân viên</option>
     </select>
   </div>
 </div>
