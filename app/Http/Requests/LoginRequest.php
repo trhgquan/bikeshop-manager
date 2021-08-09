@@ -22,8 +22,8 @@ class LoginRequest extends FormRequest
      * @var array
      */
     private $validationMessages = [
-        'username.required' => 'Ten nguoi dung bo trong.',
-        'password.required' => 'Mat khau dang bo trong.'
+        'username.required' => 'Tên người dùng đang bỏ trống.',
+        'password.required' => 'Mật khẩu đang bỏ trống.'
     ];
 
     /**

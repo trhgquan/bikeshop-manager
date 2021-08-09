@@ -7,15 +7,17 @@
 <tbody>
 @foreach ($brands as $brand)
 <tr>
-  <td>{{ $brand->id }}</td>
+  <td>HX-{{ $brand->id }}</td>
   <td>{{ $brand->brand_name }}</td>
   <td>
     <a class="btn btn-info" href="{{ route('brands.show', $brand->id) }}">
       Chi tiết
     </a>
+    @can('update', $brand)
     <a class="btn btn-warning" href="{{ route('brands.edit', $brand->id) }}">
       Chỉnh sửa
     </a>
+    @endcan
   </td>
 </tr>
 @endforeach

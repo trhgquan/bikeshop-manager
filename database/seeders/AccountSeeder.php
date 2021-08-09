@@ -17,20 +17,20 @@ class AccountSeeder extends Seeder
     public function run()
     {
         // Add a sample account.
-        DB::table('users')->insert([
-            'name' => 'Tran Hoang Quan',
+        \App\Models\User::create([
+            'name' => 'Trần Hoàng Quân',
             'username' => 'thquan',
             'email' => 'thquan@fit.hcmus.edu.vn',
             'password' => Hash::make('thquan@fit.hcmus.edu.vn'),
-            'api_token' => hash('sha256', Str::random(60)),
+            'role' => \App\Models\Role::ROLE_ADMIN
         ]);
 
-        DB::table('users')->insert([
-            'name' => 'Tran Lui Xuong',
+        \App\Models\User::create([
+            'name' => 'Trần Lùi Xuống',
             'username' => 'tlxuong',
             'email' => 'tlxuong@fit.hcmus.edu.vn',
             'password' => Hash::make('tlxuong@fit.hcmus.edu.vn'),
-            'api_token' => hash('sha256', Str::random(60)),
+            'role' => \App\Models\Role::ROLE_MANAGER,
         ]);
     }
 }

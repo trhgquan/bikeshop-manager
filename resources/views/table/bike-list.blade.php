@@ -8,16 +8,18 @@
 <tbody>
 @foreach ($bikes as $bike)
 <tr>
-  <td>{{ $bike->id }}</td>
+  <td>LX-{{ $bike->id }}</td>
   <td>{{ $bike->bike_name }}</td>
   <td>{{ isset($brand) ? $brand->brand_name : $bike->brand->brand_name }}</td>
   <td>
     <a class="btn btn-info" href="{{ route('bikes.show', $bike->id) }}">
       Chi tiết
     </a>
+    @can('update', $bike)
     <a class="btn btn-warning" href="{{ route('bikes.edit', $bike->id) }}">
       Chỉnh sửa
     </a>
+    @endcan
   </td>
 </tr>
 @endforeach

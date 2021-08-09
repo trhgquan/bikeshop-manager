@@ -10,7 +10,7 @@
   <tbody>
   @foreach ($orders as $order)
   <tr>
-    <td>{{ $order->id }}</td>
+    <td>DH-{{ $order->id }}</td>
     <td>{{ $order->customer_name }}</td>
     <td>{{ $order->customer_email }}</td>
     <td>{{ $order->created_at }}</td>
@@ -21,9 +21,11 @@
       <a class="btn btn-info" href="{{ route('orders.show', $order->id) }}">
         Chi tiết
       </a>
+      @can('update', $order)
       <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">
         Chỉnh sửa
       </a>
+      @endcan
     </td>
   </tr>
   @endforeach

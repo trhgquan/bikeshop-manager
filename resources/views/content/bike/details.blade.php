@@ -57,5 +57,7 @@
     </dl>
   </div>
 </div>
-<a class="btn btn-warning" href="{{ route('bikes.edit', $bike->id) }}">Chỉnh sửa loại xe {{ $bike->bike_name }}</a> 
+@can('update', $bike)
+  <a class="btn btn-warning" href="{{ route('bikes.edit', $bike->id) }}">Chỉnh sửa loại xe {{ $bike->bike_name }}</a> 
+@endcan
 @endsection

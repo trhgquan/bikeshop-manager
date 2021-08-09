@@ -154,3 +154,16 @@ Route::group([
         'month_revenue_stat_index'
     ])->name('month_revenue_stat.index');
 });
+
+/*
+|--------------------------------------------------------------------------
+| User Management route.
+| 
+| These routes do User Management actions.
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'users',
+    \App\Http\Controllers\UserManagementController::class
+)->except('show')->middleware('auth');

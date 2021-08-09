@@ -9,7 +9,7 @@
 <tbody>
 @foreach ($items as $item)
 <tr>
-  <td>{{ $item->id }}</td>
+  <td>LX-{{ $item->id }}</td>
   <td>{{ $item->brand->brand_name }}</td>
   <td>{{ $item->bike_name }}</td>
   <td>{{ $item->bike_stock }}</td>
