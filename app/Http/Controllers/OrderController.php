@@ -12,13 +12,6 @@ use Illuminate\Support\Facades\Auth;
 class OrderController extends Controller
 {
     /**
-     * Maximum records to display per page.
-     * 
-     * @var int
-     */
-    private $resultsPerPage = 10;
-
-    /**
      * Error messages.
      * 
      * @var array
@@ -67,24 +60,56 @@ class OrderController extends Controller
     }
 
     /**
-     * Validate item quantity
+     * Validate item quantity on Create.
      * aka checking if that item is out of stock or not.
      * 
      * @param \Illuminate\Support\Facades\Validator $validator
      * @return array
      */
-    private function validateItemQuantity($validator) {
-        $errors = array();
+    private function validateItemQuantityCreate($validator) {
+        $errors = [];
 
         foreach ($validator['bike_id'] as $index => $bike_id) {
             $bike = Bike::find($bike_id);
+            $order_value = (int)$validator['order_value'][$index];
 
-            if ($bike->bike_stock < $validator['order_value'][$index]) {
+            if ($bike->bike_stock < $order_value) {
                 array_push($errors, $this->getItemOutOfStockError($bike));
             }
         }
 
         return $errors;
+    }
+
+    /**
+     * Validate item quantity on Update.
+     * 
+     * @param  \Illuminate\Support\Facades\Validator $validator
+     * @param  \App\Models\Order $order
+     * @return bool
+     */
+    private function validateItemQuantityUpdate($validator, Order $order) {
+        $errors = [];
+
+        foreach ($validator['bike_id'] as $index => $bike_id) {
+            $bike = Bike::find($bike_id);
+            $order_value = (int)$validator['order_value'][$index];
+
+            if ($bike->bike_stock + $order->orderValue($bike) < $order_value) {
+                array_push($errors, $this->getItemOutOfStockError($bike));
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Constructor for OrderController.
+     * 
+     * @return void
+     */
+    public function __construct() {
+        $this->authorizeResource(Order::class, 'order');
     }
 
     /**
@@ -116,7 +141,7 @@ class OrderController extends Controller
     public function store(CreateOrderRequest $request) {
         $validator = $request->validated();
 
-        $quantityErrors = $this->validateItemQuantity($validator);
+        $quantityErrors = $this->validateItemQuantityCreate($validator);
 
         if (count($quantityErrors) > 0) {
             return redirect()
@@ -188,21 +213,13 @@ class OrderController extends Controller
     public function update(CreateOrderUpdateRequest $request, Order $order) {
         $validator = $request->validated();
 
-        $quantityErrors = $this->validateItemQuantity($validator);
+        $quantityErrors = $this->validateItemQuantityUpdate($validator, $order);
 
         if (count($quantityErrors) > 0) {
             return redirect()
-                ->route('orders.update')
+                ->route('orders.update', $order)
                 ->withInput()
                 ->withErrors($quantityErrors);
-        }
-
-        // Remove any non-chosen bike.
-        foreach ($order->bikes as $bike) {
-            if (! in_array($bike->id, $request->bike_id)) {
-                $bike->bike_stock += $bike->pivot->order_value;
-                $bike->save();
-            }
         }
 
         // Get new information of updated bikes.

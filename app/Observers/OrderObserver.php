@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use App\Models\Bike;
 use Illuminate\Support\Facades\Auth;
 
 class OrderObserver
@@ -37,6 +38,14 @@ class OrderObserver
      */
     public function deleted(Order $order) {
         if (Auth::check()) {
+            // If order isn't checked out, recover added bikes.
+            if (! $order->getCheckedOut()) {
+                foreach ($order->bikes as $bike) {
+                    $bike->bike_stock += $order->orderValue($bike);
+                    $bike->save();
+                }
+            }
+
             $order->updated_by_user = Auth::id();
             $order->save();
         }

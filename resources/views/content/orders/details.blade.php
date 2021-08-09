@@ -33,7 +33,9 @@
       <dt class="col-sm-3">Ngày sửa</dt>
       <dd class="col-sm-9">{{ $order->updated_at }}</dd>
     </dl>
-    <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">Chỉnh sửa đơn hàng</a>
+    @can('update', $order)
+      <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">Chỉnh sửa đơn hàng</a>
+    @endcan
   </div>
   <div class="col-sm">
     @include('table.invoice-list', compact('detail', 'order'))
