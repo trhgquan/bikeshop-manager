@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Bike;
 use App\Http\Requests\CreateOrderRequest;
-use App\Http\Requests\CreateOrderUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -206,11 +205,11 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\CreateOrderUpdateRequest  $request
+     * @param  \App\Http\Requests\CreateOrderRequest  $request
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(CreateOrderUpdateRequest $request, Order $order) {
+    public function update(CreateOrderRequest $request, Order $order) {
         $validator = $request->validated();
 
         $quantityErrors = $this->validateItemQuantityUpdate($validator, $order);
