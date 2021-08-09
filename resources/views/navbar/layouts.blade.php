@@ -15,11 +15,13 @@
       </a>
       <div id="brands-collapse" class="collapse">
         <ul class="btn-toggle-nav fw-normal pb-1 small">
+          @can('create', \App\Models\Brand::class)
           <li>
             <a href="{{ route('brands.create') }}" class="nav-link text-white {{ Request::routeIs('brands.create') ? 'active' : '' }}">
             Thêm hãng xe mới
             </a>
           </li>
+          @endcan
           <li>
             <a href="{{ route('brands.index') }}" class="nav-link text-white {{ Request::routeIs('brands.index') ? 'active' : '' }}">
             Danh sách hãng xe
@@ -34,11 +36,13 @@
       </a>
       <div id="bikes-collapse" class="collapse">
         <ul class="btn-toggle-nav fw-normal pb-1 small">
+          @can('create', \App\Models\Bike::class)
           <li>
             <a href="{{ route('bikes.create') }}" class="nav-link text-white {{ Request::routeIs('bikes.create') ? 'active' : '' }}">
             Thêm loại xe mới
             </a>
           </li>
+          @endcan
           <li>
             <a href="{{ route('bikes.index') }}" class="nav-link text-white {{ Request::routeIs('bikes.index') ? 'active' : '' }}">
             Danh sách loại xe
@@ -95,7 +99,7 @@
   @can('viewAny', \App\Models\User::class)
   <ul class="nav nav-pills flex-column mb-auto">
     <span class="navbar-text text-secondary">
-      Phần dành cho quản lý
+      Phần dành cho Admin
     </span>
     <li class="nav-item">
       <a href="{{ route('users.index') }}" class="nav-link text-white">

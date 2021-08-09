@@ -8,6 +8,11 @@ use Illuminate\Validation\Rule;
 
 class CreateUserRequest extends FormRequest
 {
+    /**
+     * Validation messages for UserManagementController.
+     * 
+     * @var array
+     */
     private $validationMessages = [
         'required' => 'Ô :attribute đang bị bỏ trống.',
         'min' => 'Ô :attribute phải có ít nhất :min ký tự.',
@@ -18,6 +23,11 @@ class CreateUserRequest extends FormRequest
         'exists' => 'Giá trị ô :attribute không hợp lệ.'
     ];
 
+    /**
+     * Validation attributes for UserManagementController.
+     * 
+     * @var array
+     */
     private $validationAttributes = [
         'name' => 'Họ và tên',
         'username' => 'Tên người dùng',
@@ -61,10 +71,18 @@ class CreateUserRequest extends FormRequest
         ];
     }
 
+    /**
+     * Get custom attributes for validation errors.
+     * 
+     * @return array
+     */
     public function attributes() {
         return $this->validationAttributes;
     }
 
+    /**
+     * Get the error messages for the defined validation rules.
+     */
     public function messages() {
         return $this->validationMessages;
     }

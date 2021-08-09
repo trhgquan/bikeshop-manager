@@ -35,7 +35,9 @@
     </dl>
   </div>
 </div>
-<a class="btn btn-warning" href="{{ route('brands.edit', $brand->id) }}">Chỉnh sửa hãng xe {{ $brand->brand_name }}</a>
+@can('update', $brand)
+  <a class="btn btn-warning" href="{{ route('brands.edit', $brand->id) }}">Chỉnh sửa hãng xe {{ $brand->brand_name }}</a>
+@endcan
 <hr>
 
 <small class="lead list-bikes">Danh sách các loại xe thuộc hãng {{ $brand->brand_name }}</small>

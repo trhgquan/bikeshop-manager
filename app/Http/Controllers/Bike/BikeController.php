@@ -30,11 +30,13 @@ class BikeController extends Controller
     ];
 
     /**
-     * Number of records to display per page.
+     * Constructor for BikeController.
      * 
-     * @var int
+     * @return void
      */
-    private $resultsPerPage = 10;
+    public function __construct() {
+        $this->authorizeResource(Bike::class, 'bike');
+    }
 
     /**
      * Display a listing of the resource.

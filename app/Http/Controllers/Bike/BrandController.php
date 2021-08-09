@@ -17,22 +17,24 @@ class BrandController extends Controller
      */
     private $successMessages = [
         'create' => [
-            'success' => 'Them hang xe moi thanh cong.'
+            'success' => 'Thêm hãng xe mới thành công!'
         ],
         'update' => [
-            'success' => 'Chinh sua hang xe thanh cong.'
+            'success' => 'Chỉnh sửa hãng xe thành công!'
         ],
         'destroy' => [
-            'success' => 'Xoa hang xe thanh cong.'
+            'success' => 'Xóa hãng xe thành công!'
         ]
     ];
 
     /**
-     * Number of records per page to display.
+     * Constructor for BrandController.
      * 
-     * @var int
+     * @return void
      */
-    private $resultsPerPage = 10;
+    public function __construct() {
+        $this->authorizeResource(Brand::class, 'brand');
+    }
 
     /**
      * Display a listing of the resource.
