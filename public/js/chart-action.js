@@ -32,6 +32,7 @@ class customChart {
   drawChart() {
     this.myChart = new Chart(this.ctx, {
       type: this.type,
+      responsive: true,
       data: {
         labels: this.labels,
         datasets: [{
