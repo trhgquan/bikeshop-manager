@@ -3,7 +3,8 @@ name: Test Laravel App
 on:
   push:
     branches: [ main, test, dev ]
-
+  pull_request:
+    branches: [ main ]
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest

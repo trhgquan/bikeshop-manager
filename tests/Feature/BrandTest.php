@@ -81,10 +81,7 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_ADMIN
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
         $this->assertDatabaseCount('users', 1)
             ->assertDatabaseCount('brands', 1);
@@ -190,10 +187,7 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
         $this->assertDatabaseCount('users', 1)
             ->assertDatabaseCount('brands', 1);
@@ -236,10 +230,7 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
         Auth::login($user);
 
@@ -265,10 +256,7 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
         Auth::login($user);
 
@@ -299,10 +287,7 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
         $this->assertDatabaseCount('brands', 1);
 
@@ -329,10 +314,7 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
         $this->assertDatabaseCount('brands', 1);
 

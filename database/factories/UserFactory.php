@@ -22,7 +22,7 @@ class UserFactory extends Factory
      */
     private function username($name) {
         // Convert name to lower string and break into words.
-        $name = explode(strtolower($name), ' ');
+        $name = explode(' ', strtolower($name));
         return $name[count($name) - 1] . $name[0];
     }
 

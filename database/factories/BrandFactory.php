@@ -23,7 +23,9 @@ class BrandFactory extends Factory
     {
         return [
             'brand_name' => $this->faker->text(10),
-            'brand_description' => $this->faker->text(30)
+            'brand_description' => $this->faker->text(30),
+            'created_by_user' => \App\Models\User::all()->random()->id,
+            'updated_by_user' => \App\Models\User::all()->random()->id,
         ];
     }
 }
