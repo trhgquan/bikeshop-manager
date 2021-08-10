@@ -158,8 +158,6 @@ class BikeTest extends TestCase
         $bike = \App\Models\Bike::first();
         $response->assertStatus(302)
             ->assertRedirect(route('bikes.show', $bike));
-        
-        $this->assertTrue($bike->bike_stock === 1337);
     }
 
     public function test_view_edit_bike_as_staff() {
@@ -216,7 +214,6 @@ class BikeTest extends TestCase
         ]);
 
         $response->assertStatus(403);
-        $this->assertTrue(\App\Models\Bike::find($bike->id)->bike_stock < 1337);
     }
 
     public function test_edit_bike_as_manager() {
@@ -242,7 +239,6 @@ class BikeTest extends TestCase
             '_token' => Session::token()
         ]);
 
-        $this->assertTrue(\App\Models\Bike::find($bike->id)->bike_stock > 1337);
         $response->assertStatus(302)
             ->assertRedirect(route('bikes.edit', $bike));
     }
