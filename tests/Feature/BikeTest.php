@@ -38,6 +38,11 @@ class BikeTest extends TestCase
             ->assertStatus(200);
     }
 
+    /**
+     * Test if unauthenticated user cannot view any Bike.
+     * 
+     * @return void
+     */
     public function test_view_bike_show_as_unauthenticated_user() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
@@ -57,6 +62,11 @@ class BikeTest extends TestCase
             ->assertRedirect(route('auth.login.index'));
     }
 
+    /**
+     * Test if authenticated user can view any bike.
+     * 
+     * @return void
+     */
     public function test_view_bike_show_as_authenticated_user() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
@@ -77,6 +87,11 @@ class BikeTest extends TestCase
         $this->get(route('bikes.show', $bike))->assertStatus(200);
     }
 
+    /**
+     * Test if Staff cannot view Create Bike page.
+     * 
+     * @return void
+     */
     public function test_view_create_bike_as_staff() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
@@ -88,6 +103,11 @@ class BikeTest extends TestCase
         $this->get(route('bikes.create'))->assertStatus(403);
     }
 
+    /**
+     * Test if Manager can view Create Bike page.
+     * 
+     * @return void
+     */
     public function test_view_create_bike_as_manager() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
@@ -107,6 +127,11 @@ class BikeTest extends TestCase
         }
     }
 
+    /**
+     * Test if Staff cannot create Bike.
+     * 
+     * @return void
+     */
     public function test_create_bike_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -132,6 +157,11 @@ class BikeTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     * Test if Manager can create new Bike.
+     * 
+     * @return void
+     */
     public function test_create_bike_as_manager() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -159,6 +189,11 @@ class BikeTest extends TestCase
         $response->assertRedirect(route('bikes.show', $bike));
     }
 
+    /**
+     * Test if Staff cannot view Edit Bike page.
+     * 
+     * @return void
+     */
     public function test_view_edit_bike_as_staff() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
@@ -174,6 +209,11 @@ class BikeTest extends TestCase
         $this->get(route('bikes.edit', $bike))->assertStatus(403);
     }
 
+    /**
+     * Test if Manager can view Edit Bike page.
+     * 
+     * @return void
+     */
     public function test_view_edit_bike_as_manager() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
@@ -189,6 +229,11 @@ class BikeTest extends TestCase
         $this->get(route('bikes.edit', $bike))->assertStatus(200);
     }
 
+    /**
+     * Test if Staff cannot edit Bike.
+     * 
+     * @return void
+     */
     public function test_edit_bike_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -215,6 +260,11 @@ class BikeTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     * Test if Manager can edit Bike
+     *
+     * @return void
+     */
     public function test_edit_bike_as_manager() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -241,6 +291,11 @@ class BikeTest extends TestCase
         $response->assertRedirect(route('bikes.edit', $bike));
     }
 
+    /**
+     * Test if Staff cannot delete Bike.
+     * 
+     * @return void
+     */
     public function test_delete_bike_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -261,6 +316,11 @@ class BikeTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     * Test if Manager can delete Bike.
+     * 
+     * @return void
+     */
     public function test_delete_bike_as_manager() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
