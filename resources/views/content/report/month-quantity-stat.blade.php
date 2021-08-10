@@ -2,15 +2,6 @@
 
 @section('title', 'Sản phẩm bán chạy - Báo cáo')
 
-@section('extra-css')
-<style>
-  .graph-wrap {
-    width: 690px !important;
-    height: 345px !important;
-  }
-</style>
-@endsection
-
 @section('page-small-title')
 <small class="lead">Loại xe bán chạy trong tháng</small>
 @endsection
@@ -35,7 +26,7 @@
 <div id="introduction"></div>
 <div class="row">
   <div class="col">
-    <div class="graph-wrap" id="graph-wrap" style="display: none;">
+    <div id="graph-wrap" style="display: none;">
       <canvas id="myChart"></canvas>
     </div>
   </div>
