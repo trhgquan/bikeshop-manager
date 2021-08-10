@@ -14,224 +14,229 @@ class BrandTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Check if non-auth user redirected back to login page or not.
+     * Test if non-auth user redirected back to login page or not.
      * 
      * @return void
      */
     public function test_view_brands_index_as_not_authentiated_user() {
-        $response = $this->get(route('brands.index'));
-
-        $response->assertRedirect(route('auth.login.index'));
+        $this->get(route('brands.index'))
+            ->assertRedirect(route('auth.login.index'));
     }
 
     /**
-     * Check if any authenticated user can view every brand.
+     * Test if any authenticated user can view every brand.
      *
      * @return void
      */
     public function test_view_brands_index_as_authenticated_user()
     {
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
 
         // Log user in.
-        $user = \App\Models\User::where('id', 1)->first();
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
         Auth::login($user);
 
         // Anyone can view every Brand.
-        $response = $this->get(route('brands.index'));
-
-        $response->assertStatus(200);
-    }
-
-
-    public function test_view_brands_show_as_non_authenticated_user()
-    {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
-
-        // Log user in.
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
-
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
-
-        // Anyone can view any Brand.
-        $response = $this->get(route('brands.show', $brand));
-
-        $response->assertRedirect(route('auth.login.index'));
+        $this->get(route('brands.index'))->assertStatus(200);
     }
 
     /**
-     * Check if any authenticated user can view any brand.
+     * Test if a non-authenticated user can view a brand.
+     * 
+     * @return void
+     */
+    public function test_view_brands_show_as_non_authenticated_user()
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN,
+        ]);
+        
+        $brand = \App\Models\Brand::factory()->create([
+            'created_by_user' => $user->id,
+            'updated_by_user' => $user->id,
+        ]);
+
+        $this->assertDatabaseCount('users', 1)
+            ->assertDatabaseCount('brands', 1);
+
+        // Anyone can view any Brand.
+        $this->get(route('brands.show', $brand))
+            ->assertRedirect(route('auth.login.index'));
+    }
+
+    /**
+     * Test if any authenticated user can view any brand.
      *
      * @return void
      */
     public function test_view_brands_show_as_authenticated_user()
     {
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
 
-        // Log user in.
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN
+        ]);
 
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
+        $brand = \App\Models\Brand::factory()->create([
             'created_by_user' => $user->id,
             'updated_by_user' => $user->id
         ]);
+
+        $this->assertDatabaseCount('users', 1)
+            ->assertDatabaseCount('brands', 1);
 
         Auth::login($user);
 
         // Anyone can view any Brand.
-        $response = $this->get(route('brands.show', $brand));
-
-        $response->assertStatus(200);
+        $this->get(route('brands.show', $brand))->assertStatus(200);
     }
 
+    /**
+     * Test if a staff can view Create Brand page.
+     * 
+     * @return void
+     */
     public function test_view_create_brand_as_staff() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
-        $user = \App\Models\User::create([
-            'name' => 'F. D. Thomas',
-            'username' => 'meovantomy',
-            'password' => Hash::make('meovantomy'),
-            'email' => 'meovantomy@gmail.com',
+        $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-
-        // User cannot create
         Auth::login($user);
 
-        $response = $this->get(route('brands.create'));
-
-        $response->assertStatus(403);
+        $this->get(route('brands.create'))->assertStatus(403);
     }
 
+    /**
+     * Test if a manager can view Create Brand page.
+     * 
+     * @return void
+     */
     public function test_view_create_brand_as_manager() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
 
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN
+        ]);
         Auth::login($user);
 
-        $response = $this->get(route('brands.create'));
-        $response->assertStatus(200);
+        $this->get(route('brands.create'))->assertStatus(200);
     }
 
+    /**
+     * Test if a Staff cannot create a Brand.
+     * 
+     * @return void
+     */
     public function test_create_brand_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
 
-        $user = \App\Models\User::create([
-            'name' => 'F. D. Thomas',
-            'username' => 'meovantomy',
-            'password' => Hash::make('meovantomy'),
-            'email' => 'meovantomy@gmail.com',
+        $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-
-        // User cannot create
         Auth::login($user);
 
-        $response = $this->post(route('brands.store'), [
+        $response = $this->actingAs($user)->post(route('brands.store'), [
             'brand_name' => 'Lorem ipsum',
             'brand_description' => 'Lorem ipsum dolor sit amet, cost',
-            '_token' => Session::token(),
+            '_token' => Session::token()
         ]);
 
         $response->assertStatus(403);
+        $this->assertDatabaseCount('brands', 0);
     }
 
+    /**
+     * Test if a Manager can create a Brand.
+     * 
+     * @return void
+     */
     public function test_create_brand_as_manager() {
         Session::start();
-
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
 
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER
+        ]);
 
         Auth::login($user);
 
-        $response = $this->post(route('brands.store'), [
+        $response = $this->actingAs($user)->post(route('brands.store'), [
             'brand_name' => 'Lorem ipsum',
             'brand_description' => 'Lorem ipsum dolor sit amet, cost',
             '_token' => Session::token(),
         ]);
 
-        $response->assertStatus(302);
+        $this->assertDatabaseCount('brands', 1);
+        
+        $brand = \App\Models\Brand::first();
+        $response->assertRedirect(route('brands.show', $brand));
     }
 
+    /**
+     * Test if a Staff cannot view Edit Brand page.
+     * 
+     * @return void
+     */
     public function test_view_edit_brand_as_staff() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
 
-        $user = \App\Models\User::where('username', '=', 'thquan')->first();
-
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
-
-        $user = \App\Models\User::create([
-            'name' => 'F. D. Thomas',
-            'username' => 'meovantomy',
-            'password' => Hash::make('meovantomy'),
-            'email' => 'meovantomy@gmail.com',
+        $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
-        Auth::login($user);
-
-        $response = $this->get(route('brands.edit', $brand));
-
-        $response->assertStatus(403);
-    }
-
-    public function test_view_edit_brand_as_manager() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
-
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
-
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
+        $brand = \App\Models\Brand::factory()->create([
             'created_by_user' => $user->id,
             'updated_by_user' => $user->id
         ]);
 
+        $this->assertDatabaseCount('users', 1)
+            ->assertDatabaseCount('brands', 1);
+
         Auth::login($user);
 
-        $response = $this->get(route('brands.edit', $brand));
+        $this->get(route('brands.edit', $brand))->assertStatus(403);
+    }
 
-        $response->assertStatus(200);
+    /**
+     * Test if a Manager can view Edit Brand page.
+     * 
+     * @return void
+     */
+    public function test_view_edit_brand_as_manager() {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create([
+            'created_by_user' => $user->id,
+            'updated_by_user' => $user->id
+        ]);
+
+        $this->assertDatabaseCount('users', 1)
+            ->assertDatabaseCount('brands', 1);
+
+        Auth::login($user);
+
+        $this->get(route('brands.edit', $brand))->assertStatus(200);
     }
 
     public function test_edit_brand_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
         
-        $user = \App\Models\User::create([
-            'name' => 'F. D. Thomas',
-            'username' => 'meovantomy',
-            'password' => Hash::make('meovantomy'),
-            'email' => 'meovantomy@gmail.com',
+        $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
+        $brand = \App\Models\Brand::factory()->create([
             'created_by_user' => $user->id,
             'updated_by_user' => $user->id
         ]);
@@ -243,19 +248,24 @@ class BrandTest extends TestCase
             '_token' => Session::token()
         ]);
 
+        $this->assertTrue($brand->brand_name !== 'Cheeky breeky iv damke!');
         $response->assertStatus(403);
     }
 
+    /**
+     * Test if Manager can edit a Brand.
+     * 
+     * @return void
+     */
     public function test_edit_brand_as_manager() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
         
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER
+        ]);
 
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
+        $brand = \App\Models\Brand::factory()->create([
             'created_by_user' => $user->id,
             'updated_by_user' => $user->id
         ]);
@@ -264,63 +274,76 @@ class BrandTest extends TestCase
 
         $response = $this->put(route('brands.update', $brand), [
             'brand_name' => 'Cheeky breeky iv damke!',
+            'brand_description' => $brand->brand_description,
             '_token' => Session::token()
         ]);
-
-        $response->assertStatus(302);
+    
+        $this->assertEquals(
+            \App\Models\Brand::find($brand->id)->first()->brand_name, 
+            'Cheeky breeky iv damke!'
+        );
+        $response->assertStatus(302)
+            ->assertRedirect(route('brands.edit', $brand));
     }
 
+    /**
+     * Test if a Staff cannot delete a Brand.
+     * 
+     * @return void
+     */
     public function test_delete_brand_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
         
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
-
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
-
-        $user = \App\Models\User::create([
-            'name' => 'F. D. Thomas',
-            'username' => 'meovantomy',
-            'password' => Hash::make('meovantomy'),
-            'email' => 'meovantomy@gmail.com',
+        $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
-        Auth::login($user);
-
-        $response = $this->delete(route('brands.update', $brand), [
-            '_token' => Session::token()
-        ]);
-
-        $response->assertStatus(403);
-    }
-
-    public function test_delete_brand_as_manager() {
-        Session::start();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        $this->seed(\Database\Seeders\AccountSeeder::class);
-        
-        $user = \App\Models\User::where('username', '=', 'tlxuong')->first();
-
-        $brand = \App\Models\Brand::create([
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
+        $brand = \App\Models\Brand::factory()->create([
             'created_by_user' => $user->id,
             'updated_by_user' => $user->id
         ]);
 
+        $this->assertDatabaseCount('brands', 1);
+
         Auth::login($user);
 
         $response = $this->delete(route('brands.update', $brand), [
             '_token' => Session::token()
         ]);
 
-        $response->assertStatus(302);
+        $this->assertDatabaseCount('brands', 1);
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test if a Manager can delete a Brand.
+     * 
+     * @return void
+     */
+    public function test_delete_brand_as_manager() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create([
+            'created_by_user' => $user->id,
+            'updated_by_user' => $user->id
+        ]);
+
+        $this->assertDatabaseCount('brands', 1);
+
+        Auth::login($user);
+
+        $response = $this->delete(route('brands.update', $brand), [
+            '_token' => Session::token()
+        ]);
+
+        $this->assertSoftDeleted($brand);
+        $response->assertStatus(302)
+            ->assertRedirect(route('brands.index'));
     }
 }
