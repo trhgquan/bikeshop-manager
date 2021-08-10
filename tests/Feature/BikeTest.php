@@ -156,8 +156,7 @@ class BikeTest extends TestCase
         $this->assertDatabaseCount('bikes', 1);
 
         $bike = \App\Models\Bike::first();
-        $response->assertStatus(302)
-            ->assertRedirect(route('bikes.show', $bike));
+        $response->assertRedirect(route('bikes.show', $bike));
     }
 
     public function test_view_edit_bike_as_staff() {
@@ -239,8 +238,7 @@ class BikeTest extends TestCase
             '_token' => Session::token()
         ]);
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('bikes.edit', $bike));
+        $response->assertRedirect(route('bikes.edit', $bike));
     }
 
     public function test_delete_bike_as_staff() {
@@ -281,7 +279,6 @@ class BikeTest extends TestCase
         ]);
 
         $this->assertSoftDeleted($bike);
-        $response->assertStatus(302)
-            ->assertRedirect(route('bikes.index'));
+        $response->assertRedirect(route('bikes.index'));
     }
 }
