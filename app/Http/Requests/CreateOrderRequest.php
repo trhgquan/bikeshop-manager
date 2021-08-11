@@ -16,8 +16,9 @@ class CreateOrderRequest extends FormRequest
     protected $validationRules = [
         'customer_name' => 'required',
         'customer_email' => 'required|email',
-        'bike_id.*' => 'distinct|exists:bikes,id',
-        'order_value.*' => 'required|numeric|integer|min:1'
+        'order_detail' => 'required|array',
+        'order_detail.*.bike_id' => 'required|distinct|exists:bikes,id',
+        'order_detail.*.order_value' => 'required|numeric|integer|min:1'
     ];
 
     /**
@@ -26,6 +27,7 @@ class CreateOrderRequest extends FormRequest
      * @var array
      */
     protected $validationMessages = [
+        'array' => 'Giá trị các ô :attribute không hợp lệ',
         'distinct' => 'Giá trị các ô :attribute phải khác nhau',
         'required' => 'Ô :attribute đang bị để trống.',
         'exists' => 'Giá trị ô :attribute không hợp lệ.',
@@ -43,8 +45,8 @@ class CreateOrderRequest extends FormRequest
     protected $validationAttributes = [
         'customer_name' => 'Tên khách hàng',
         'customer_email' => 'Email khách hàng',
-        'bike_id.*' => 'Loại xe',
-        'order_value.*' => 'Số lượng'
+        'order_detail.*.bike_id' => 'Loại xe',
+        'order_detail.*.order_value' => 'Số lượng'
     ];
 
     /**
