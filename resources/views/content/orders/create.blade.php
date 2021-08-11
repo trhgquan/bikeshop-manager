@@ -88,9 +88,16 @@
 @endsection
 
 @section('javascripts')
+@if(!old('order_detail', NULL))
 <script type="text/javascript">
 const MAX_TABLE_ITEMS = {!! $bike->count() !!};
 var countItems = 1;
 </script>
+@else
+<script type="text/javascript">
+const MAX_TABLE_ITEMS = {!! $bike->count() !!};
+var countItems = {!! count(old('order_detail')) !!};
+</script>  
+@endif
 <script type="text/javascript" src="{{ asset('js/order-table-action.js') }}"></script>
 @endsection
