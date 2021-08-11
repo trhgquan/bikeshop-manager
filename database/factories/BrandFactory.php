@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Brand;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BrandFactory extends Factory
@@ -22,8 +23,8 @@ class BrandFactory extends Factory
     public function definition()
     {
         return [
-            'brand_name' => $this->faker->text(10),
-            'brand_description' => $this->faker->text(30),
+            'brand_name' => Str::random(50),
+            'brand_description' => Str::random(100),
             'created_by_user' => \App\Models\User::all()->random()->id,
             'updated_by_user' => \App\Models\User::all()->random()->id,
         ];

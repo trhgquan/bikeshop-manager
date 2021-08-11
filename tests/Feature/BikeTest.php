@@ -11,6 +11,7 @@ use Tests\TestCase;
 class BikeTest extends TestCase
 {
     use RefreshDatabase;
+
     /**
      * Test if non-authenticated user cannot view bikes index page.
      *
@@ -54,10 +55,6 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
 
-        $this->assertDatabaseCount('users', 1)
-            ->assertDatabaseCount('brands', 1)
-            ->assertDatabaseCount('bikes', 1);
-
         $this->get(route('bikes.show', $bike))
             ->assertRedirect(route('auth.login.index'));
     }
@@ -78,13 +75,12 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
 
-        $this->assertDatabaseCount('users', 1)
-            ->assertDatabaseCount('brands', 1)
-            ->assertDatabaseCount('bikes', 1);
-
         Auth::login($user);
 
-        $this->get(route('bikes.show', $bike))->assertStatus(200);
+        $this->get(route('bikes.show', $bike))
+            ->assertStatus(200)
+            ->assertSee($brand->brand_name)
+            ->assertSee($bike->bike_name);
     }
 
     /**
@@ -98,8 +94,8 @@ class BikeTest extends TestCase
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-
         Auth::login($user);
+        
         $this->get(route('bikes.create'))->assertStatus(403);
     }
 
@@ -118,6 +114,7 @@ class BikeTest extends TestCase
         $brands = \App\Models\Brand::factory()->count(100)->create();
 
         Auth::login($user);
+        
         $this->get(route('bikes.create'))->assertStatus(200);
 
         // Check if all brands appear on the selection.
@@ -173,7 +170,8 @@ class BikeTest extends TestCase
         $brand = \App\Models\Brand::factory()->create();
 
         Auth::login($user);
-        $response = $this->post(route('bikes.store', [
+
+        $formData = [
             'brand_id' => $brand->id,
             'bike_name' => 'Cheeki breeki',
             'bike_description' => 'Cheeki breeki iv domke!',
@@ -181,12 +179,91 @@ class BikeTest extends TestCase
             'bike_buy_price' => 1337,
             'bike_sell_price' => 1337,
             '_token' => Session::token()
-        ]));
+        ];
 
+        $this->followingRedirects()
+            ->from(route('bikes.create'))
+            ->post(route('bikes.store', $formData))
+            ->assertSee($formData['bike_name'])
+            ->assertSee($formData['bike_description'])
+            ->assertSee($formData['bike_stock']);
+        
         $this->assertDatabaseCount('bikes', 1);
+    }
 
-        $bike = \App\Models\Bike::first();
-        $response->assertRedirect(route('bikes.show', $bike));
+    /**
+     * Test if invalid data cannot be used to create Bike.
+     * 
+     * @return void
+     */
+    public function test_create_bike_with_invalid_data() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN
+        ]);
+        Auth::login($user);
+
+        $brand = \App\Models\Brand::factory()->create();
+
+        // Brand doesn't exist.
+        $formData = [
+            'brand_id' => 1337,
+            'bike_name' => \Illuminate\Support\Str::random(10),
+            'bike_description' => \Illuminate\Support\Str::random(100),
+            'bike_stock' => 1337,
+            'bike_buy_price' => 1337,
+            'bike_sell_price' => 1337,
+            '_token' => Session::token()
+        ];
+
+        $this->from(route('bikes.create'))
+            ->post(route('bikes.store'), $formData)
+            ->assertSessionHasErrors(['brand_id']);
+
+        // Name and description are too long.
+        $formData['brand_id'] = $brand->id;
+        $formData['bike_name'] = \Illuminate\Support\Str::random(1337);
+        $formData['bike_description'] = \Illuminate\Support\Str::random(1337);
+
+        $this->from(route('bikes.create'))
+            ->post(route('bikes.store'), $formData)
+            ->assertSessionHasErrors([
+                'bike_name',
+                'bike_description'
+            ]);
+
+
+        // Invalid integers.
+        $formData['bike_stock'] = -1;
+        $formData['bike_buy_price'] = -1;
+        $formData['bike_sell_price'] = -1;
+
+        $this->from(route('bikes.create'))
+            ->post(route('bikes.store'), $formData)
+            ->assertSessionHasErrors([
+                'bike_stock',
+                'bike_buy_price',
+                'bike_sell_price'
+            ]);
+
+        // No data
+        $formData = ['_token' => Session::token()];
+
+        $this->from(route('bikes.create'))
+            ->post(route('bikes.store'), $formData)
+            ->assertSessionHasErrors([
+                'brand_id',
+                'bike_name',
+                'bike_description',
+                'bike_stock',
+                'bike_buy_price',
+                'bike_sell_price'
+            ]);
+        
+        // Afterall, no bikes should be created.
+        $this->assertDatabaseCount('bikes', 0);
     }
 
     /**
@@ -221,12 +298,21 @@ class BikeTest extends TestCase
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
-        $brand = \App\Models\Brand::factory()->create();
+        $brands = \App\Models\Brand::factory()->count(100)->create();
 
         $bike = \App\Models\Bike::factory()->create();
 
         Auth::login($user);
-        $this->get(route('bikes.edit', $bike))->assertStatus(200);
+        $this->get(route('bikes.edit', $bike))
+            ->assertStatus(200);
+
+        $view = $this->view('content.bike.update', compact('brands', 'bike'));
+        $view->assertSee($bike->bike_name)
+            ->assertSee($bike->bike_description);
+
+        foreach ($brands as $brand) {
+            $view->assertSee($brand->brand_name);
+        }
     }
 
     /**
@@ -247,7 +333,8 @@ class BikeTest extends TestCase
         $bike = \App\Models\Bike::factory()->create();
 
         Auth::login($user);
-        $response = $this->put(route('bikes.update', $bike), [
+
+        $formData = [
             'brand_id' => $brand->id,
             'bike_name' => $bike->bike_name,
             'bike_description' => $bike->bike_description,
@@ -255,9 +342,10 @@ class BikeTest extends TestCase
             'bike_buy_price' => $bike->bike_buy_price,
             'bike_sell_price' => $bike->bike_sell_price,
             '_token' => Session::token()
-        ]);
+        ];
 
-        $response->assertStatus(403);
+        $this->put(route('bikes.update', $bike), $formData)
+            ->assertStatus(403);
     }
 
     /**
@@ -278,17 +366,101 @@ class BikeTest extends TestCase
         $bike = \App\Models\Bike::factory()->create();
 
         Auth::login($user);
-        $response = $this->put(route('bikes.update', $bike), [
+
+        $newStock = random_int(1337, 7331);
+
+        $formData = [
             'brand_id' => $brand->id,
             'bike_name' => $bike->bike_name,
             'bike_description' => $bike->bike_description,
-            'bike_stock' => $bike->bike_stock + 1337,
+            'bike_stock' => $newStock,
             'bike_buy_price' => $bike->bike_buy_price,
             'bike_sell_price' => $bike->bike_sell_price,
             '_token' => Session::token()
-        ]);
+        ];
 
-        $response->assertRedirect(route('bikes.edit', $bike));
+        $this->followingRedirects()
+            ->from(route('bikes.edit', $bike))
+            ->put(route('bikes.update', $bike), $formData)
+            ->assertSee($newStock);
+
+        $this->assertEquals(
+            $bike->fresh()->bike_stock, 
+            $newStock
+        );
+    }
+
+    /**
+     * Test if invalid data cannot be used to edit a Bike.
+     * 
+     * @return void
+     */
+    public function test_edit_bike_with_invalid_data() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN
+        ]);
+        Auth::login($user);
+
+        $brand = \App\Models\Brand::factory()->create();
+
+        $bike = \App\Models\Bike::factory()->create();
+
+        // Brand doesn't exist.
+        $formData = [
+            'brand_id' => 1337,
+            'bike_name' => \Illuminate\Support\Str::random(10),
+            'bike_description' => \Illuminate\Support\Str::random(100),
+            'bike_stock' => 1337,
+            'bike_buy_price' => 1337,
+            'bike_sell_price' => 1337,
+            '_token' => Session::token()
+        ];
+
+        $this->from(route('bikes.edit', $bike))
+            ->put(route('bikes.update', $bike), $formData)
+            ->assertSessionHasErrors(['brand_id']);
+
+        // Name and description are too long.
+        $formData['brand_id'] = $brand->id;
+        $formData['bike_name'] = \Illuminate\Support\Str::random(1337);
+        $formData['bike_description'] = \Illuminate\Support\Str::random(1337);
+
+        $this->from(route('bikes.edit', $bike))
+            ->put(route('bikes.update', $bike), $formData)
+            ->assertSessionHasErrors([
+                'bike_name',
+                'bike_description'
+            ]);
+
+        // Invalid integers.
+        $formData['bike_stock'] = -1;
+        $formData['bike_buy_price'] = -1;
+        $formData['bike_sell_price'] = -1;
+
+        $this->from(route('bikes.edit', $bike))
+            ->put(route('bikes.update', $bike), $formData)
+            ->assertSessionHasErrors([
+                'bike_stock',
+                'bike_buy_price',
+                'bike_sell_price'
+            ]);
+
+        // No data
+        $formData = ['_token' => Session::token()];
+
+        $this->from(route('bikes.edit', $bike))
+            ->put(route('bikes.update', $bike), $formData)
+            ->assertSessionHasErrors([
+                'brand_id',
+                'bike_name',
+                'bike_description',
+                'bike_stock',
+                'bike_buy_price',
+                'bike_sell_price'
+            ]);
     }
 
     /**
@@ -334,11 +506,13 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
         
-        $response = $this->delete(route('bikes.update', $bike), [
-            '_token' => Session::token()
-        ]);
+        $this->followingRedirects()
+            ->from(route('bikes.edit', $bike))
+            ->delete(route('bikes.update', $bike), [
+                '_token' => Session::token()
+            ])
+            ->assertDontSee($bike->brand_name);
 
         $this->assertSoftDeleted($bike);
-        $response->assertRedirect(route('bikes.index'));
     }
 }

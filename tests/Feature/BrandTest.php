@@ -89,7 +89,10 @@ class BrandTest extends TestCase
         Auth::login($user);
 
         // Anyone can view any Brand.
-        $this->get(route('brands.show', $brand))->assertStatus(200);
+        $this->get(route('brands.show', $brand))
+            ->assertStatus(200)
+            ->assertSee($brand->brand_name)
+            ->assertSee($brand->brand_description);
     }
 
     /**
@@ -163,16 +166,87 @@ class BrandTest extends TestCase
 
         Auth::login($user);
 
-        $response = $this->actingAs($user)->post(route('brands.store'), [
+        $formData = [
             'brand_name' => 'Lorem ipsum',
             'brand_description' => 'Lorem ipsum dolor sit amet, cost',
             '_token' => Session::token(),
-        ]);
+        ];
+
+        $this->followingRedirects()
+            ->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSee($formData['brand_name'])
+            ->assertSee($formData['brand_description']);
 
         $this->assertDatabaseCount('brands', 1);
-        
-        $brand = \App\Models\Brand::first();
-        $response->assertRedirect(route('brands.show', $brand));
+    }
+
+    /**
+     * Test create Brand with invalid data.
+     * 
+     * @return void
+     */
+    public function test_create_brand_with_invalid_data() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN
+        ]);
+
+        Auth::login($user);
+
+        // Brand name too long.
+        $formData = [
+            'brand_name' => \Illuminate\Support\Str::random(1337),
+            'brand_description' => \Illuminate\Support\Str::random(100),
+            '_token' => Session::token()
+        ];
+
+        $response = $this
+            ->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSessionHasErrors(['brand_name']);
+
+        // Brand name too sort.
+        $formData['brand_name'] = \Illuminate\Support\Str::random(5);
+
+        $this->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSessionHasErrors(['brand_name']);
+
+        // Brand description is too long.
+        $formData['brand_name'] = \Illuminate\Support\Str::random(10);
+        $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
+
+        $this->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSessionHasErrors(['brand_description']);
+
+        // Brand description is too short.
+        $formData['brand_description'] = \Illuminate\Support\Str::random(3);
+
+        $this->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSessionHasErrors(['brand_description']);
+
+        // Both are too long.
+        $formData['brand_name'] = \Illuminate\Support\Str::random(1337);
+        $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
+
+        $this->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSessionHasErrors(['brand_name', 'brand_description']);
+
+        // No data.
+        $formData = ['_token' => Session::token()];
+
+        $this->from(route('brands.create'))
+            ->post(route('brands.store'), $formData)
+            ->assertSessionHasErrors(['brand_name']);
+
+        // At the end, no new brands should be created.
+        $this->assertDatabaseCount('brands', 0);
     }
 
     /**
@@ -219,9 +293,17 @@ class BrandTest extends TestCase
 
         Auth::login($user);
 
-        $this->get(route('brands.edit', $brand))->assertStatus(200);
+        $this->get(route('brands.edit', $brand))
+            ->assertStatus(200)
+            ->assertSee($brand->brand_name)
+            ->assertSee($brand->brand_description);
     }
 
+    /**
+     * Test if a Staff cannot edit a Brand.
+     * 
+     * @return void
+     */
     public function test_edit_brand_as_staff() {
         Session::start();
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -260,18 +342,125 @@ class BrandTest extends TestCase
 
         Auth::login($user);
 
-        $response = $this->put(route('brands.update', $brand), [
+        $formData = [
             'brand_name' => 'Cheeky breeky iv damke!',
+            'brand_description' => 'Lorem ipsum dolor sit amet',
+            '_token' => Session::token()
+        ];
+
+        $response = $this->followingRedirects()
+            ->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSee($formData['brand_name'])
+            ->assertSee($formData['brand_description']);
+
+        $this->assertEquals(
+            $brand->fresh()->brand_name, 
+            $formData['brand_name']
+        );
+
+        $this->assertEquals(
+            $brand->fresh()->brand_description, 
+            $formData['brand_description']
+        );
+    }
+
+    /**
+     * Test edit Brand with invalid data.
+     * 
+     * @return void
+     */
+    public function test_edit_brand_with_invalid_data() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_ADMIN
+        ]);
+
+        Auth::login($user);
+
+        $brand = \App\Models\Brand::factory()->create();
+
+        // Brand name too long.
+        $formData = [
+            'brand_name' => \Illuminate\Support\Str::random(1337),
             'brand_description' => $brand->brand_description,
             '_token' => Session::token()
-        ]);
-    
-        $this->assertEquals(
-            \App\Models\Brand::find($brand->id)->first()->brand_name, 
-            'Cheeky breeky iv damke!'
+        ];
+
+        $response = $this
+            ->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSessionHasErrors(['brand_name']);
+
+        $this->assertNotEquals(
+            $brand->fresh()->brand_name, 
+            $formData['brand_name']
         );
-        $response->assertStatus(302)
-            ->assertRedirect(route('brands.edit', $brand));
+
+        // Brand name too sort.
+        $formData['brand_name'] = \Illuminate\Support\Str::random(5);
+
+        $this->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSessionHasErrors(['brand_name']);
+
+        $this->assertNotEquals(
+            $brand->fresh()->brand_name,
+            $formData['brand_name']
+        );
+
+        // Brand description is too long.
+        $formData['brand_name'] = \Illuminate\Support\Str::random(10);
+        $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
+
+        $this->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSessionHasErrors(['brand_description']);
+
+        $this->assertNotEquals(
+            $brand->fresh()->brand_description,
+            $formData['brand_description']
+        );
+
+        // Brand description is too short.
+        $formData['brand_description'] = \Illuminate\Support\Str::random(3);
+
+        $this->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSessionHasErrors(['brand_description']);
+
+        $this->assertNotEquals(
+            $brand->fresh()->brand_description,
+            $formData['brand_description']
+        );
+
+        // Both are too long.
+        $formData['brand_name'] = \Illuminate\Support\Str::random(1337);
+        $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
+
+
+        $this->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSessionHasErrors(['brand_name', 'brand_description']);
+
+        $this->assertNotEquals(
+            $brand->fresh()->brand_name,
+            $formData['brand_name']
+        );
+
+        $this->assertNotEquals(
+            $brand->fresh()->brand_description,
+            $formData['brand_description']
+        );
+
+        // No data.
+        $formData = ['_token' => Session::token()];
+
+        $this->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand), $formData)
+            ->assertSessionHasErrors(['brand_name']);
     }
 
     /**
@@ -320,12 +509,15 @@ class BrandTest extends TestCase
 
         Auth::login($user);
 
-        $response = $this->delete(route('brands.update', $brand), [
+        $formData = [
             '_token' => Session::token()
-        ]);
+        ];
+
+        $response = $this->followingRedirects()
+            ->from(route('brands.edit', $brand))
+            ->delete(route('brands.update', $brand), $formData)
+            ->assertDontSee($brand->brand_name);
 
         $this->assertSoftDeleted($brand);
-        $response->assertStatus(302)
-            ->assertRedirect(route('brands.index'));
     }
 }
