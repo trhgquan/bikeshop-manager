@@ -507,6 +507,8 @@ class BrandTest extends TestCase
 
         $this->assertDatabaseCount('brands', 1);
 
+        $bikes = \App\Models\Bike::factory()->count(100)->create();
+
         Auth::login($user);
 
         $formData = [
@@ -519,5 +521,10 @@ class BrandTest extends TestCase
             ->assertDontSee($brand->brand_name);
 
         $this->assertSoftDeleted($brand);
+
+        // All bikes also deleted, too.
+        foreach ($bikes as $bike) {
+            $this->assertSoftDeleted($bike);
+        }
     }
 }
