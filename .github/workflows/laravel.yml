@@ -2,7 +2,7 @@ name: Test Laravel App
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main, dev, add-order-test ]
   pull_request:
     branches: [ main ]
 jobs:
@@ -18,6 +18,9 @@ jobs:
 
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Remove composer.lock
+        run: rm composer.lock
 
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
@@ -37,4 +40,10 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABSE: database/database.sqlite
-        run: ./vendor/bin/phpunit
+        run: ./vendor/bin/phpunit --testdox
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: Logs
+          path: ./storage/logs
