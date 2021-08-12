@@ -51,13 +51,17 @@
             <select name="order_detail[{{ $index }}][bike_id]" class="form-select">
               @foreach ($bikes as $bike)
               <option value="{{ $bike->id }}" 
-                {{ $order_detail['bike_id'] == $bike->id ? "selected" : "" }}>
+                @isset($order_detail['bike_id'])
+                {{ $order_detail['bike_id'] == $bike->id ? "selected" : "" }}
+                @endisset
+              >
                 {{ $bike->id }} - {{ $bike->bike_name }} 
                 (giá bán: {{$bike->bike_sell_price }} - trong kho: {{ $bike->bike_stock }})
               </option>
               @endforeach
             </select>
-            <input type="number" name="order_detail[{{ $index }}][order_value]" class="form-control" value="{{ $order_detail['order_value']  }}" placeholder="Số lượng"/>
+            <input type="number" name="order_detail[{{ $index }}][order_value]" 
+              class="form-control" value="{{ isset($order_detail['order_value']) ? $order_detail['order_value'] : '' }}" placeholder="Số lượng"/>
             <button class="btn btn-danger" onclick="removeItem(this);" type="button">Xóa</button>
           </div>
         </div>
@@ -71,7 +75,7 @@
     <button type="button" class="btn btn-secondary" onclick="addItem(this);">Thêm loại xe</button>
   </div>
   <div class="col-sm-10">
-    <p class="text-danger">Tối đa {{ $bike->count() }} sản phẩm.</p>
+    <p class="text-danger">Tối đa {{ $bikes->count() }} sản phẩm.</p>
   </div>
 </div>
 <div class="row mb-3">
@@ -90,12 +94,12 @@
 @section('javascripts')
 @if(!old('order_detail', NULL))
 <script type="text/javascript">
-const MAX_TABLE_ITEMS = {!! $bike->count() !!};
+const MAX_TABLE_ITEMS = {!! $bikes->count() !!};
 var countItems = 1;
 </script>
 @else
 <script type="text/javascript">
-const MAX_TABLE_ITEMS = {!! $bike->count() !!};
+const MAX_TABLE_ITEMS = {!! $bikes->count() !!};
 var countItems = {!! count(old('order_detail')) !!};
 </script>  
 @endif

@@ -19,9 +19,6 @@ class OrderController extends Controller
         'out-of-stock' => [
             'Mặt hàng :item không đủ, chỉ còn :stock trong kho.'
         ],
-        'inconsistent' => [
-            'Thông tin đơn hàng không nhất quán!'
-        ],
     ];
 
     /**

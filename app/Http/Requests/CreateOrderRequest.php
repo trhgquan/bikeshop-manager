@@ -45,6 +45,7 @@ class CreateOrderRequest extends FormRequest
     protected $validationAttributes = [
         'customer_name' => 'Tên khách hàng',
         'customer_email' => 'Email khách hàng',
+        'order_detail' => 'Chi tiết đơn hàng',
         'order_detail.*.bike_id' => 'Loại xe',
         'order_detail.*.order_value' => 'Số lượng'
     ];
