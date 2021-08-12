@@ -71,9 +71,10 @@ class OrderPolicy
      */
     public function delete(User $user, Order $order) {
         // User can delete an order if it is not checked out,
-        // or User is an Admin / Manager!
-        return ! $order->getCheckedOut() ||
-            in_array($user->role, [
+        // and is the creator of the order; or User is an Admin / Manager!
+        return (! $order->getCheckedOut() 
+                && $user->id === $order->created_by_user) 
+            || in_array($user->role, [
                 Role::ROLE_ADMIN,
                 Role::ROLE_MANAGER,
             ]);

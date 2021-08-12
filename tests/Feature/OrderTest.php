@@ -20,6 +20,7 @@ class OrderTest extends TestCase
         $this->followingRedirects()
             ->from(route('orders.create'))
             ->post(route('orders.store'), $formData)
+            ->assertStatus(200)
             ->assertSee($signature);
     }
 
@@ -75,7 +76,7 @@ class OrderTest extends TestCase
     }
 
     /**
-     * A basic feature test example.
+     * Test if we can create Order with any User and Bikes.
      *
      * @return void
      */
@@ -157,7 +158,7 @@ class OrderTest extends TestCase
      * 
      * @return void
      */
-    public function test_order_with_invalid_data() {
+    public function test_create_order_with_invalid_data() {
         Session::start();
         // $this->withoutExceptionHandling();
 
@@ -230,5 +231,274 @@ class OrderTest extends TestCase
         // At the final, no orders should be created!
         $this->assertDatabaseCount('orders', 0);
         $this->assertDatabaseCount('order_bike', 0);
+    }
+
+    /**
+     * Test if not everyone can delete a non-checkout order.
+     * (as a user, we'll test if only that user can delete that order
+     * while it's not checked out).
+     * 
+     * @return void
+     */
+    public function test_delete_non_checkout_order_as_staff() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+
+        $this->actingAs($user);
+
+        $brands = \App\Models\Brand::factory()->count(10)->create();
+        $bikes = \App\Models\Bike::factory()->count(10)->create([
+            'bike_stock' => 1337
+        ]);
+
+        $order_detail = [];
+
+        /**
+         * Delete a non-checkedout order.
+         * 
+         * 
+         */
+        foreach ($bikes as $bike) {
+            array_push($order_detail, [
+                'bike_id' => $bike->id,
+                'order_value' => 13
+            ]);
+        }
+
+        $formData = [
+            'customer_name' => $this->faker->name(),
+            'customer_email' => $this->faker->email(),
+            'order_detail' => $order_detail,
+            '_token' => Session::token()
+        ];
+
+        $response = $this->followingRedirects()
+            ->from(route('orders.create'))
+            ->post(route('orders.store', $formData))
+            ->assertStatus(200);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_bike', $bikes->count());
+
+        $bikes = $bikes->fresh();
+        foreach ($bikes as $bike) {
+            $this->assertEquals($bike->bike_stock, 1324);
+        }
+
+        $order = \App\Models\Order::first();
+
+        $this->assertEquals($order->getCheckedOut(), false);
+
+        $theOneCannotDelete = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $this->actingAs($theOneCannotDelete);
+
+        $this->followingRedirects()
+            ->from(route('orders.edit', $order))
+            ->delete(route('orders.destroy', $order), [
+                '_token' => Session::token()
+            ])
+            ->assertStatus(403);
+        
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'deleted_at' => NULL
+        ]);
+        
+        $this->actingAs($user);
+        $this->followingRedirects()
+        ->from(route('orders.edit', $order))
+        ->delete(route('orders.destroy', $order), [
+            '_token' => Session::token()
+        ])
+        ->assertStatus(200);
+
+        $this->assertSoftDeleted($order);
+        
+        $bikes = $bikes->fresh();
+        foreach ($bikes as $bike) {
+            $this->assertEquals($bike->bike_stock, 1337);
+        }
+
+        $this->get(route('orders.show', $order))
+            ->assertStatus(404);
+    }
+
+    /**
+     * Although he did not created this order, Manager can still delete it.
+     * 
+     * @return void
+     */
+    public function test_delete_non_checkout_order_as_manager() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+
+        $this->actingAs($user);
+
+        $brands = \App\Models\Brand::factory()->count(10)->create();
+        $bikes = \App\Models\Bike::factory()->count(10)->create([
+            'bike_stock' => 1337
+        ]);
+
+        $order_detail = [];
+
+        /**
+         * Delete a non-checkedout order.
+         * 
+         * 
+         */
+        foreach ($bikes as $bike) {
+            array_push($order_detail, [
+                'bike_id' => $bike->id,
+                'order_value' => 13
+            ]);
+        }
+
+        $formData = [
+            'customer_name' => $this->faker->name(),
+            'customer_email' => $this->faker->email(),
+            'order_detail' => $order_detail,
+            '_token' => Session::token()
+        ];
+
+        $response = $this->followingRedirects()
+            ->from(route('orders.create'))
+            ->post(route('orders.store', $formData))
+            ->assertStatus(200);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_bike', $bikes->count());
+
+        $bikes = $bikes->fresh();
+        foreach ($bikes as $bike) {
+            $this->assertEquals($bike->bike_stock, 1324);
+        }
+
+        $order = \App\Models\Order::first();
+
+        $this->assertEquals($order->getCheckedOut(), false);
+
+        $theOneCanDeleteEveryOrder = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER,
+        ]);
+
+        $this->actingAs($theOneCanDeleteEveryOrder);
+        $this->followingRedirects()
+        ->from(route('orders.edit', $order))
+        ->delete(route('orders.destroy', $order), [
+            '_token' => Session::token()
+        ])
+        ->assertStatus(200);
+
+        $this->assertSoftDeleted($order);
+        
+        $bikes = $bikes->fresh();
+        foreach ($bikes as $bike) {
+            $this->assertEquals($bike->bike_stock, 1337);
+        }
+
+        $this->get(route('orders.show', $order))
+            ->assertStatus(404);
+    }
+
+    /**
+     * Test if staff cannot and manager can delete checked out orders.
+     * 
+     * @return void
+     */
+    public function test_delete_checkedout_order_with_both() {
+        Session::start();
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+
+        $this->actingAs($user);
+
+        $brands = \App\Models\Brand::factory()->count(10)->create();
+        $bikes = \App\Models\Bike::factory()->count(10)->create([
+            'bike_stock' => 1337
+        ]);
+
+        $order_detail = [];
+
+        /**
+         * Delete a non-checkedout order.
+         * 
+         * 
+         */
+        foreach ($bikes as $bike) {
+            array_push($order_detail, [
+                'bike_id' => $bike->id,
+                'order_value' => 13
+            ]);
+        }
+
+        $formData = [
+            'customer_name' => $this->faker->name(),
+            'customer_email' => $this->faker->email(),
+            'order_detail' => $order_detail,
+            'order_checkout' => '1',
+            '_token' => Session::token()
+        ];
+
+        $response = $this->followingRedirects()
+            ->from(route('orders.create'))
+            ->post(route('orders.store', $formData))
+            ->assertStatus(200);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_bike', $bikes->count());
+
+        $bikes = $bikes->fresh();
+        foreach ($bikes as $bike) {
+            $this->assertEquals($bike->bike_stock, 1324);
+        }
+
+        $order = \App\Models\Order::first();
+
+        $this->assertEquals($order->getCheckedOut(), true);
+
+        $this->followingRedirects()
+            ->from(route('orders.edit', $order))
+            ->delete(route('orders.destroy', $order), [
+                '_token' => Session::token()
+            ])
+            ->assertStatus(403);
+        
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'deleted_at' => NULL
+        ]);
+
+        $theOneCanDelete = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER,
+        ]);
+
+        $this->actingAs($theOneCanDelete);
+        $this->followingRedirects()
+            ->from(route('orders.edit', $order))
+            ->delete(route('orders.destroy', $order), [
+                '_token' => Session::token()
+            ])
+            ->assertStatus(200)
+            ->assertDontSee($order->customer_name)
+            ->assertDontSee($order->customer_email);
+
+        $this->assertSoftDeleted($order);
+
+        $this->get(route('orders.show', $order))
+            ->assertStatus(404);
     }
 }

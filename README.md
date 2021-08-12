@@ -70,12 +70,29 @@ php artisan cache:config --env=testing
 ```
 php artisan test --env=testing
 ```
+
+Kỹ tính hơn, gộp bước 3 và 4 lại làm một:
+```
+php artisan cache:config --env=testing && php artisan test -env=testing
+```
 5. Xài xong cần chuyển về môi trường bình thường:
 ```
 php artisan cache:config --env=local
 ```
 
 (Data trong môi trường test được sinh ngẫu nhiên, không phải mấy cái trong seeder!)
+
+**Trường hợp gặp lỗi `file_put_content` khi test**
+
+Mô tả: Chạy test bị lỗi `file_put_content <...> failed to open stream: Permission denied.`
+
+Sửa: Chú ý phần `<...>`, nếu là view thì clear cache view
+```
+php artisan cache:view
+```
+
+Nếu báo lỗi khác thì đi sửa đi? Chủ yếu là do code ngu á!
+
 ## Chạy trên domain ở local
  (VD: `bike.test`)
 
