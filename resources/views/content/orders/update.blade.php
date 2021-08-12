@@ -74,8 +74,8 @@
 <p>Nếu là Quản lý hoặc Admin, bạn có thể xóa đơn hàng này.</p>
 @endif
 
+@can('delete', $order)
 <hr>
-
 <small class="lead">Xóa đơn hàng</small>
 <form action="{{ route('orders.destroy', $order->id) }}" method="POST">
 @csrf
@@ -85,6 +85,7 @@
 </p>
 <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa đơn hàng. Đồng ý?');">sudo rm -r -f</button>
 </form>
+@endcan
 @endsection
 
 @section('javascripts')

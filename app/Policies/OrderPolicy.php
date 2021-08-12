@@ -54,9 +54,10 @@ class OrderPolicy
      */
     public function update(User $user, Order $order) {
         // User can update an order if it is not checked out,
-        // or User is an Admin / Manager!
-        return ! $order->getCheckedOut() ||
-            in_array($user->role, [
+        // and he's the creator; or User is an Admin / Manager!
+        return (! $order->getCheckedOut() 
+                && $user->id === $order->created_by_user)
+            ||  in_array($user->role, [
                 Role::ROLE_ADMIN,
                 Role::ROLE_MANAGER,
             ]);

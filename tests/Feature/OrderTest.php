@@ -313,11 +313,11 @@ class OrderTest extends TestCase
         
         $this->actingAs($user);
         $this->followingRedirects()
-        ->from(route('orders.edit', $order))
-        ->delete(route('orders.destroy', $order), [
-            '_token' => Session::token()
-        ])
-        ->assertStatus(200);
+            ->from(route('orders.edit', $order))
+            ->delete(route('orders.destroy', $order), [
+                '_token' => Session::token()
+            ])
+            ->assertStatus(200);
 
         $this->assertSoftDeleted($order);
         
@@ -394,11 +394,11 @@ class OrderTest extends TestCase
 
         $this->actingAs($theOneCanDeleteEveryOrder);
         $this->followingRedirects()
-        ->from(route('orders.edit', $order))
-        ->delete(route('orders.destroy', $order), [
-            '_token' => Session::token()
-        ])
-        ->assertStatus(200);
+            ->from(route('orders.edit', $order))
+            ->delete(route('orders.destroy', $order), [
+                '_token' => Session::token()
+            ])
+            ->assertStatus(200);
 
         $this->assertSoftDeleted($order);
         
