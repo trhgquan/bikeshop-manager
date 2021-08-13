@@ -21,11 +21,11 @@ class OrderObserver
     }
 
     /**
-     * Handle the Order "updating" event.
+     * Handle the Order "saving" event.
      * 
      * @param  \App\Models\Order $order
      */
-    public function updating(Order $order) {
+    public function saving(Order $order) {
         if (Auth::check()) {
             $order->updated_by_user = Auth::id();
         }

@@ -18,7 +18,7 @@ class OrderController extends Controller
     private $errorMessages = [
         'out-of-stock' => [
             'Mặt hàng :item không đủ, chỉ còn :stock trong kho.'
-        ]
+        ],
     ];
 
     /**
@@ -62,15 +62,15 @@ class OrderController extends Controller
      * Validate item quantity on Create.
      * aka checking if that item is out of stock or not.
      * 
-     * @param \Illuminate\Support\Facades\Validator $validator
+     * @param  array $validator
      * @return array
      */
     private function validateItemQuantityCreate($validator) {
         $errors = [];
 
-        foreach ($validator['bike_id'] as $index => $bike_id) {
-            $bike = Bike::find($bike_id);
-            $order_value = (int)$validator['order_value'][$index];
+        foreach ($validator['order_detail'] as $order_detail) {
+            $bike = Bike::find($order_detail['bike_id']);
+            $order_value = (int)$order_detail['order_value'];
 
             if ($bike->bike_stock < $order_value) {
                 array_push($errors, $this->getItemOutOfStockError($bike));
@@ -83,16 +83,16 @@ class OrderController extends Controller
     /**
      * Validate item quantity on Update.
      * 
-     * @param  \Illuminate\Support\Facades\Validator $validator
+     * @param  array $validator
      * @param  \App\Models\Order $order
-     * @return bool
+     * @return array
      */
     private function validateItemQuantityUpdate($validator, Order $order) {
         $errors = [];
 
-        foreach ($validator['bike_id'] as $index => $bike_id) {
-            $bike = Bike::find($bike_id);
-            $order_value = (int)$validator['order_value'][$index];
+        foreach ($validator['order_detail'] as $order_detail) {
+            $bike = Bike::find($order_detail['bike_id']);
+            $order_value = (int)$order_detail['order_value'];
 
             if ($bike->bike_stock + $order->orderValue($bike) < $order_value) {
                 array_push($errors, $this->getItemOutOfStockError($bike));
@@ -153,20 +153,20 @@ class OrderController extends Controller
             'customer_name' => $validator['customer_name'],
             'customer_email' => $validator['customer_email'],
             'checkout_at' => $request->has('order_checkout')
-                ? Carbon\Carbon::now()->toDateTimeString()
+                ? \Carbon\Carbon::now()->toDateTimeString()
                 : NULL
         ]);
 
-        foreach ($validator['bike_id'] as $index => $bike_id) {
-            $bike = Bike::find($bike_id);
+        foreach ($validator['order_detail'] as $order_detail) {
+            $bike = Bike::find($order_detail['bike_id']);
 
-            $bike->bike_stock -= (int)$validator['order_value'][$index];
+            $bike->bike_stock -= (int)$order_detail['order_value'];
             $bike->save();
 
-            $new_order->bikes()->attach($bike_id, [
-                'order_value' => $validator['order_value'][$index],
+            $new_order->bikes()->attach($bike->id, [
+                'order_value' => $order_detail['order_value'],
                 'order_buy_price' => $bike->bike_buy_price,
-                'order_sell_price' => $bike->bike_sell_price
+                'order_sell_price' => $bike->bike_sell_price,
             ]);
         }
 
@@ -193,7 +193,7 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(Order $order) {
-        $bikes = Bike::where('bike_stock', '>', 0)->get();
+        $bikes = Bike::all();
         $details = $order->bikes()->get();
 
         return view(
@@ -224,21 +224,27 @@ class OrderController extends Controller
         // Get new information of updated bikes.
         $bikes_updated = [];
 
-        foreach ($validator['bike_id'] as $index => $bike_id) {
-            // Update bike stock.
-            $bike = Bike::find($bike_id);
+        foreach ($validator['order_detail'] as $order_detail) {
+            $bike = Bike::find($order_detail['bike_id']);
 
-            $bike->bike_stock -=
-                (int)$validator['order_value'][$index]
-                - $order->orderValue($bike);
-            
+            $bike->bike_stock -= (int)$order_detail['order_value']
+                                    - $order->orderValue($bike);
+
             $bike->save();
 
-            $bikes_updated[$bike_id] = [
-                'order_value' => $validator['order_value'][$index],
+            $bikes_updated[$bike->id] = [
+                'order_value' => $order_detail['order_value'],
                 'order_buy_price' => $bike->bike_buy_price,
                 'order_sell_price' => $bike->bike_sell_price
             ];
+        }
+
+        // Restore bikes that was eliminated from the Order.
+        foreach ($order->bikes as $bike) {
+            if (!array_key_exists($bike->id, $bikes_updated)) {
+                $bike->bike_stock += $order->orderValue($bike);
+                $bike->save();
+            }
         }
 
         $order->bikes()->sync($bikes_updated);

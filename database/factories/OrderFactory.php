@@ -2,18 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\Brand;
-use Illuminate\Support\Str;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class BrandFactory extends Factory
+class OrderFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Brand::class;
+    protected $model = Order::class;
 
     /**
      * Define the model's default state.
@@ -23,8 +22,9 @@ class BrandFactory extends Factory
     public function definition()
     {
         return [
-            'brand_name' => Str::random(50),
-            'brand_description' => Str::random(100),
+            'customer_name' => $this->faker->name(),
+            'customer_email' => $this->faker->email(),
+            'checkout_at' => NULL,
             'created_by_user' => \App\Models\User::all()->random()->id,
             'updated_by_user' => \App\Models\User::all()->random()->id,
         ];

@@ -42,6 +42,11 @@ APP_KEY=<key mới tạo>
 
 4. **NHỚ BẬT MYSQL!**
 5. Tạo database (vào MySQL tạo!)
+- Vào MySQL tạo mới 1 database, đặt tên (VD: `bikeshop-manager`)
+- Cập nhật tên database trong file .env
+```
+DB_DATABASE=bikeshop-manager
+```
 6. Tạo các bảng liên quan
 ```
 php artisan migrate
@@ -50,6 +55,43 @@ php artisan migrate
 ```
 php artisan db:seed
 ```
+
+## Test
+1. Tạo database test (VD: `bikeshop-manager-test`)
+2. Tạo `.env.testing`, cấu hình y như `.env` nhưng có thay đổi:
+```
+DB_DATABASE=bikeshop-manager-test
+```
+3. **CHUYỂN MODE SANG TEST**
+```
+php artisan cache:config --env=testing
+```
+4. Chạy test
+```
+php artisan test --env=testing
+```
+
+Kỹ tính hơn, gộp bước 3 và 4 lại làm một:
+```
+php artisan cache:config --env=testing && php artisan test -env=testing
+```
+5. Xài xong cần chuyển về môi trường bình thường:
+```
+php artisan cache:config --env=local
+```
+
+(Data trong môi trường test được sinh ngẫu nhiên, không phải mấy cái trong seeder!)
+
+**Trường hợp gặp lỗi `file_put_content` khi test**
+
+Mô tả: Chạy test bị lỗi `file_put_content <...> failed to open stream: Permission denied.`
+
+Sửa: Chú ý phần `<...>`, nếu là view thì clear cache view
+```
+php artisan cache:view
+```
+
+Nếu báo lỗi khác thì đi sửa đi? Chủ yếu là do code ngu á!
 
 ## Chạy trên domain ở local
  (VD: `bike.test`)
