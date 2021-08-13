@@ -216,7 +216,7 @@ class OrderController extends Controller
 
         if (count($quantityErrors) > 0) {
             return redirect()
-                ->route('orders.update', $order)
+                ->route('orders.edit', $order)
                 ->withInput()
                 ->withErrors($quantityErrors);
         }
