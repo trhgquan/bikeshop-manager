@@ -162,8 +162,7 @@ class OrderTest extends TestCase
      */
     public function test_create_order_with_invalid_data() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        // $this->withoutExceptionHandling();
-
+ 
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         // Create new user, brand and bikes.
@@ -176,7 +175,7 @@ class OrderTest extends TestCase
         $brand = \App\Models\Brand::factory()->create();
 
         $bikes = \App\Models\Bike::factory()
-            ->count(random_int(1, 13))
+            ->count(random_int(10, 13))
             ->create();
         $order_detail = [];
 
@@ -235,18 +234,15 @@ class OrderTest extends TestCase
     }
 
     /**
-     * Test if Creator can delete orders he created.
-     * 
-     * @return void
+     * Test if a user can delete his own order.
      */
-    public function test_delete_non_checked_out_order_as_creator() {
+    public function test_delete_non_checked_out_order_as_owner() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        $this->withoutExceptionHandling();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
+            'role' => \App\Models\Role::ROLE_STAFF
         ]);
 
         $brands = \App\Models\Brand::factory()->count(10)->create();
@@ -254,29 +250,42 @@ class OrderTest extends TestCase
             'bike_stock' => 1337
         ]);
 
-        $this->actingAs($user);
-
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $user->id
+            'created_by_user' => $user->id,
+            'updated_by_user' => $user->id,
         ]);
 
         foreach ($bikes as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => 1337,
+                'order_value' => $bike->bike_stock,
                 'order_buy_price' => $bike->bike_buy_price,
                 'order_sell_price' => $bike->bike_sell_price
             ]);
             $bike->update(['bike_stock' => 0]);
         }
 
-        $this->followingRedirects()
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_bike', $bikes->count());
+
+        $bikes = $bikes->fresh();
+        foreach ($bikes as $bike) {
+            $this->assertEquals($bike->bike_stock, 0);
+        }
+
+        $order = \App\Models\Order::first();
+        foreach ($order->bikes as $bike) {
+            $this->assertEquals($bike->pivot->order_value, 1337);
+        }
+
+        // Attempts to delete.
+        $this->actingAs($user)
+            ->followingRedirects()
             ->from(route('orders.edit', $order))
             ->delete(route('orders.destroy', $order))
-            ->assertDontSee($order->customer_name)
-            ->assertDontSee($order->customer_email);
-
+            ->assertStatus(200);
+        
         $this->assertSoftDeleted($order);
-
+        
         $bikes = $bikes->fresh();
         foreach ($bikes as $bike) {
             $this->assertEquals($bike->bike_stock, 1337);
@@ -480,5 +489,138 @@ class OrderTest extends TestCase
             ->assertDontSee($order->customer_email);
         
         $this->assertSoftDeleted($order);
+    }
+
+    /**
+     * Test if Owner can update his Order.
+     * 
+     * @return void
+     */
+    public function test_update_order_as_owner() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create([
+            'bike_stock' => 1330
+        ]);
+
+        $order = \App\Models\Order::factory()->create();
+        $order->bikes()->attach($bike, [
+            'order_value' => 7,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $this->actingAs($user)
+            ->followingRedirects()
+            ->from(route('orders.edit', $order))
+            ->put(route('orders.update', $order), [
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'order_detail' => [
+                    ['bike_id' => $bike->id, 'order_value' => 1337]
+                ]
+            ])
+            ->assertSee(1337);
+
+        $bike = $bike->fresh();
+        $this->assertEquals($bike->bike_stock, 0);
+    }
+
+    /**
+     * Test if Stranger cannot update orders he did not created.
+     * 
+     * @return void
+     */
+    public function test_update_order_as_stranger() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create([
+            'bike_stock' => 1330
+        ]);
+
+        $order = \App\Models\Order::factory()->create();
+        $order->bikes()->attach($bike, [
+            'order_value' => 7,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $tester = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $this->actingAs($tester)
+            ->from(route('orders.edit', $order))
+            ->put(route('orders.update', $order), [
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'order_detail' => [
+                    ['bike_id' => $bike->id, 'order_value' => 1337]
+                ]
+            ])
+            ->assertStatus(403);
+
+        $bike = $bike->fresh();
+        $this->assertNotEquals($bike->bike_stock, 0);
+    }
+
+    /**
+     * Test if Manager can update Order he did not created.
+     * 
+     * @return void
+     */
+    public function test_update_order_as_manager() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create([
+            'bike_stock' => 1330
+        ]);
+
+        $order = \App\Models\Order::factory()->create();
+        $order->bikes()->attach($bike, [
+            'order_value' => 7,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $tester = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER,
+        ]);
+
+        $this->actingAs($tester)
+            ->followingRedirects()
+            ->from(route('orders.edit', $order))
+            ->put(route('orders.update', $order), [
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'order_detail' => [
+                    ['bike_id' => $bike->id, 'order_value' => 1337]
+                ]
+            ])
+            ->assertSee(1337);
+
+        $bike = $bike->fresh();
+        $this->assertEquals($bike->bike_stock, 0);
     }
 }
