@@ -2,7 +2,7 @@ name: Test Laravel App
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main, dev, add-code-coverage ]
   pull_request:
     branches: [ main ]
 jobs:
@@ -37,4 +37,4 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABSE: database/database.sqlite
-        run: php artisan test
+        run: ./vendor/bin/phpunit --verbose --coverage-text
