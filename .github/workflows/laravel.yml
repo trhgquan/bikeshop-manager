@@ -2,7 +2,7 @@ name: Test Laravel App
 
 on:
   push:
-    branches: [ main, dev, add-code-coverage ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 jobs:
