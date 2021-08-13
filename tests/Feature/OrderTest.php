@@ -280,7 +280,7 @@ class OrderTest extends TestCase
         // Attempts to delete.
         $this->actingAs($user)
             ->followingRedirects()
-            ->from(route('orders.edit', $order))
+            ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(200);
         
@@ -329,7 +329,7 @@ class OrderTest extends TestCase
 
         $this->actingAs($tester)
             ->followingRedirects()
-            ->from(route('orders.edit', $order))
+            ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(403);
 
@@ -381,7 +381,7 @@ class OrderTest extends TestCase
 
         $this->actingAs($tester)
             ->followingRedirects()
-            ->from(route('orders.edit', $order))
+            ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(200)
             ->assertDontSee($order->customer_name)
@@ -430,7 +430,7 @@ class OrderTest extends TestCase
 
         $this->actingAs($user)
             ->followingRedirects()
-            ->from(route('orders.edit', $order))
+            ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(403);
         
@@ -482,7 +482,7 @@ class OrderTest extends TestCase
 
         $this->actingAs($tester)
             ->followingRedirects()
-            ->from(route('orders.edit', $order))
+            ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(200)
             ->assertDontSee($order->customer_name)
@@ -622,5 +622,128 @@ class OrderTest extends TestCase
 
         $bike = $bike->fresh();
         $this->assertEquals($bike->bike_stock, 0);
+    }
+
+    /**
+     * Test if we cannot update Order with non exist bikes.
+     * 
+     * @return void
+     */
+    public function test_update_order_with_not_exist_bikes() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $tester = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create([
+            'bike_stock' => 1330
+        ]);
+
+        $order = \App\Models\Order::factory()->create();
+        $order->bikes()->attach($bike, [
+            'order_value' => 7,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $this->actingAs($tester)
+            ->from(route('orders.edit', $order))
+            ->put(route('orders.update', $order), [
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'order_detail' => [
+                    ['bike_id' => 1337, 'order_value' => 1337]
+                ]
+            ])
+            ->assertSessionHasErrors(['order_detail.*.bike_id']);
+
+        $bike = $bike->fresh();
+        $this->assertEquals($bike->bike_stock, 1330);
+    }
+
+    /**
+     * Test if we cannot update Order with overstock.
+     * 
+     * @return void
+     */
+    public function test_update_order_with_overstock() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $tester = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create([
+            'bike_stock' => 1330
+        ]);
+
+        $order = \App\Models\Order::factory()->create();
+        $order->bikes()->attach($bike, [
+            'order_value' => 7,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $response = $this->actingAs($tester)
+            ->from(route('orders.edit', $order))
+            ->put(route('orders.update', $order), [
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'order_detail' => [
+                    ['bike_id' => $bike->id, 'order_value' => 7331]
+                ]
+            ])
+            ->assertSessionHasErrors();
+
+        $bike = $bike->fresh();
+        $this->assertEquals($bike->bike_stock, 1330);
+    }
+
+    /**
+     * Test if no one can update checked out Orders.
+     * 
+     * @return void
+     */
+    public function test_update_checkedout_orders() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create();
+
+        $order = \App\Models\Order::factory()->create([
+            'checkout_at' => \Carbon\Carbon::now()
+        ]);
+        $order->bikes()->attach($bike->id, [
+            'order_value' => 1337,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price
+        ]);
+
+        $this->actingAs($user)
+            ->followingRedirects()
+            ->from(route('orders.show', $order))
+            ->put(route('orders.update', $order), [
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'order_detail' => [
+                    ['bike_id' => $bike->id, 'order_value' => 1]
+                ]
+            ])
+            ->assertStatus(403);
+        
+        $this->assertEquals($order->quantity(), 1337);
     }
 }

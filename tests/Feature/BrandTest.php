@@ -4,9 +4,6 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class BrandTest extends TestCase
@@ -28,40 +25,31 @@ class BrandTest extends TestCase
      *
      * @return void
      */
-    public function test_view_brands_index_as_authenticated_user()
-    {
+    public function test_view_brands_index_as_authenticated_user() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         // Log user in.
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        Auth::login($user);
 
         // Anyone can view every Brand.
-        $this->get(route('brands.index'))->assertStatus(200);
+        $this->actingAs($user)->get(route('brands.index'))->assertStatus(200);
     }
 
     /**
-     * Test if a non-authenticated user can view a brand.
+     * Test if a non-authenticated user cannot view a brand.
      * 
      * @return void
      */
-    public function test_view_brands_show_as_non_authenticated_user()
-    {
+    public function test_view_brands_show_as_non_authenticated_user() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_ADMIN,
         ]);
         
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id,
-        ]);
-
-        $this->assertDatabaseCount('users', 1)
-            ->assertDatabaseCount('brands', 1);
+        $brand = \App\Models\Brand::factory()->create();
 
         // Anyone can view any Brand.
         $this->get(route('brands.show', $brand))
@@ -73,8 +61,7 @@ class BrandTest extends TestCase
      *
      * @return void
      */
-    public function test_view_brands_show_as_authenticated_user()
-    {
+    public function test_view_brands_show_as_authenticated_user() {
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
@@ -83,13 +70,9 @@ class BrandTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        $this->assertDatabaseCount('users', 1)
-            ->assertDatabaseCount('brands', 1);
-
-        Auth::login($user);
-
         // Anyone can view any Brand.
-        $this->get(route('brands.show', $brand))
+        $this->actingAs($user)
+            ->get(route('brands.show', $brand))
             ->assertStatus(200)
             ->assertSee($brand->brand_name)
             ->assertSee($brand->brand_description);
@@ -106,9 +89,8 @@ class BrandTest extends TestCase
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        Auth::login($user);
 
-        $this->get(route('brands.create'))->assertStatus(403);
+        $this->actingAs($user)->get(route('brands.create'))->assertStatus(403);
     }
 
     /**
@@ -122,9 +104,8 @@ class BrandTest extends TestCase
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_ADMIN
         ]);
-        Auth::login($user);
 
-        $this->get(route('brands.create'))->assertStatus(200);
+        $this->actingAs($user)->get(route('brands.create'))->assertStatus(200);
     }
 
     /**
@@ -133,21 +114,21 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_create_brand_as_staff() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        Auth::login($user);
 
-        $response = $this->actingAs($user)->post(route('brands.store'), [
-            'brand_name' => 'Lorem ipsum',
-            'brand_description' => 'Lorem ipsum dolor sit amet, cost',
-            '_token' => Session::token()
-        ]);
+        $this->actingAs($user)
+            ->post(route('brands.store'), [
+                'brand_name' => 'Lorem ipsum',
+                'brand_description' => 'Lorem ipsum dolor sit amet, cost',
+            ])
+            ->assertStatus(403);
 
-        $response->assertStatus(403);
         $this->assertDatabaseCount('brands', 0);
     }
 
@@ -157,22 +138,21 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_create_brand_as_manager() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
-        Auth::login($user);
-
         $formData = [
             'brand_name' => 'Lorem ipsum',
             'brand_description' => 'Lorem ipsum dolor sit amet, cost',
-            '_token' => Session::token(),
         ];
 
-        $this->followingRedirects()
+        $this->actingAs($user)
+            ->followingRedirects()
             ->from(route('brands.create'))
             ->post(route('brands.store'), $formData)
             ->assertSee($formData['brand_name'])
@@ -187,23 +167,21 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_create_brand_with_invalid_data() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_ADMIN
         ]);
 
-        Auth::login($user);
-
         // Brand name too long.
         $formData = [
             'brand_name' => \Illuminate\Support\Str::random(1337),
             'brand_description' => \Illuminate\Support\Str::random(100),
-            '_token' => Session::token()
         ];
 
-        $response = $this
+        $this->actingAs($user)
             ->from(route('brands.create'))
             ->post(route('brands.store'), $formData)
             ->assertSessionHasErrors(['brand_name']);
@@ -211,7 +189,8 @@ class BrandTest extends TestCase
         // Brand name too sort.
         $formData['brand_name'] = \Illuminate\Support\Str::random(5);
 
-        $this->from(route('brands.create'))
+        $this->actingAs($user)
+            ->from(route('brands.create'))
             ->post(route('brands.store'), $formData)
             ->assertSessionHasErrors(['brand_name']);
 
@@ -219,14 +198,16 @@ class BrandTest extends TestCase
         $formData['brand_name'] = \Illuminate\Support\Str::random(10);
         $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->from(route('brands.create'))
+        $this->actingAs($user)
+            ->from(route('brands.create'))
             ->post(route('brands.store'), $formData)
             ->assertSessionHasErrors(['brand_description']);
 
         // Brand description is too short.
         $formData['brand_description'] = \Illuminate\Support\Str::random(3);
 
-        $this->from(route('brands.create'))
+        $this->actingAs($user)
+            ->from(route('brands.create'))
             ->post(route('brands.store'), $formData)
             ->assertSessionHasErrors(['brand_description']);
 
@@ -234,15 +215,15 @@ class BrandTest extends TestCase
         $formData['brand_name'] = \Illuminate\Support\Str::random(1337);
         $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->from(route('brands.create'))
+        $this->actingAs($user)
+            ->from(route('brands.create'))
             ->post(route('brands.store'), $formData)
             ->assertSessionHasErrors(['brand_name', 'brand_description']);
 
         // No data.
-        $formData = ['_token' => Session::token()];
-
-        $this->from(route('brands.create'))
-            ->post(route('brands.store'), $formData)
+        $this->actingAs($user)
+            ->from(route('brands.create'))
+            ->post(route('brands.store'))
             ->assertSessionHasErrors(['brand_name']);
 
         // At the end, no new brands should be created.
@@ -266,9 +247,9 @@ class BrandTest extends TestCase
         $this->assertDatabaseCount('users', 1)
             ->assertDatabaseCount('brands', 1);
 
-        Auth::login($user);
-
-        $this->get(route('brands.edit', $brand))->assertStatus(403);
+        $this->actingAs($user)
+            ->get(route('brands.edit', $brand))
+            ->assertStatus(403);
     }
 
     /**
@@ -283,17 +264,10 @@ class BrandTest extends TestCase
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
-        $brand = \App\Models\Brand::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id
-        ]);
+        $brand = \App\Models\Brand::factory()->create();
 
-        $this->assertDatabaseCount('users', 1)
-            ->assertDatabaseCount('brands', 1);
-
-        Auth::login($user);
-
-        $this->get(route('brands.edit', $brand))
+        $this->actingAs($user)
+            ->get(route('brands.edit', $brand))
             ->assertStatus(200)
             ->assertSee($brand->brand_name)
             ->assertSee($brand->brand_description);
@@ -305,7 +279,8 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_edit_brand_as_staff() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
         
         $user = \App\Models\User::factory()->create([
@@ -314,15 +289,16 @@ class BrandTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        Auth::login($user);
+        $this->actingAs($user)
+            ->put(route('brands.update', $brand), [
+                'brand_name' => 'Cheeky breeky iv damke!',
+            ])
+            ->assertStatus(403);
 
-        $response = $this->put(route('brands.update', $brand), [
-            'brand_name' => 'Cheeky breeky iv damke!',
-            '_token' => Session::token()
-        ]);
-
-        $this->assertTrue($brand->brand_name !== 'Cheeky breeky iv damke!');
-        $response->assertStatus(403);
+        $this->assertNotEquals(
+            $brand->fresh()->brand_name,
+            'Cheeky breeky iv damke!'
+        );
     }
 
     /**
@@ -331,7 +307,8 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_edit_brand_as_manager() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
         
         $user = \App\Models\User::factory()->create([
@@ -340,15 +317,13 @@ class BrandTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        Auth::login($user);
-
         $formData = [
             'brand_name' => 'Cheeky breeky iv damke!',
             'brand_description' => 'Lorem ipsum dolor sit amet',
-            '_token' => Session::token()
         ];
 
-        $response = $this->followingRedirects()
+        $this->actingAs($user)
+            ->followingRedirects()
             ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
             ->assertSee($formData['brand_name'])
@@ -371,14 +346,13 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_edit_brand_with_invalid_data() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_ADMIN
         ]);
-
-        Auth::login($user);
 
         $brand = \App\Models\Brand::factory()->create();
 
@@ -386,23 +360,23 @@ class BrandTest extends TestCase
         $formData = [
             'brand_name' => \Illuminate\Support\Str::random(1337),
             'brand_description' => $brand->brand_description,
-            '_token' => Session::token()
         ];
 
-        $response = $this
+        $this->actingAs($user)
             ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
             ->assertSessionHasErrors(['brand_name']);
 
         $this->assertNotEquals(
-            $brand->fresh()->brand_name, 
+            $brand->fresh()->brand_name,
             $formData['brand_name']
         );
 
         // Brand name too sort.
         $formData['brand_name'] = \Illuminate\Support\Str::random(5);
 
-        $this->from(route('brands.edit', $brand))
+        $this->actingAs($user)
+            ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
             ->assertSessionHasErrors(['brand_name']);
 
@@ -415,7 +389,8 @@ class BrandTest extends TestCase
         $formData['brand_name'] = \Illuminate\Support\Str::random(10);
         $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->from(route('brands.edit', $brand))
+        $this->actingAs($user)
+            ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
             ->assertSessionHasErrors(['brand_description']);
 
@@ -427,7 +402,8 @@ class BrandTest extends TestCase
         // Brand description is too short.
         $formData['brand_description'] = \Illuminate\Support\Str::random(3);
 
-        $this->from(route('brands.edit', $brand))
+        $this->actingAs($user)
+            ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
             ->assertSessionHasErrors(['brand_description']);
 
@@ -440,8 +416,8 @@ class BrandTest extends TestCase
         $formData['brand_name'] = \Illuminate\Support\Str::random(1337);
         $formData['brand_description'] = \Illuminate\Support\Str::random(1337);
 
-
-        $this->from(route('brands.edit', $brand))
+        $this->actingAs($user)
+            ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
             ->assertSessionHasErrors(['brand_name', 'brand_description']);
 
@@ -455,11 +431,10 @@ class BrandTest extends TestCase
             $formData['brand_description']
         );
 
-        // No data.
-        $formData = ['_token' => Session::token()];
-
-        $this->from(route('brands.edit', $brand))
-            ->put(route('brands.update', $brand), $formData)
+        // Nothing sent
+        $this->actingAs($user)
+            ->from(route('brands.edit', $brand))
+            ->put(route('brands.update', $brand))
             ->assertSessionHasErrors(['brand_name']);
     }
 
@@ -469,7 +444,7 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_delete_brand_as_staff() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
         
         $user = \App\Models\User::factory()->create([
@@ -478,16 +453,11 @@ class BrandTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        $this->assertDatabaseCount('brands', 1);
-
-        Auth::login($user);
-
-        $response = $this->delete(route('brands.update', $brand), [
-            '_token' => Session::token()
-        ]);
+        $this->actingAs($user)
+            ->delete(route('brands.update', $brand))
+            ->assertStatus(403);
 
         $this->assertDatabaseCount('brands', 1);
-        $response->assertStatus(403);
     }
 
     /**
@@ -496,7 +466,7 @@ class BrandTest extends TestCase
      * @return void
      */
     public function test_delete_brand_as_manager() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
         
         $user = \App\Models\User::factory()->create([
@@ -505,19 +475,12 @@ class BrandTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        $this->assertDatabaseCount('brands', 1);
-
         $bikes = \App\Models\Bike::factory()->count(100)->create();
 
-        Auth::login($user);
-
-        $formData = [
-            '_token' => Session::token()
-        ];
-
-        $response = $this->followingRedirects()
+        $response = $this->actingAs($user)
+            ->followingRedirects()
             ->from(route('brands.edit', $brand))
-            ->delete(route('brands.update', $brand), $formData)
+            ->delete(route('brands.update', $brand))
             ->assertDontSee($brand->brand_name);
 
         $this->assertSoftDeleted($brand);
