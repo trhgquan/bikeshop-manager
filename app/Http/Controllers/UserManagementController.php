@@ -77,7 +77,7 @@ class UserManagementController extends Controller
     public function store(CreateUserRequest $request) {
         $validator = $request->validated();
 
-        $user = User::create([
+        User::create([
             'username' => $validator['username'],
             'password' => Hash::make($validator['password']),
             'email' => $validator['email'],

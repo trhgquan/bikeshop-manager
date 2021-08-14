@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class AuthenticateTest extends TestCase
+class AccountTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
@@ -116,5 +116,63 @@ class AuthenticateTest extends TestCase
             ->get('/logout')
             ->assertSee('username')
             ->assertSee('password');
+    }
+
+    /**
+     * Test if user can change password.
+     * 
+     * @return void
+     */
+    public function test_changing_password() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'password' => \Illuminate\Support\Facades\Hash::make('lorem')
+        ]);
+
+        $new_password = '13377331';
+
+        $this->get(route('auth.changepassword.index'))
+            ->assertRedirect(route('auth.login.index'));
+
+        // Non logged in should be redirected back to login page.
+        $this->from(route('auth.changepassword.index'))
+            ->post(route('auth.changepassword.handle'), [
+                'password' => 'lorem',
+                'new_password' => $new_password,
+                'confirm_password' => $new_password
+            ])
+            ->assertRedirect(route('auth.login.index'));
+
+        // Password should remain unchanged
+        $this->assertTrue(auth()->attempt([
+            'username' => $user->username,
+            'password' => 'lorem'
+        ]));
+
+        $this->actingAs($user)
+            ->get(route('auth.changepassword.index'))
+            ->assertStatus(200);
+
+        $this->actingAs($user)
+            ->from(route('auth.changepassword.index'))
+            ->post(route('auth.changepassword.handle'), [
+                'password' => 'lorem',
+                'new_password' => $new_password,
+                'confirm_password' => $new_password
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertTrue(auth()->attempt([
+            'username' => $user->username,
+            'password' => $new_password
+        ]));
+
+        $this->assertFalse(auth()->attempt([
+            'username' => $user->username,
+            'password' => 'lorem'
+        ]));
     }
 }

@@ -115,7 +115,8 @@ class OrderTest extends TestCase
         $formData = [
             'customer_name' => $this->faker->name(),
             'customer_email' => $this->faker->email(),
-            'order_detail' => $order_detail
+            'order_detail' => $order_detail,
+            'order_checkout' => '1',
         ];
 
         $this->followingRedirects()
@@ -139,6 +140,7 @@ class OrderTest extends TestCase
         $this->assertEquals($order->quantity(), $quantity);
         $this->assertEquals($order->revenue(), $revenue);
         $this->assertEquals($order->profit(), $profit);
+        $this->assertTrue($order->getCheckedOut());
 
         // Make sure that all informations are correct.
         $response = $this->get(route('orders.show', $order))
@@ -631,6 +633,9 @@ class OrderTest extends TestCase
         $bike = \App\Models\Bike::factory()->create([
             'bike_stock' => 1330
         ]);
+        $new_bike = \App\Models\Bike::factory()->create([
+            'bike_stock' => 1337
+        ]);
 
         $order = \App\Models\Order::factory()->create();
         $order->bikes()->attach($bike, [
@@ -650,13 +655,15 @@ class OrderTest extends TestCase
                 'customer_name' => $order->customer_name,
                 'customer_email' => $order->customer_email,
                 'order_detail' => [
-                    ['bike_id' => $bike->id, 'order_value' => 1337]
-                ]
+                    ['bike_id' => $new_bike->id, 'order_value' => 1337]
+                ],
+                'order_checkout' => '1',
             ])
-            ->assertSee(1337);
+            ->assertStatus(200);
 
-        $bike = $bike->fresh();
-        $this->assertEquals($bike->bike_stock, 0);
+        $this->assertEquals($bike->fresh()->bike_stock, 1337);
+        $this->assertEquals($new_bike->fresh()->bike_stock, 0);
+        $this->assertTrue($order->fresh()->getCheckedOut());
 
         $this->actingAs($user)
             ->get(route('orders.show', $order))
