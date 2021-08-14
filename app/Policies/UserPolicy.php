@@ -17,7 +17,7 @@ class UserPolicy
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function viewAny(User $user) {
-        return $user->role === Role::ROLE_ADMIN;
+        return $user->role == Role::ROLE_ADMIN;
     }
 
     /**
@@ -28,7 +28,7 @@ class UserPolicy
      */
     public function create(User $user) {
         // Only Admin can add more account.
-        return $user->role === Role::ROLE_ADMIN;
+        return $user->role == Role::ROLE_ADMIN;
     }
 
     /**
@@ -40,8 +40,8 @@ class UserPolicy
      */
     public function update(User $user, User $model) {
         // Only Admin can update user model.
-        return $user->role === Role::ROLE_ADMIN
-            && $model->role !== Role::ROLE_ADMIN;
+        return $user->role == Role::ROLE_ADMIN
+            && $model->role != Role::ROLE_ADMIN;
     }
 
     /**
