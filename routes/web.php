@@ -141,7 +141,7 @@ Route::group([
 ], function () {
     Route::get('/out-of-stock', [
         \App\Http\Controllers\ReportController::class,
-        'out_of_stock'
+        'out_of_stock_index'
     ])->name('out_of_stock');
 
     Route::get('/month-quantity-stat', [

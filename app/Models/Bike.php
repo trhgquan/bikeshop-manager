@@ -50,15 +50,6 @@ class Bike extends Model
     }
 
     /**
-     * Get Orders having this Bike.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function orders() {
-        return $this->belongsToMany(Order::class);
-    }
-    
-    /**
      * Get the User that created the Bike.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

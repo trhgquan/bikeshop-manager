@@ -3,6 +3,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/reports
 .env
 .env.backup
 .env.testing

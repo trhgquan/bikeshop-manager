@@ -78,10 +78,16 @@ $(document).ready(function() {
           );
 
           // Load table
+          let url = "{{ route('orders.show', ':id') }}";
+
           result.data.detail.forEach(order => {
+            url = url.replace(':id', order.id);
             $('#revenueTableContent').append($('<tr>')
               .append($('<td>')
-                .text(order.id)
+                .append($('<a>')
+                  .text('DH-' + order.id)
+                  .attr('href', url)
+                )
               ).append($('<td>')
                 .text(order.quantity)
               ).append($('<td>')

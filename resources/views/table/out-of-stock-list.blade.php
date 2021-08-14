@@ -17,9 +17,11 @@
     <a class="btn btn-info" href="{{ route('bikes.show', $item->id) }}">
       Chi tiết
     </a>
+    @can('update', $item)
     <a class="btn btn-warning" href="{{ route('bikes.edit', $item->id) }}">
       Chỉnh sửa
     </a>
+    @endcan
   </td>
 </tr>
 @endforeach

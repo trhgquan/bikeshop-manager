@@ -41,4 +41,16 @@
     @include('table.invoice-list', compact('detail', 'order'))
   </div>
 </div>
+@can('delete', $order)
+  <hr>
+  <small class="lead">Xóa đơn hàng</small>
+  <form action="{{ route('orders.destroy', $order->id) }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <p class="text-danger">
+      Nhấn vào nút này là bạn sẽ xóa đơn hàng {{ $order->id }}. Suy nghĩ kỹ chưa?
+    </p>
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa đơn hàng. Đồng ý?');">sudo rm -r -f</button>
+  </form>
+@endcan
 @endsection

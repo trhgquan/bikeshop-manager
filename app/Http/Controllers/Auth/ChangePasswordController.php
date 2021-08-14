@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
@@ -30,47 +29,22 @@ class ChangePasswordController extends Controller
     ];
 
     /**
-     * Confirm password changed successfully.
-     * 
-     * @param  string $password
-     * @return bool
-     */
-    private function confirmChangeSuccess(string $password) {
-        return User::find(Auth::id())->password == $password;
-    }
-
-    /**
-     * Save new password to the database.
-     * 
-     * @param  \App\Models\User $user
-     * @param  string $password
-     */
-    private function store(User $user, string $password) {
-        $user->password = $password;
-        $user->save();
-    }
-
-    /**
      * Invoke change password procedure.
      * 
      * @param  \App\Http\Requests\ChangePasswordRequest $request
      * @return \Illuminate\Http\Response
      */
     public function handle(ChangePasswordRequest $request) {
-        // Get validated data.
-        $validated = $request->validated();
-
         // Generate hash value for new password.
-        $new_password = Hash::make($validated['new_password']);
+        $new_password = Hash::make($request->new_password);
 
-        // Update new password.
-        $this->store(Auth::user(), $new_password);
+        // Update new password, then return with success message.
+        Auth::user()->password = $new_password;
+        Auth::user()->save();
 
-        // Confirm password change success, then send notification.
-        if ($this->confirmChangeSuccess($new_password)) {
-            return back()->with('notify', $this->successMessage);
-        }
-        return back()->withErrors($this->failedMessage);
+        return redirect()
+            ->route('auth.changepassword.index')
+            ->with('notify', $this->successMessage);
     }
 
     /**

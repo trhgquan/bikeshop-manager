@@ -53,14 +53,14 @@ class OrderPolicy
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function update(User $user, Order $order) {
-        // User can update an order if it is not checked out,
-        // and he's the creator; or User is an Admin / Manager!
-        return (!$order->getCheckedOut() 
-                && ($user->id == $order->created_by_user))
-            ||  in_array($user->role, [
-                Role::ROLE_ADMIN,
-                Role::ROLE_MANAGER,
-            ]);
+        // User can update an order if it is not checked out and either
+        // he's the creator or an Admin / Manager!
+        return !$order->getCheckedOut() 
+            && (($user->id == $order->created_by_user) ||  
+                in_array($user->role, [
+                    Role::ROLE_ADMIN,
+                    Role::ROLE_MANAGER,
+                ]));
     }
 
     /**

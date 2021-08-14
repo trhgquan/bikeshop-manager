@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Bike;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateBikeRequest;
 use App\Models\Brand;
 use App\Models\Bike;
 use App\Models\Stock;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateBikeRequest;
 
 class BikeController extends Controller
 {

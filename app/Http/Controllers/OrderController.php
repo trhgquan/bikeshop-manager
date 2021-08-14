@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Bike;
 use App\Http\Requests\CreateOrderRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
@@ -216,7 +215,7 @@ class OrderController extends Controller
 
         if (count($quantityErrors) > 0) {
             return redirect()
-                ->route('orders.update', $order)
+                ->route('orders.edit', $order)
                 ->withInput()
                 ->withErrors($quantityErrors);
         }

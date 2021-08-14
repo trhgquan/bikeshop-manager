@@ -8,7 +8,6 @@
 
 @section('page-form')
 
-@if (! $order->getCheckedOut())
 <form action="{{ route('orders.update', $order->id) }}" method="POST">
 @csrf
 @method('PUT')
@@ -69,23 +68,6 @@
 </div>
 <button class="btn btn-primary" type="submit">Lưu chỉnh sửa</button>
 </form>
-@else
-<p>Đơn hàng không thể chỉnh sửa nội dung vì khách hàng đã thanh toán! <a href="{{ route('orders.show', $order->id) }}">Chi tiết đơn hàng</a></p>
-<p>Nếu là Quản lý hoặc Admin, bạn có thể xóa đơn hàng này.</p>
-@endif
-
-@can('delete', $order)
-<hr>
-<small class="lead">Xóa đơn hàng</small>
-<form action="{{ route('orders.destroy', $order->id) }}" method="POST">
-@csrf
-@method('DELETE')
-<p class="text-danger">
-  Nhấn vào nút này là bạn sẽ xóa đơn hàng {{ $order->id }}. Suy nghĩ kỹ chưa?
-</p>
-<button type="submit" class="btn btn-danger" onclick="return confirm('Xóa đơn hàng. Đồng ý?');">sudo rm -r -f</button>
-</form>
-@endcan
 @endsection
 
 @section('javascripts')

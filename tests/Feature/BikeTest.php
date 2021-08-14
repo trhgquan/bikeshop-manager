@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -33,10 +31,8 @@ class BikeTest extends TestCase
         $user = \App\Models\User::factory()->make([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        Auth::login($user);
 
-        $this->get(route('bikes.index'))
-            ->assertStatus(200);
+        $this->actingAs($user)->get(route('bikes.index'))->assertStatus(200);
     }
 
     /**
@@ -75,9 +71,8 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
 
-        Auth::login($user);
-
-        $this->get(route('bikes.show', $bike))
+        $this->actingAs($user)
+            ->get(route('bikes.show', $bike))
             ->assertStatus(200)
             ->assertSee($brand->brand_name)
             ->assertSee($bike->bike_name);
@@ -94,9 +89,8 @@ class BikeTest extends TestCase
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        Auth::login($user);
         
-        $this->get(route('bikes.create'))->assertStatus(403);
+        $this->actingAs($user)->get(route('bikes.create'))->assertStatus(403);
     }
 
     /**
@@ -113,9 +107,7 @@ class BikeTest extends TestCase
 
         $brands = \App\Models\Brand::factory()->count(100)->create();
 
-        Auth::login($user);
-        
-        $this->get(route('bikes.create'))->assertStatus(200);
+        $this->actingAs($user)->get(route('bikes.create'))->assertStatus(200);
 
         // Check if all brands appear on the selection.
         $view = $this->view('content.bike.create', compact('brands'));
@@ -130,7 +122,8 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_create_bike_as_staff() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
@@ -139,19 +132,18 @@ class BikeTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        Auth::login($user);
-        $response = $this->post(route('bikes.store', [
-            'brand_id' => $brand->id,
-            'bike_name' => 'Cheeki breeki iv domke!',
-            'bike_description' => 'Cheeki breeki iv domke!',
-            'bike_stock' => 1337,
-            'bike_buy_price' => 1337,
-            'bike_sell_price' => 1337,
-            '_token' => Session::token()
-        ]));
+        $this->actingAs($user)
+            ->post(route('bikes.store', [
+                'brand_id' => $brand->id,
+                'bike_name' => 'Cheeki breeki iv domke!',
+                'bike_description' => 'Cheeki breeki iv domke!',
+                'bike_stock' => 1337,
+                'bike_buy_price' => 1337,
+                'bike_sell_price' => 1337,
+            ]))
+            ->assertStatus(403);
 
         $this->assertDatabaseCount('bikes', 0);
-        $response->assertStatus(403);
     }
 
     /**
@@ -160,7 +152,8 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_create_bike_as_manager() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
@@ -169,8 +162,6 @@ class BikeTest extends TestCase
 
         $brand = \App\Models\Brand::factory()->create();
 
-        Auth::login($user);
-
         $formData = [
             'brand_id' => $brand->id,
             'bike_name' => 'Cheeki breeki',
@@ -178,12 +169,13 @@ class BikeTest extends TestCase
             'bike_stock' => 1337,
             'bike_buy_price' => 1337,
             'bike_sell_price' => 1337,
-            '_token' => Session::token()
         ];
 
-        $this->followingRedirects()
+        $this->actingAs($user)
+            ->followingRedirects()
             ->from(route('bikes.create'))
             ->post(route('bikes.store', $formData))
+            ->assertSee($brand->brand_name)
             ->assertSee($formData['bike_name'])
             ->assertSee($formData['bike_description'])
             ->assertSee($formData['bike_stock']);
@@ -197,13 +189,13 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_create_bike_with_invalid_data() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_ADMIN
         ]);
-        Auth::login($user);
 
         $brand = \App\Models\Brand::factory()->create();
 
@@ -214,11 +206,11 @@ class BikeTest extends TestCase
             'bike_description' => \Illuminate\Support\Str::random(100),
             'bike_stock' => 1337,
             'bike_buy_price' => 1337,
-            'bike_sell_price' => 1337,
-            '_token' => Session::token()
+            'bike_sell_price' => 1337
         ];
 
-        $this->from(route('bikes.create'))
+        $this->actingAs($user)
+            ->from(route('bikes.create'))
             ->post(route('bikes.store'), $formData)
             ->assertSessionHasErrors(['brand_id']);
 
@@ -227,20 +219,21 @@ class BikeTest extends TestCase
         $formData['bike_name'] = \Illuminate\Support\Str::random(1337);
         $formData['bike_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->from(route('bikes.create'))
+        $this->actingAs($user)
+            ->from(route('bikes.create'))
             ->post(route('bikes.store'), $formData)
             ->assertSessionHasErrors([
                 'bike_name',
                 'bike_description'
             ]);
 
-
         // Invalid integers.
         $formData['bike_stock'] = -1;
         $formData['bike_buy_price'] = -1;
         $formData['bike_sell_price'] = -1;
 
-        $this->from(route('bikes.create'))
+        $this->actingAs($user)
+            ->from(route('bikes.create'))
             ->post(route('bikes.store'), $formData)
             ->assertSessionHasErrors([
                 'bike_stock',
@@ -249,10 +242,9 @@ class BikeTest extends TestCase
             ]);
 
         // No data
-        $formData = ['_token' => Session::token()];
-
-        $this->from(route('bikes.create'))
-            ->post(route('bikes.store'), $formData)
+        $this->actingAs($user)
+            ->from(route('bikes.create'))
+            ->post(route('bikes.store'))
             ->assertSessionHasErrors([
                 'brand_id',
                 'bike_name',
@@ -282,8 +274,8 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
 
-        Auth::login($user);
-        $this->get(route('bikes.edit', $bike))->assertStatus(403);
+        $this->actingAs($user)
+            ->get(route('bikes.edit', $bike))->assertStatus(403);
     }
 
     /**
@@ -302,8 +294,8 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
 
-        Auth::login($user);
-        $this->get(route('bikes.edit', $bike))
+        $this->actingAs($user)
+            ->get(route('bikes.edit', $bike))
             ->assertStatus(200);
 
         $view = $this->view('content.bike.update', compact('brands', 'bike'));
@@ -321,7 +313,8 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_edit_bike_as_staff() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
@@ -332,8 +325,6 @@ class BikeTest extends TestCase
 
         $bike = \App\Models\Bike::factory()->create();
 
-        Auth::login($user);
-
         $formData = [
             'brand_id' => $brand->id,
             'bike_name' => $bike->bike_name,
@@ -341,10 +332,10 @@ class BikeTest extends TestCase
             'bike_stock' => $bike->bike_stock + 1337,
             'bike_buy_price' => $bike->bike_buy_price,
             'bike_sell_price' => $bike->bike_sell_price,
-            '_token' => Session::token()
         ];
 
-        $this->put(route('bikes.update', $bike), $formData)
+        $this->actingAs($user)
+            ->put(route('bikes.update', $bike), $formData)
             ->assertStatus(403);
     }
 
@@ -354,18 +345,21 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_edit_bike_as_manager() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::all()->random()->id
+        ]);
+
+        $tester = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
         $brand = \App\Models\Brand::factory()->create();
 
         $bike = \App\Models\Bike::factory()->create();
-
-        Auth::login($user);
 
         $newStock = random_int(1337, 7331);
 
@@ -376,13 +370,18 @@ class BikeTest extends TestCase
             'bike_stock' => $newStock,
             'bike_buy_price' => $bike->bike_buy_price,
             'bike_sell_price' => $bike->bike_sell_price,
-            '_token' => Session::token()
         ];
 
-        $this->followingRedirects()
+        $this->actingAs($tester)
+            ->followingRedirects()
             ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSee($newStock);
+
+        $this->actingAs($user)
+            ->get(route('bikes.show', $bike))
+            ->assertSee($newStock)
+            ->assertSee($tester->nameAndUsername());
 
         $this->assertEquals(
             $bike->fresh()->bike_stock, 
@@ -396,13 +395,13 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_edit_bike_with_invalid_data() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_ADMIN
         ]);
-        Auth::login($user);
 
         $brand = \App\Models\Brand::factory()->create();
 
@@ -416,10 +415,10 @@ class BikeTest extends TestCase
             'bike_stock' => 1337,
             'bike_buy_price' => 1337,
             'bike_sell_price' => 1337,
-            '_token' => Session::token()
         ];
 
-        $this->from(route('bikes.edit', $bike))
+        $this->actingAs($user)
+            ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSessionHasErrors(['brand_id']);
 
@@ -428,7 +427,8 @@ class BikeTest extends TestCase
         $formData['bike_name'] = \Illuminate\Support\Str::random(1337);
         $formData['bike_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->from(route('bikes.edit', $bike))
+        $this->actingAs($user)
+            ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSessionHasErrors([
                 'bike_name',
@@ -440,7 +440,8 @@ class BikeTest extends TestCase
         $formData['bike_buy_price'] = -1;
         $formData['bike_sell_price'] = -1;
 
-        $this->from(route('bikes.edit', $bike))
+        $this->actingAs($user)
+            ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSessionHasErrors([
                 'bike_stock',
@@ -449,10 +450,8 @@ class BikeTest extends TestCase
             ]);
 
         // No data
-        $formData = ['_token' => Session::token()];
-
         $this->from(route('bikes.edit', $bike))
-            ->put(route('bikes.update', $bike), $formData)
+            ->put(route('bikes.update', $bike))
             ->assertSessionHasErrors([
                 'brand_id',
                 'bike_name',
@@ -469,23 +468,21 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_delete_bike_as_staff() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        Auth::login($user);
 
         $brand = \App\Models\Brand::factory()->create();
 
         $bike = \App\Models\Bike::factory()->create();
         
-        $response = $this->delete(route('bikes.update', $bike), [
-            '_token' => Session::token()
-        ]);
-
-        $response->assertStatus(403);
+        $this->actingAs($user)
+            ->delete(route('bikes.update', $bike))
+            ->assertStatus(403);
     }
 
     /**
@@ -494,23 +491,22 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_delete_bike_as_manager() {
-        Session::start();
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
-        Auth::login($user);
 
         $brand = \App\Models\Brand::factory()->create();
 
         $bike = \App\Models\Bike::factory()->create();
         
-        $this->followingRedirects()
+        $this->actingAs($user)
+            ->followingRedirects()
             ->from(route('bikes.edit', $bike))
-            ->delete(route('bikes.update', $bike), [
-                '_token' => Session::token()
-            ])
+            ->delete(route('bikes.update', $bike))
             ->assertDontSee($bike->brand_name);
 
         $this->assertSoftDeleted($bike);
