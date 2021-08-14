@@ -16,28 +16,18 @@ class UserFactory extends Factory
     protected $model = User::class;
 
     /**
-     * Get username from a name.
-     * 
-     * @return string
-     */
-    private function username($name) {
-        // Convert name to lower string and break into words.
-        $name = explode(' ', strtolower($name));
-        return $name[count($name) - 1] . $name[0];
-    }
-
-    /**
      * Define the model's default state.
      *
      * @return array
      */
     public function definition()
     {
-        $name = $this->faker->name();
+        $email = $this->faker->unique()->safeEmail();
+        $username = explode('@', $email)[0];
         return [
-            'name' => $name,
-            'username' => $this->username($name),
-            'email' => $this->faker->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'username' => $username,
+            'email' => $email,
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),

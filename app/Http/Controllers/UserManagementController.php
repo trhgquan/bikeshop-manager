@@ -40,13 +40,20 @@ class UserManagementController extends Controller
     ];
 
     /**
+     * Constructor for UserManagementController.
+     * 
+     * @return void
+     */
+    public function __construct() {
+        $this->authorizeResource(User::class, 'user');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        $this->authorize('viewAny', User::class);
-
         $users = User::with('roles')->get();
         return view('content.users.dashboard', compact('users'));        
     }
@@ -57,8 +64,6 @@ class UserManagementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create() {
-        $this->authorize('create', User::class);
-
         $roles = Role::all()->except(Role::ROLE_ADMIN);
         return view('content.users.create', compact('roles'));
     }
@@ -70,8 +75,6 @@ class UserManagementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(CreateUserRequest $request) {
-        $this->authorize('create', User::class);
-
         $validator = $request->validated();
 
         $user = User::create([
@@ -94,8 +97,6 @@ class UserManagementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user) {
-        $this->authorize('update', $user);
-
         $roles = Role::all()->except(Role::ROLE_ADMIN);
         return view('content.users.update', compact('user', 'roles'));
     }
@@ -108,8 +109,6 @@ class UserManagementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, User $user) {
-        $this->authorize('update', $user);
-
         $validator = Validator::make($request->all(), [
             'role' => [
                 'required',
@@ -142,8 +141,6 @@ class UserManagementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user) {
-        $this->authorize('delete', $user);
-
         $user->delete();
 
         return redirect()

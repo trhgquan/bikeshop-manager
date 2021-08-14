@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
@@ -46,8 +45,7 @@ class ChangePasswordController extends Controller
      * @param  string $password
      */
     private function store(User $user, string $password) {
-        $user->password = $password;
-        $user->save();
+        $user->update(['password' => $password]);
     }
 
     /**
@@ -57,11 +55,8 @@ class ChangePasswordController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function handle(ChangePasswordRequest $request) {
-        // Get validated data.
-        $validated = $request->validated();
-
         // Generate hash value for new password.
-        $new_password = Hash::make($validated['new_password']);
+        $new_password = Hash::make($request->new_password);
 
         // Update new password.
         $this->store(Auth::user(), $new_password);

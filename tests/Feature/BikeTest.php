@@ -175,6 +175,7 @@ class BikeTest extends TestCase
             ->followingRedirects()
             ->from(route('bikes.create'))
             ->post(route('bikes.store', $formData))
+            ->assertSee($brand->brand_name)
             ->assertSee($formData['bike_name'])
             ->assertSee($formData['bike_description'])
             ->assertSee($formData['bike_stock']);
@@ -349,6 +350,10 @@ class BikeTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::all()->random()->id
+        ]);
+
+        $tester = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
@@ -367,11 +372,16 @@ class BikeTest extends TestCase
             'bike_sell_price' => $bike->bike_sell_price,
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($tester)
             ->followingRedirects()
             ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSee($newStock);
+
+        $this->actingAs($user)
+            ->get(route('bikes.show', $bike))
+            ->assertSee($newStock)
+            ->assertSee($tester->nameAndUsername());
 
         $this->assertEquals(
             $bike->fresh()->bike_stock, 

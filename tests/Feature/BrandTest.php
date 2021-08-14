@@ -312,6 +312,10 @@ class BrandTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
         
         $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::all()->random()->id
+        ]);
+
+        $tester = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_MANAGER
         ]);
 
@@ -322,7 +326,7 @@ class BrandTest extends TestCase
             'brand_description' => 'Lorem ipsum dolor sit amet',
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($tester)
             ->followingRedirects()
             ->from(route('brands.edit', $brand))
             ->put(route('brands.update', $brand), $formData)
@@ -338,6 +342,10 @@ class BrandTest extends TestCase
             $brand->fresh()->brand_description, 
             $formData['brand_description']
         );
+
+        $this->actingAs($user)
+            ->get(route('brands.show', $brand))
+            ->assertSee($tester->nameAndUsername());
     }
 
     /**

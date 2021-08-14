@@ -492,6 +492,41 @@ class OrderTest extends TestCase
     }
 
     /**
+     * Test if we can view Order Update with all bikes.
+     * 
+     * @return void
+     */
+    public function test_view_update_order() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $tester = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $brand = \App\Models\Brand::factory()->create();
+        $bikes = \App\Models\Bike::factory()->count(10)->create([
+            'bike_stock' => 1330
+        ]);
+        $bike = \App\Models\Bike::all()->random();
+
+        $order = \App\Models\Order::factory()->create();
+        $order->bikes()->attach($bike, [
+            'order_value' => 7,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $response = $this->actingAs($tester)
+            ->get(route('orders.edit', $order));
+
+        foreach ($bikes as $bike) {
+            $response->assertSee($bike->bike_name);
+        }
+    }
+
+    /**
      * Test if Owner can update his Order.
      * 
      * @return void
@@ -622,6 +657,11 @@ class OrderTest extends TestCase
 
         $bike = $bike->fresh();
         $this->assertEquals($bike->bike_stock, 0);
+
+        $this->actingAs($user)
+            ->get(route('orders.show', $order))
+            ->assertSee(1337)
+            ->assertSee($tester->nameAndUsername());
     }
 
     /**
