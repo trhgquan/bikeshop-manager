@@ -330,7 +330,6 @@ class AdminTest extends TestCase
         $user = \App\Models\User::factory()->create([
             'role' => \App\Models\Role::ROLE_STAFF
         ]);
-        $admin = \App\Models\User::factory()->create();
         $brand = \App\Models\Brand::factory()->create();
         $bike = \App\Models\Bike::factory()->create();
         $order = \App\Models\Order::factory()->create();
@@ -341,11 +340,13 @@ class AdminTest extends TestCase
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
+        $admin = \App\Models\User::factory()->create();
+
         $this->actingAs($admin)
             ->from(route('users.edit', $user))
             ->delete(route('users.destroy', $user))
             ->assertSessionHasNoErrors();
-        
+
         $this->assertSoftDeleted($user);
 
         $this->get(route('brands.show', $brand))
