@@ -56,7 +56,11 @@
   <div class="col-sm-10">
     <select name="role" id="role" class="form-select">
       @foreach ($roles as $role)
-        <option value="{{ $role->id }}">{{ $role->role_name }}</option>
+        <option value="{{ $role->id }}"
+          @if(old('role', NULL) != NULL)
+            {{ $role->id == old('role') ? 'selected' : '' }}
+          @endif
+          >{{ $role->role_name }}</option>
       @endforeach
     </select>
   </div>

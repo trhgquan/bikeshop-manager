@@ -59,7 +59,7 @@ class Bike extends Model
             User::class,
             'created_by_user',
             'id'
-        );
+        )->withTrashed();
     }
 
     /**
@@ -72,6 +72,6 @@ class Bike extends Model
             User::class,
             'updated_by_user',
             'id'
-        );
+        )->withTrashed();
     }
 }

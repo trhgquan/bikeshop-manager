@@ -15,8 +15,7 @@
   <div class="col-sm-10">
     <select id="brand_id" class="form-select" name="brand_id">
       @foreach ($brands as $brand)
-      <option {{ $bike->id == $brand->id ? "selected" : ""}} 
-        value="{{ $brand->id }}">
+      <option value="{{ $brand->id }}" {{ $bike->brand_id == $brand->id ? "selected" : ""}} >
         {{ $brand->idAndName() }}
       </option>
       @endforeach
