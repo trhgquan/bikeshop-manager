@@ -54,7 +54,7 @@ class Order extends Model
             User::class,
             'created_by_user',
             'id'
-        );
+        )->withTrashed();
     }
 
     /**
@@ -67,7 +67,7 @@ class Order extends Model
             User::class,
             'updated_by_user',
             'id'
-        );
+        )->withTrashed();
     }
 
     /**

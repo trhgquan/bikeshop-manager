@@ -315,4 +315,49 @@ class AdminTest extends TestCase
 
         $this->assertSoftDeleted($victim);
     }
+
+    /**
+     * Test if we can delete a user with an Admin account,
+     * but data remains.
+     * 
+     * @return void
+     */
+    public function test_delete_user_with_admin() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+        $admin = \App\Models\User::factory()->create();
+        $brand = \App\Models\Brand::factory()->create();
+        $bike = \App\Models\Bike::factory()->create();
+        $order = \App\Models\Order::factory()->create();
+
+        $order->bikes()->attach($bike->id, [
+            'order_value' => 1,
+            'order_buy_price' => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('users.edit', $user))
+            ->delete(route('users.destroy', $user))
+            ->assertSessionHasNoErrors();
+        
+        $this->assertSoftDeleted($user);
+
+        $this->get(route('brands.show', $brand))
+            ->assertStatus(200)
+            ->assertSee($user->nameAndUsername());
+
+        $this->get(route('bikes.show', $bike))
+            ->assertStatus(200)
+            ->assertSee($user->nameAndUsername());
+
+        $this->get(route('orders.show', $order))
+            ->assertStatus(200)
+            ->assertSee($user->nameAndUsername());
+    }
 }
