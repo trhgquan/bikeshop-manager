@@ -35,8 +35,7 @@
 <footer>
   Code by Tran Hoang Quan - 19120338 <a href="https://github.com/trhgquan">(@trhgquan)</a><br/>
   <a href="https://github.com/trhgquan/bikeshop-manager">https://github.com/trhgquan/bikeshop-manager</a><br/>
-</div>
-</div>
+</footer>
 
 @if (Auth::check())
 <script type="text/javascript">
