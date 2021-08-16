@@ -310,7 +310,7 @@ class AdminTest extends TestCase
                 'role' => \App\Models\Role::ROLE_ADMIN,
                 'new_password' => $new_password
             ])
-            ->assertSessionHasErrors();
+            ->assertSessionHasErrors(['role']);
 
         $this->assertFalse(auth()->attempt([
             'username' => $user->username,
