@@ -10,7 +10,7 @@
 <form action="{{ route('users.update', $user) }}" method="POST">
 @csrf
 @method('PUT')
-<small class="lead">Chỉnh sửa thông tin</small>
+<small class="lead">Chỉnh sửa quyền</small>
 <hr>
 <div class="row mb-3">
   <label for="role" class="col-sm-2 col-form-label">Quyền</label>
@@ -26,6 +26,31 @@
   <div class="col-sm-2"></div>
   <div class="col-sm-10">
     <button type="submit" class="btn btn-primary">Lưu sửa đổi</button>
+  </div>
+</div>
+</form>
+
+<small class="lead">Đặt mật khẩu mới</small>
+<hr>
+<form action="{{ route('users.update', $user) }}" method="POST">
+@csrf
+@method('PUT')
+<div class="row mb-3">
+  <label for="new_password" class="col-sm-2 col-form-label">Mật khẩu mới</label>
+  <div class="col-sm-10">
+    <input type="password" class="form-control" placeholder="Nhập mật khẩu mới" name="new_password" id="new_password">
+  </div>
+</div>
+<div class="row mb-3">
+  <label for="re_password" class="col-sm-2 col-form-label">Nhập lại mật khẩu mới</label>
+  <div class="col-sm-10">
+    <input type="password" class="form-control" placeholder="Nhập lại mật khẩu mới" name="re_password" id="re_password">
+  </div>
+</div>
+<div class="row mb-3">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-10">
+    <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
   </div>
 </div>
 </form>

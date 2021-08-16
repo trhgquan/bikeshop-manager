@@ -22,8 +22,11 @@ class UserManagementController extends Controller
         'create' => [
             'success' => 'Thêm người dùng mới thành công!'
         ],
-        'update' => [
-            'success' => 'Chỉnh sửa người dùng thành công!'
+        'update_role' => [
+            'success' => 'Chỉnh sửa quyền người dùng thành công!'
+        ],
+        'update_password' => [
+            'success' => 'Chỉnh sửa mật khẩu người dùng thành công!'
         ],
         'destroy' => [
             'success' => 'Xóa người dùng thành công!'
@@ -31,13 +34,65 @@ class UserManagementController extends Controller
     ];
 
     /**
-     * Failed messages for UserManagementController
+     * Update user Role.
      * 
-     * @var array
+     * @param  array $request
+     * @param  \App\Models\User $user
+     * @return \Illuminate\Http\Response
      */
-    private $failedMessages = [
-        'update' => 'Vui lòng chọn quyền hợp lệ!',
-    ];
+    private function updateRole(Array $request, User $user) {
+        $validator = Validator::make($request, [
+            'role' => [
+                'required',
+                'exists:App\Models\Role,id',
+                Rule::in([
+                    Role::ROLE_MANAGER,
+                    Role::ROLE_STAFF
+                ])
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->route('users.edit', $user)
+                ->withErrors($validator);
+        }
+
+        $user->role = $request['role'];
+        $user->save();
+
+        return redirect()
+            ->route('users.edit', $user)
+            ->with('notify', $this->successMessages['update_role']);
+    }
+
+    /**
+     * Update user password.
+     * 
+     * @param  \Illuminate\Http\Request $request
+     * @param  \App\Models\User $user
+     * @return \Illuminate\Http\Response
+     */
+    private function updatePassword(Array $request, User $user) {
+        $validator = Validator::make($request, [
+            'new_password' => 'required|min:8',
+            're_password' => 'required|same:new_password'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->route('users.edit', $user)
+                ->withInput()
+                ->withErrors($validator);
+        }
+
+        $user->password = Hash::make($request['new_password']);
+        $user->save();
+
+        return redirect()
+            ->route('users.edit', $user)
+            ->with('notify', $this->successMessages['update_password']);
+    }
 
     /**
      * Constructor for UserManagementController.
@@ -109,29 +164,18 @@ class UserManagementController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, User $user) {
-        $validator = Validator::make($request->all(), [
-            'role' => [
-                'required',
-                'exists:App\Models\Role,id',
-                Rule::in([
-                    Role::ROLE_MANAGER,
-                    Role::ROLE_STAFF
-                ])
-            ]
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()
-                ->route('users.edit', $user)
-                ->withErrors($this->failedMessages['update']);
+        if ($request->has('role')) {
+            return $this->updateRole($request->only('role'), $user);
         }
 
-        $user->role = $request->role;
-        $user->save();
+        if ($request->has(['new_password', 're_password'])) {
+            return $this->updatePassword(
+                $request->only(['new_password', 're_password']),
+                $user
+            );
+        }
 
-        return redirect()
-            ->route('users.edit', $user)
-            ->with('notify', $this->successMessages['update']);
+        return abort(403);
     }
 
     /**

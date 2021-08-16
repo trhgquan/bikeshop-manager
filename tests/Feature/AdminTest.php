@@ -111,7 +111,7 @@ class AdminTest extends TestCase
         $this->actingAs($accounts->random())
             ->post(route('users.store'), [
                 'name' => $this->faker->name(),
-                'username' => explode('@', $email)[0],
+                'username' => \Illuminate\Support\Str::random(6),
                 'email' => $email,
                 'password' => $password,
                 're_password' => $password,
@@ -134,7 +134,7 @@ class AdminTest extends TestCase
 
         $admin = \App\Models\User::factory()->create();
         $email = $this->faker->unique()->safeEmail();
-        $username = explode('@', $email)[0];
+        $username = \Illuminate\Support\Str::random(6);
         $password = \Illuminate\Support\Str::random(15);
 
         $this->actingAs($admin)
@@ -175,7 +175,7 @@ class AdminTest extends TestCase
         ]);
 
         $email = $this->faker->unique()->safeEmail();
-        $username = explode('@', $email)[0];
+        $username = \Illuminate\Support\Str::random(6);
         $password = \Illuminate\Support\Str::random(15);
 
         $formData = [
@@ -205,7 +205,7 @@ class AdminTest extends TestCase
      * 
      * @return void
      */
-    public function test_update_user_with_non_admin() {
+    public function test_update_user_role_by_admin_function() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -263,6 +263,101 @@ class AdminTest extends TestCase
             $user->fresh()->role,
             \App\Models\Role::ROLE_MANAGER
         );
+    }
+
+    public function test_update_user_password_by_admin_function() {
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $staff = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+        $manager = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER
+        ]);
+        $admin = \App\Models\User::factory()->create();
+        $user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF
+        ]);
+        
+        $new_password = 'l33t1337';
+
+        $this->actingAs($staff)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user), [
+                'new_password' => $new_password,
+                're_password' => $new_password
+            ])
+            ->assertStatus(403);
+
+        $this->actingAs($manager)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user), [
+                'new_password' => $new_password,
+                're_password' => $new_password
+            ])
+            ->assertStatus(403);
+
+        $this->assertFalse(auth()->attempt([
+            'username' => $user->username,
+            'password' => $new_password
+        ]));
+        
+        $this->actingAs($admin)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user), [
+                'role' => \App\Models\Role::ROLE_ADMIN,
+                'new_password' => $new_password
+            ])
+            ->assertSessionHasErrors(['role']);
+
+        $this->assertFalse(auth()->attempt([
+            'username' => $user->username,
+            'password' => $new_password
+        ]));
+
+        $this->actingAs($admin)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user))
+            ->assertStatus(403);
+
+        $this->actingAs($admin)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user), [
+                'new_password' => '1337',
+                're_password' => $new_password
+            ])
+            ->assertSessionHasErrors(['new_password', 're_password']);
+
+        $this->actingAs($admin)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user), [
+                'role' => \App\Models\Role::all()
+                    ->except(\App\Models\Role::ROLE_ADMIN)
+                    ->random()->id,
+                'new_password' => $new_password,
+                're_password' => $new_password,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertFalse(auth()->attempt([
+            'username' => $user->username,
+            'password' => $new_password
+        ]));
+
+        $this->actingAs($admin)
+            ->from(route('users.edit', $user))
+            ->put(route('users.update', $user), [
+                'new_password' => $new_password,
+                're_password' => $new_password
+            ])
+            ->assertSessionHasNoErrors();
+        
+        $this->assertTrue(auth()->attempt([
+            'username' => $user->username,
+            'password' => $new_password
+        ]));
     }
 
     /**
