@@ -16,7 +16,7 @@
       <input class="form-control" type="date" id="month"/>
     </div>
     <div class="col">
-      <button class="btn btn-outline-primary" type="submit">Xem</button>
+      <button id="submitBtn" class="btn btn-outline-primary" type="submit">Xem</button>
     </div>
   </div>
   <span id="month_error" class="invalid-feedback"></span>
@@ -47,6 +47,8 @@
 <script type="text/javascript">
 $(document).ready(function() {
   $('#loadMonthStat').on('submit', function(e) {
+    $('#submitBtn').attr('disabled', 'disabled');
+
     let month = $('#month').val();
     $('#revenueTable').hide();
     $('#introduction').empty();
@@ -111,6 +113,11 @@ $(document).ready(function() {
     });
 
     e.preventDefault();
+
+    // Prevent user spamming the button
+    setTimeout(function() {
+      $('#submitBtn').removeAttr('disabled');
+    }, 3000);
   });
 });
 </script>

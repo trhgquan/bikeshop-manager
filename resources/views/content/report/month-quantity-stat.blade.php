@@ -17,7 +17,7 @@
       <input type="date" class="form-control" id="month"/>
     </div>
     <div class="col">
-      <button class="btn btn-outline-primary" type="submit">Xem</button>
+      <button id="submitBtn" class="btn btn-outline-primary" type="submit">Xem</button>
     </div>
   </div>
   <span id="month_error" class="invalid-feedback"></span>
@@ -52,7 +52,9 @@ let ctx = document.getElementById('myChart').getContext('2d');
 let myChart = null;
 
 $(document).ready(function() {
-  $('#loadMonthStat').on('submit', function(e) {  
+  $('#loadMonthStat').submit(function(e) {
+    $('#submitBtn').attr('disabled', 'disabled');
+
     let month = $('#month').val();
     $('#graph-wrap').hide();
     $('#month-stat-detail').hide();
@@ -100,9 +102,12 @@ $(document).ready(function() {
           result.data.detail.forEach(bike => {
             $('#month-stat-detail').append($('<tr>')
               .append($('<td>')
-                .text(bike.id)
+                .text('LX-' + bike.id)
               ).append($('<td>')
-                .text(bike.bike_name)
+                .append($('<a>')
+                  .attr('href', bike.url)
+                  .text(bike.bike_name)
+                )
               ).append($('<td>')
                 .text(bike.bike_order_value)
               )
@@ -113,6 +118,11 @@ $(document).ready(function() {
     });
 
     e.preventDefault();
+
+    // Prevent user spamming the button.
+    setTimeout(function() {
+      $('#submitBtn').removeAttr('disabled');
+    }, 3000);
   });
 });
 </script>

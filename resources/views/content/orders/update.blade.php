@@ -75,5 +75,18 @@
 const MAX_TABLE_ITEMS = {!! $bikes->count() !!};
 var countItems = {!! $details->count() !!};
 </script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#order_checkout').change(function(e) {
+    if ($(this).prop('checked')) {
+      $(this).prop(
+        'checked', 
+        confirm('Đơn hàng đã thanh toán sẽ không sửa được nữa! Tiếp tục?')
+      );
+    }
+    e.preventDefault();
+  });
+});
+</script>
 <script type="text/javascript" src="{{ url('js/order-table-action.js') }}"></script>
 @endsection

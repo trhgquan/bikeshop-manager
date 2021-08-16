@@ -82,7 +82,7 @@
   <label for="order_checkout" class="col-sm-2 col-form-label">Trạng thái thanh toán</label>
   <div class="col-sm-10">
     <div class="form-check col-sm-10">
-      <input type="checkbox" value="" class="form-check-input" id="order_checkout" name="order_checkout"/>
+      <input type="checkbox" class="form-check-input" id="order_checkout" name="order_checkout"/>
       <label for="order_checkout" class="form-check-label">Đã thanh toán</label>
     </div>
   </div>
@@ -103,5 +103,18 @@ const MAX_TABLE_ITEMS = {!! $bikes->count() !!};
 var countItems = {!! count(old('order_detail')) !!};
 </script>  
 @endif
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#order_checkout').change(function(e) {
+    if ($(this).prop('checked')) {
+      $(this).prop(
+        'checked', 
+        confirm('Đơn hàng đã thanh toán sẽ không sửa được nữa! Tiếp tục?')
+      );
+    }
+    e.preventDefault();
+  });
+});
+</script>
 <script type="text/javascript" src="{{ asset('js/order-table-action.js') }}"></script>
 @endsection

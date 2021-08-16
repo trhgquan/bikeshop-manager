@@ -102,7 +102,11 @@ class ReportAPIController extends Controller
         $endDate = \Carbon\Carbon::parse($request->month)
             ->endOfMonth();
 
-        $quantity = $this->bikeQuantityInRange($startDate, $endDate);
+        $quantity = $this
+            ->bikeQuantityInRange($startDate, $endDate)
+            ->each(function ($item) {
+                $item->url = route('bikes.show', $item->id);
+            });
 
         return response()->json([
             'data' => [
