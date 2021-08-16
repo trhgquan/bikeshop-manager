@@ -34,15 +34,6 @@ class UserManagementController extends Controller
     ];
 
     /**
-     * Failed messages for UserManagementController
-     * 
-     * @var array
-     */
-    private $failedMessages = [
-        'update_role' => 'Vui lòng chọn quyền hợp lệ!',
-    ];
-
-    /**
      * Update user Role.
      * 
      * @param  array $request
@@ -64,7 +55,7 @@ class UserManagementController extends Controller
         if ($validator->fails()) {
             return redirect()
                 ->route('users.edit', $user)
-                ->withErrors($this->failedMessages['update_role']);
+                ->withErrors($validator);
         }
 
         $user->role = $request['role'];

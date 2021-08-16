@@ -134,7 +134,11 @@ class ReportAPIController extends Controller
         $endDate = \Carbon\Carbon::parse($request->month)
             ->endOfMonth();
 
-        $ordersInRange = $this->getOrdersInRange($startDate, $endDate);
+        $ordersInRange = $this
+            ->getOrdersInRange($startDate, $endDate)
+            ->each(function($item) {
+                $item->url = route('orders.show', $item->id);
+            });
         $ordersTotal = [
             'quantity' => collect($ordersInRange)->sum('quantity'),
             'revenue' => collect($ordersInRange)->sum('revenue'),
