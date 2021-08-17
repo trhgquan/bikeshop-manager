@@ -195,6 +195,9 @@ class APIController extends Controller
 
     /**
      * View Orders in a specific Month.
+     * 
+     * @param  \Illuminate\Http\Request
+     * @return \Illuminate\Http\Response
      */
     public function order_month(Request $request) {
         $validator = Validator::make($request->all(), [
