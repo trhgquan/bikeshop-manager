@@ -7,7 +7,7 @@
     <th>Trạng thái thanh toán</th>
     <th>Hành động</th>
   </thead>
-  <tbody>
+  <tbody id="ordersTableBody">
   @foreach ($orders as $order)
   <tr>
     <td>DH-{{ $order->id }}</td>
@@ -21,11 +21,6 @@
       <a class="btn btn-info" href="{{ route('orders.show', $order->id) }}">
         Chi tiết
       </a>
-      @can('update', $order)
-      <a class="btn btn-warning" href="{{ route('orders.edit', $order->id) }}">
-        Chỉnh sửa
-      </a>
-      @endcan
     </td>
   </tr>
   @endforeach
