@@ -69,9 +69,9 @@ $(document).ready(function() {
 
       else {
         if (result.data.items == 0) {
-          $('#introduction').html(
+          $('#month_error').html(
             'Không có số liệu trong tháng ' + result.data.month
-          );
+          ).show();
         }
 
         else {
