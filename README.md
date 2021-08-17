@@ -47,14 +47,18 @@ APP_KEY=<key mới tạo>
 ```
 DB_DATABASE=bikeshop-manager
 ```
-6. Tạo các bảng liên quan
+6. Tạo các bảng liên quan & seed tài khoản
 ```
-php artisan migrate
+php artisan migrate:fresh --seed
 ```
-6. Seed data (chủ yếu là account đầu)
-```
-php artisan db:seed
-```
+
+## Tài khoản mặc định
+| Loại tài khoản | Username | Password |
+|----------------|----------|----------|
+| Admin | `thquan` | `thquan@fit.hcmus.edu.vn` |
+| Quản lý | `tlxuong` | `tlxuong@fit.hcmus.edu.vn` |
+
+**Để thay đổi tài khoản mặc định, sửa file `Database\Seeders\AccountSeeder.php`**
 
 ## Test
 1. Tạo database test (VD: `bikeshop-manager-test`)
