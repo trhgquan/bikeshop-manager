@@ -80,9 +80,9 @@ $(document).ready(function() {
         }
 
         if (result.data.items == 0) {
-          $('#introduction').html(
+          $('#month_error').html(
             'Không có dữ liệu tháng ' + result.data.month
-          );
+          ).show();
         }
 
         else {
