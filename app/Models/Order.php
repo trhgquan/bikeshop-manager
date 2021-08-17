@@ -25,6 +25,20 @@ class Order extends Model
     ];
 
     /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'created_by_user',
+        'updated_by_user',
+        'updated_at',
+        'checkout_at',
+        'created_at',
+        'deleted_at',
+    ];
+
+    /**
      * The attributes that should be cast to native types.
      * 
      * @var array

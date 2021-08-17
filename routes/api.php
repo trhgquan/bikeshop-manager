@@ -30,12 +30,17 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 */
 Route::group(['as' => 'api.', 'middleware' => 'auth:api'], function () {
     Route::get('/month-quantity-stat', [
-        App\Http\Controllers\API\ReportAPIController::class,
+        App\Http\Controllers\API\APIController::class,
         'bike_quantity_month'
     ])->name('report.month-quantity-stat');
 
     Route::get('/month-revenue-stat', [
-        App\Http\Controllers\API\ReportAPIController::class,
+        App\Http\Controllers\API\APIController::class,
         'order_revenue_month'
     ])->name('report.month-revenue-stat');
+
+    Route::get('/month-orders', [
+        App\Http\Controllers\API\APIController::class,
+        'order_month'
+    ])->name('orders.month');
 });

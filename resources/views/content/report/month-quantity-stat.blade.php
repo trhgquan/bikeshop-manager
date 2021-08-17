@@ -92,7 +92,7 @@ $(document).ready(function() {
 
           // Draw the graph.
           $('#graph-wrap').show();
-          myChart = new customChart(ctx, result.data.detail, 'bar', 
+          myChart = new customChart(ctx, result.data.detail, 'pie', 
             'Số lượng bán ra trong tháng ' + result.data.month
           );
           myChart.drawChart();
