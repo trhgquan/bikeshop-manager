@@ -126,7 +126,7 @@ class APIController extends Controller
 
         if ($validator->fails()) {
             return response()
-                ->json(['data' => ['error' => $validator->errors()]]);
+                ->json(['data' => ['errors' => $validator->errors()]]);
         }
 
         // Get the month we are querying for.
