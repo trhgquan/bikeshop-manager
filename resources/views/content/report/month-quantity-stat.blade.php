@@ -1,6 +1,6 @@
 @extends('content.report.layouts')
 
-@section('title', 'Sản phẩm bán chạy - Báo cáo')
+@section('title', 'Loại xe bán chạy - Báo cáo')
 
 @section('page-small-title')
 <small class="lead">Loại xe bán chạy trong tháng</small>
@@ -69,8 +69,8 @@ $(document).ready(function() {
         month: month
       }
     }).done(function(result) {
-      if (result.data.hasOwnProperty('error')) {
-        let error = result.data.error.month;
+      if (result.data.hasOwnProperty('errors')) {
+        let error = result.data.errors.month;
         $('#month_error').html(error).show();
       }
 
