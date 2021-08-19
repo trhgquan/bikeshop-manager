@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AccountTest extends TestCase
@@ -11,25 +12,49 @@ class AccountTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     /**
+     * Resources used in this test.
+     * 
+     * @var \App\Models\User
+     */
+    protected $user;
+
+    /**
+     * Default password.
+     * 
+     * @var string
+     */
+    protected $current_password = '1337';
+    
+    /**
+     * Setting up test resources.
+     * 
+     * @return void
+     */
+    public function setUp() : void {
+        parent::setUp();
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->user = \App\Models\User::factory()->create([
+            'password' => Hash::make($this->current_password)
+        ]);
+    }
+
+    /**
      * Test login logout with already logged in account.
      * 
      * @return void
      */
     public function test_login_logout_with_logged_in_account() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        
-        $user = \App\Models\User::factory()->create();
-
-        \Illuminate\Support\Facades\Session::start();
-        auth()->login($user);
+        auth()->login($this->user);
 
         $this->get(route('auth.login.index'))
             ->assertRedirect(route('dashboard'));
-        
+
         $this->post(route('auth.logout'), [
             '_token' => \Illuminate\Support\Facades\Session::token()
-            ])
-            ->assertRedirect(route('auth.login.index'));
+        ])
+        ->assertRedirect(route('auth.login.index'));
     }
 
     /**
@@ -39,12 +64,6 @@ class AccountTest extends TestCase
      */
     public function test_login() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'password' => \Illuminate\Support\Facades\Hash::make('1337')
-        ]);
 
         $this->post(route('auth.login.handle'), [
             'username' => '123',
@@ -63,14 +82,14 @@ class AccountTest extends TestCase
             ->assertSessionHasErrors(['username', 'password']);
 
         $this->post(route('auth.login.handle'), [
-            'username' => $user->username,
-            'password' => '1337'
+            'username' => $this->user->username,
+            'password' => $this->current_password
         ])
         ->assertRedirect(route('dashboard'));
 
         $this->assertEquals(
             auth()->user()->nameAndUsername(),
-            $user->nameAndUsername()
+            $this->user->nameAndUsername()
         );
     }
 
@@ -80,10 +99,8 @@ class AccountTest extends TestCase
      * @return void
      */
     public function test_logout_with_no_account() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        
         \Illuminate\Support\Facades\Session::start();
-        
+ 
         $this->post(route('auth.logout'), [
             '_token' => \Illuminate\Support\Facades\Session::token()
         ])->assertRedirect(route('auth.login.index'));
@@ -95,20 +112,16 @@ class AccountTest extends TestCase
      * @return void
      */
     public function test_accessing_logout_with_get_method() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        
         \Illuminate\Support\Facades\Session::start();
 
-        $user = \App\Models\User::factory()->create();
-
-        auth()->login($user);
+        auth()->login($this->user);
 
         $this->get('/logout')
             ->assertRedirect(route('dashboard'));
 
         $this->assertTrue(auth()->check());
 
-        auth()->logout($user);
+        auth()->logout($this->user);
 
         $this->assertFalse(auth()->check());
 
@@ -126,12 +139,6 @@ class AccountTest extends TestCase
     public function test_changing_password() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'password' => \Illuminate\Support\Facades\Hash::make('lorem')
-        ]);
-
         $new_password = '13377331';
 
         $this->get(route('auth.changepassword.index'))
@@ -140,7 +147,7 @@ class AccountTest extends TestCase
         // Non logged in should be redirected back to login page.
         $this->from(route('auth.changepassword.index'))
             ->post(route('auth.changepassword.handle'), [
-                'password' => 'lorem',
+                'password' => $this->current_password,
                 'new_password' => $new_password,
                 'confirm_password' => $new_password
             ])
@@ -148,30 +155,30 @@ class AccountTest extends TestCase
 
         // Password should remain unchanged
         $this->assertTrue(auth()->attempt([
-            'username' => $user->username,
-            'password' => 'lorem'
+            'username' => $this->user->username,
+            'password' => $this->current_password
         ]));
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->get(route('auth.changepassword.index'))
             ->assertStatus(200);
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->from(route('auth.changepassword.index'))
             ->post(route('auth.changepassword.handle'), [
-                'password' => 'lorem',
+                'password' => $this->current_password,
                 'new_password' => $new_password,
                 'confirm_password' => $new_password
             ])
             ->assertSessionHasNoErrors();
 
         $this->assertTrue(auth()->attempt([
-            'username' => $user->username,
+            'username' => $this->user->username,
             'password' => $new_password
         ]));
 
         $this->assertFalse(auth()->attempt([
-            'username' => $user->username,
+            'username' => $this->user->username,
             'password' => 'lorem'
         ]));
     }

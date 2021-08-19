@@ -11,6 +11,50 @@ class BikeTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * Resource to be used in testing.
+     * 
+     * @var mixed
+     */
+    protected $user, $manager, $admin;
+    protected $brands, $bikes;
+
+    /** 
+     * Default models created 
+     * 
+     * @var int
+     */
+    protected $created = 5;
+
+    /**
+     * Setting up testing resources.
+     * 
+     * @return void
+     */
+    public function setUp() : void {
+        parent::setUp();
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $this->manager = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER,
+        ]);
+
+        $this->admin = \App\Models\User::factory()->create();
+
+        $this->brands = \App\Models\Brand::factory()
+            ->count($this->created)
+            ->create();
+
+        $this->bikes = \App\Models\Bike::factory()
+            ->count($this->created)
+            ->create();
+    }
+
+    /**
      * Test if non-authenticated user cannot view bikes index page.
      *
      * @return void
@@ -26,13 +70,9 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_bikes_index_as_authenticated_user() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->make([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $this->actingAs($user)->get(route('bikes.index'))->assertStatus(200);
+        $this->actingAs($this->user)
+            ->get(route('bikes.index'))
+            ->assertStatus(200);
     }
 
     /**
@@ -41,17 +81,7 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_bike_show_as_unauthenticated_user() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_ADMIN
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-
-        $this->get(route('bikes.show', $bike))
+        $this->get(route('bikes.show', $this->bikes->random()))
             ->assertRedirect(route('auth.login.index'));
     }
 
@@ -61,20 +91,12 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_bike_show_as_authenticated_user() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $bike = $this->bikes->random();
 
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->get(route('bikes.show', $bike))
             ->assertStatus(200)
-            ->assertSee($brand->brand_name)
+            ->assertSee($bike->brand->brand_name)
             ->assertSee($bike->bike_name);
     }
 
@@ -84,13 +106,9 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_create_bike_as_staff() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        
-        $this->actingAs($user)->get(route('bikes.create'))->assertStatus(403);
+        $this->actingAs($this->user)
+            ->get(route('bikes.create'))
+            ->assertStatus(403);
     }
 
     /**
@@ -99,19 +117,15 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_create_bike_as_manager() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-
-        $brands = \App\Models\Brand::factory()->count(100)->create();
-
-        $this->actingAs($user)->get(route('bikes.create'))->assertStatus(200);
+        $this->actingAs($this->manager)
+            ->get(route('bikes.create'))
+            ->assertStatus(200);
 
         // Check if all brands appear on the selection.
-        $view = $this->view('content.bike.create', compact('brands'));
-        foreach ($brands as $brand) {
+        $view = $this->view('content.bike.create', [
+            'brands' => $this->brands
+        ]);
+        foreach ($this->brands as $brand) {
             $view->assertSee($brand->brand_name);
         }
     }
@@ -124,17 +138,9 @@ class BikeTest extends TestCase
     public function test_create_bike_as_staff() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->post(route('bikes.store', [
-                'brand_id' => $brand->id,
+                'brand_id' => $this->brands->random()->id,
                 'bike_name' => 'Cheeki breeki iv domke!',
                 'bike_description' => 'Cheeki breeki iv domke!',
                 'bike_stock' => 1337,
@@ -143,7 +149,7 @@ class BikeTest extends TestCase
             ]))
             ->assertStatus(403);
 
-        $this->assertDatabaseCount('bikes', 0);
+        $this->assertDatabaseCount('bikes', $this->created);
     }
 
     /**
@@ -154,13 +160,7 @@ class BikeTest extends TestCase
     public function test_create_bike_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
+        $brand = $this->brands->random();
 
         $formData = [
             'brand_id' => $brand->id,
@@ -171,7 +171,7 @@ class BikeTest extends TestCase
             'bike_sell_price' => 1337,
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('bikes.create'))
             ->post(route('bikes.store', $formData))
@@ -180,7 +180,7 @@ class BikeTest extends TestCase
             ->assertSee($formData['bike_description'])
             ->assertSee($formData['bike_stock']);
         
-        $this->assertDatabaseCount('bikes', 1);
+        $this->assertDatabaseCount('bikes', $this->created + 1);
     }
 
     /**
@@ -191,13 +191,7 @@ class BikeTest extends TestCase
     public function test_create_bike_with_invalid_data() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_ADMIN
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
+        $brand = $this->brands->random();
 
         // Brand doesn't exist.
         $formData = [
@@ -209,7 +203,7 @@ class BikeTest extends TestCase
             'bike_sell_price' => 1337
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.create'))
             ->post(route('bikes.store'), $formData)
             ->assertSessionHasErrors(['brand_id']);
@@ -219,7 +213,7 @@ class BikeTest extends TestCase
         $formData['bike_name'] = \Illuminate\Support\Str::random(1337);
         $formData['bike_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.create'))
             ->post(route('bikes.store'), $formData)
             ->assertSessionHasErrors([
@@ -232,7 +226,7 @@ class BikeTest extends TestCase
         $formData['bike_buy_price'] = -1;
         $formData['bike_sell_price'] = -1;
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.create'))
             ->post(route('bikes.store'), $formData)
             ->assertSessionHasErrors([
@@ -242,7 +236,7 @@ class BikeTest extends TestCase
             ]);
 
         // No data
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.create'))
             ->post(route('bikes.store'))
             ->assertSessionHasErrors([
@@ -255,7 +249,7 @@ class BikeTest extends TestCase
             ]);
         
         // Afterall, no bikes should be created.
-        $this->assertDatabaseCount('bikes', 0);
+        $this->assertDatabaseCount('bikes', $this->created);
     }
 
     /**
@@ -264,18 +258,9 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_edit_bike_as_staff() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-
-        $this->actingAs($user)
-            ->get(route('bikes.edit', $bike))->assertStatus(403);
+        $this->actingAs($this->user)
+            ->get(route('bikes.edit', $this->bikes->random()))
+            ->assertStatus(403);
     }
 
     /**
@@ -284,25 +269,20 @@ class BikeTest extends TestCase
      * @return void
      */
     public function test_view_edit_bike_as_manager() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $bike = $this->bikes->random();
 
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-
-        $brands = \App\Models\Brand::factory()->count(100)->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->get(route('bikes.edit', $bike))
             ->assertStatus(200);
 
-        $view = $this->view('content.bike.update', compact('brands', 'bike'));
+        $view = $this->view('content.bike.update', [
+            'brands' => $this->brands,
+            'bike' => $bike
+        ]);
         $view->assertSee($bike->bike_name)
             ->assertSee($bike->bike_description);
 
-        foreach ($brands as $brand) {
+        foreach ($this->brands as $brand) {
             $view->assertSee($brand->brand_name);
         }
     }
@@ -315,18 +295,10 @@ class BikeTest extends TestCase
     public function test_edit_bike_as_staff() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
+        $bike = $this->bikes->random();
 
         $formData = [
-            'brand_id' => $brand->id,
+            'brand_id' => $bike->brand->id,
             'bike_name' => $bike->bike_name,
             'bike_description' => $bike->bike_description,
             'bike_stock' => $bike->bike_stock + 1337,
@@ -334,7 +306,7 @@ class BikeTest extends TestCase
             'bike_sell_price' => $bike->bike_sell_price,
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->put(route('bikes.update', $bike), $formData)
             ->assertStatus(403);
     }
@@ -347,24 +319,12 @@ class BikeTest extends TestCase
     public function test_edit_bike_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::all()->random()->id
-        ]);
-
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-
         $newStock = random_int(1337, 7331);
 
+        $bike = $this->bikes->random();
+
         $formData = [
-            'brand_id' => $brand->id,
+            'brand_id' => $bike->brand->id,
             'bike_name' => $bike->bike_name,
             'bike_description' => $bike->bike_description,
             'bike_stock' => $newStock,
@@ -372,16 +332,16 @@ class BikeTest extends TestCase
             'bike_sell_price' => $bike->bike_sell_price,
         ];
 
-        $this->actingAs($tester)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSee($newStock);
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->get(route('bikes.show', $bike))
             ->assertSee($newStock)
-            ->assertSee($tester->nameAndUsername());
+            ->assertSee($this->manager->nameAndUsername());
 
         $this->assertEquals(
             $bike->fresh()->bike_stock, 
@@ -397,15 +357,7 @@ class BikeTest extends TestCase
     public function test_edit_bike_with_invalid_data() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_ADMIN
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
+        $bike = $this->bikes->random();
 
         // Brand doesn't exist.
         $formData = [
@@ -417,17 +369,17 @@ class BikeTest extends TestCase
             'bike_sell_price' => 1337,
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSessionHasErrors(['brand_id']);
 
         // Name and description are too long.
-        $formData['brand_id'] = $brand->id;
+        $formData['brand_id'] = $bike->brand->id;
         $formData['bike_name'] = \Illuminate\Support\Str::random(1337);
         $formData['bike_description'] = \Illuminate\Support\Str::random(1337);
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSessionHasErrors([
@@ -440,7 +392,7 @@ class BikeTest extends TestCase
         $formData['bike_buy_price'] = -1;
         $formData['bike_sell_price'] = -1;
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->from(route('bikes.edit', $bike))
             ->put(route('bikes.update', $bike), $formData)
             ->assertSessionHasErrors([
@@ -470,18 +422,8 @@ class BikeTest extends TestCase
     public function test_delete_bike_as_staff() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-        
-        $this->actingAs($user)
-            ->delete(route('bikes.update', $bike))
+        $this->actingAs($this->user)
+            ->delete(route('bikes.update', $this->bikes->random()))
             ->assertStatus(403);
     }
 
@@ -493,17 +435,9 @@ class BikeTest extends TestCase
     public function test_delete_bike_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $bike = $this->bikes->random();
 
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bike = \App\Models\Bike::factory()->create();
-        
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('bikes.edit', $bike))
             ->delete(route('bikes.update', $bike))
