@@ -440,22 +440,30 @@ class OrderTest extends TestCase
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $this->user->id
+            'created_by_user' => $this->user
         ]);
-        foreach ($this->bikes as $bike) {
+
+        $random_bike = $this->bikes->random();
+        $random_bike->update(['bike_stock' => 0]);
+
+        foreach ($this->bikes->except($random_bike->id) as $bike) {
             $order->bikes()->attach($bike->id, [
                 'order_value' => 7,
                 'order_buy_price' => $bike->bike_buy_price,
                 'order_sell_price' => $bike->bike_sell_price,
             ]);
+
+            $bike->update(['bike_stock' => 0]);
         }
 
         $response = $this->actingAs($this->user)
             ->get(route('orders.edit', $order));
 
-        foreach ($this->bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes->except($random_bike->id) as $bike) {
             $response->assertSee($bike->bike_name);
         }
+        $response->assertDontSee($random_bike->bike_name);
     }
 
     /**
@@ -503,7 +511,9 @@ class OrderTest extends TestCase
 
         $bike = $this->bikes->random();
 
-        $order = \App\Models\Order::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user,
+        ]);
         $order->bikes()->attach($bike, [
             'order_value' => 7,
             'order_buy_price' => $bike->bike_buy_price,
@@ -532,7 +542,9 @@ class OrderTest extends TestCase
     public function test_update_order_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $order = \App\Models\Order::factory()->create();
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user,
+        ]);
 
         $bike = $this->bikes->random();
 

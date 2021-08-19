@@ -192,7 +192,11 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(Order $order) {
-        $bikes = Bike::all();
+        $bikes = Bike::where('bike_stock', '>', 0)
+            ->orWhereHas('orders', function ($query) use ($order) {
+                $query->where('order_id', $order->id);
+            })
+            ->get();
         $details = $order->bikes()->get();
 
         return view(
