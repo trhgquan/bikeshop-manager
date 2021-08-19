@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminTest extends TestCase
@@ -11,65 +12,106 @@ class AdminTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     /**
+     * Accounts to be used.
+     * 
+     * @var \App\Models\User
+     */
+    protected $user, $manager, $admin, $example;
+
+    /**
+     * Number of accounts pre-created.
+     * 
+     * @var int
+     */
+    protected $current_accounts;
+
+    /**
+     * Current password of accounts.
+     * 
+     * @var string
+     */
+    protected $current_password = 'l33t1337';
+
+    /**
+     * Setting up test resources.
+     * 
+     * @return void
+     */
+    public function setUp() : void {
+        parent::setUp();
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+            'password' => Hash::make($this->current_password),
+        ]);
+
+        $this->example = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+            'password' => Hash::make($this->current_password),
+        ]);
+
+        $this->manager = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER,
+            'password' => Hash::make($this->current_password),
+        ]);
+
+        $this->admin = \App\Models\User::factory()->create([
+            'password' => Hash::make($this->current_password),
+        ]);
+
+        $this->current_accounts = \App\Models\User::all()->count();
+    }
+
+    /**
      * Test if normal user cannot access to Admin Dashboard.
      *
      * @return void
      */
     public function test_access_admin_dashboard_as_admin() {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $staff = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        $manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-        $admin = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_ADMIN
-        ]);
-
-        $this->actingAs($staff)
+        $this->actingAs($this->user)
             ->get(route('users.index'))
             ->assertStatus(403);
 
-        $this->actingAs($staff)
+        $this->actingAs($this->user)
             ->get(route('users.create'))
             ->assertStatus(403);
 
-        $this->actingAs($staff)
-            ->get(route('users.edit', $staff))
+        $this->actingAs($this->user)
+            ->get(route('users.edit', $this->user))
             ->assertStatus(403);
 
-        $this->actingAs($manager)
+        $this->actingAs($this->manager)
             ->get(route('users.create'))
             ->assertStatus(403);
 
-        $this->actingAs($manager)
+        $this->actingAs($this->manager)
             ->get(route('users.index'))
             ->assertStatus(403);
 
-        $this->actingAs($manager)
-            ->get(route('users.edit', $manager))
+        $this->actingAs($this->manager)
+            ->get(route('users.edit', $this->manager))
             ->assertStatus(403);
 
-        $this->actingAs($admin)
+        $this->actingAs($this->admin)
             ->get(route('users.create'))
             ->assertStatus(200);
 
-        $this->actingAs($admin)
+        $this->actingAs($this->admin)
             ->get(route('users.index'))
             ->assertStatus(200);
 
-        $this->actingAs($admin)
-            ->get(route('users.edit', $staff))
+        $this->actingAs($this->admin)
+            ->get(route('users.edit', $this->user))
             ->assertStatus(200);
 
-        $this->actingAs($admin)
-            ->get(route('users.edit', $manager))
+        $this->actingAs($this->admin)
+            ->get(route('users.edit', $this->manager))
             ->assertStatus(200);
 
-        $this->actingAs($admin)
-            ->get(route('users.edit', $admin))
+        $this->actingAs($this->admin)
+            ->get(route('users.edit', $this->admin))
             ->assertStatus(403);
     }
 
@@ -80,8 +122,6 @@ class AdminTest extends TestCase
      */
     public function test_create_user_with_invalid_data() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-
-        $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $accounts = \App\Models\User::factory()->count(10)->create();
 
@@ -118,8 +158,8 @@ class AdminTest extends TestCase
                 'role' => \App\Models\Role::ROLE_ADMIN
             ])
             ->assertSessionHasErrors(['role']);
-        
-        $this->assertDatabaseCount('users', 10);
+
+        $this->assertDatabaseCount('users', 10 + $this->current_accounts);
     }
 
     /**
@@ -130,14 +170,11 @@ class AdminTest extends TestCase
     public function test_create_user_with_valid_data() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $admin = \App\Models\User::factory()->create();
         $email = $this->faker->unique()->safeEmail();
         $username = \Illuminate\Support\Str::random(6);
         $password = \Illuminate\Support\Str::random(15);
 
-        $this->actingAs($admin)
+        $this->actingAs($this->admin)
             ->post(route('users.store'), [
                 'name' => \Illuminate\Support\Str::random(20),
                 'username' => $username,
@@ -150,7 +187,7 @@ class AdminTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
         
-        $this->assertDatabaseCount('users', 2);
+        $this->assertDatabaseCount('users', $this->current_accounts + 1);
         $this->assertTrue(auth()->attempt([
             'username' => $username,
             'password' => $password,
@@ -164,15 +201,6 @@ class AdminTest extends TestCase
      */
     public function test_create_user_with_non_admin() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $staff = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        $manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
 
         $email = $this->faker->unique()->safeEmail();
         $username = \Illuminate\Support\Str::random(6);
@@ -189,15 +217,15 @@ class AdminTest extends TestCase
                 ->random()->id
         ];
 
-        $this->actingAs($staff)
+        $this->actingAs($this->user)
             ->post(route('users.store'), $formData)
             ->assertStatus(403);
         
-        $this->actingAs($manager)
+        $this->actingAs($this->manager)
             ->post(route('users.store'), $formData)
             ->assertStatus(403);
 
-        $this->assertDatabaseCount('users', 2);
+        $this->assertDatabaseCount('users', $this->current_accounts);
     }
 
     /**
@@ -208,131 +236,110 @@ class AdminTest extends TestCase
     public function test_update_user_role_by_admin_function() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $staff = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        $manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-        $admin = \App\Models\User::factory()->create();
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        
-        $this->actingAs($staff)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->user)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'role' => \App\Models\Role::ROLE_MANAGER
             ])
             ->assertStatus(403);
 
-        $this->actingAs($manager)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->manager)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'role' => \App\Models\Role::ROLE_MANAGER
             ])
             ->assertStatus(403);
 
         $this->assertEquals(
-            $user->fresh()->role,
+            $this->example->fresh()->role,
             \App\Models\Role::ROLE_STAFF
         );
         
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'role' => \App\Models\Role::ROLE_ADMIN
             ])
             ->assertSessionHasErrors();
         
         $this->assertEquals(
-            $user->fresh()->role,
+            $this->example->fresh()->role,
             \App\Models\Role::ROLE_STAFF
         );
 
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'role' => \App\Models\Role::ROLE_MANAGER
             ])
             ->assertSessionHasNoErrors();
-        
+
         $this->assertEquals(
-            $user->fresh()->role,
+            $this->example->fresh()->role,
             \App\Models\Role::ROLE_MANAGER
         );
     }
 
+    /**
+     * Test if Admin can update User password.
+     * 
+     * @return void
+     */
     public function test_update_user_password_by_admin_function() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $staff = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        $manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-        $admin = \App\Models\User::factory()->create();
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
         
-        $new_password = 'l33t1337';
+        $new_password = '1337l33t';
 
-        $this->actingAs($staff)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->user)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'new_password' => $new_password,
                 're_password' => $new_password
             ])
             ->assertStatus(403);
 
-        $this->actingAs($manager)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->manager)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'new_password' => $new_password,
                 're_password' => $new_password
             ])
             ->assertStatus(403);
 
         $this->assertFalse(auth()->attempt([
-            'username' => $user->username,
+            'username' => $this->example->username,
             'password' => $new_password
         ]));
         
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'role' => \App\Models\Role::ROLE_ADMIN,
                 'new_password' => $new_password
             ])
             ->assertSessionHasErrors(['role']);
 
         $this->assertFalse(auth()->attempt([
-            'username' => $user->username,
+            'username' => $this->example->username,
             'password' => $new_password
         ]));
 
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user))
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example))
             ->assertStatus(403);
 
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'new_password' => '1337',
                 're_password' => $new_password
             ])
             ->assertSessionHasErrors(['new_password', 're_password']);
 
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'role' => \App\Models\Role::all()
                     ->except(\App\Models\Role::ROLE_ADMIN)
                     ->random()->id,
@@ -342,20 +349,20 @@ class AdminTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertFalse(auth()->attempt([
-            'username' => $user->username,
+            'username' => $this->example->username,
             'password' => $new_password
         ]));
 
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->put(route('users.update', $user), [
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->example))
+            ->put(route('users.update', $this->example), [
                 'new_password' => $new_password,
                 're_password' => $new_password
             ])
             ->assertSessionHasNoErrors();
         
         $this->assertTrue(auth()->attempt([
-            'username' => $user->username,
+            'username' => $this->example->username,
             'password' => $new_password
         ]));
     }
@@ -368,47 +375,24 @@ class AdminTest extends TestCase
     public function test_delete_user_with_non_admin() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $staff = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-        $manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
-        ]);
-        $victim = \App\Models\User::factory()->create();
-        $admin = \App\Models\User::factory()->create();
-
-        $this->actingAs($staff)
-            ->delete(route('users.destroy', $victim))
+        $this->actingAs($this->user)
+            ->delete(route('users.destroy', $this->example))
             ->assertStatus(403);
-        
-        $this->actingAs($manager)
-            ->delete(route('users.destroy', $victim))
+
+        $this->actingAs($this->manager)
+            ->delete(route('users.destroy', $this->example))
+            ->assertStatus(403);
+
+        $this->example->update(['role' => \App\Models\Role::ROLE_ADMIN]);
+
+        $this->actingAs($this->admin)
+            ->delete(route('users.destroy', $this->example))
             ->assertStatus(403);
 
         $this->assertDatabaseHas('users', [
-            'id' => $victim->id,
+            'id' => $this->example->id,
             'deleted_at' => NULL
         ]);
-
-        $this->actingAs($admin)
-            ->delete(route('users.destroy', $admin))
-            ->assertStatus(403);
-
-        $this->actingAs($admin)
-            ->delete(route('users.destroy', $victim))
-            ->assertStatus(403);
-        
-        $victim->update(['role' => \App\Models\Role::ROLE_STAFF]);
-        
-        $this->actingAs($admin)
-            ->followingRedirects()
-            ->from(route('users.edit', $victim))
-            ->delete(route('users.destroy', $victim))
-            ->assertDontSee($victim->username);
-
-        $this->assertSoftDeleted($victim);
     }
 
     /**
@@ -417,17 +401,18 @@ class AdminTest extends TestCase
      * 
      * @return void
      */
-    public function test_delete_user_with_admin() {
+    public function test_delete_user_also_remove_relatives_records() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
+        $brand = \App\Models\Brand::factory()->create([
+            'created_by_user' => $this->user
         ]);
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create();
-        $order = \App\Models\Order::factory()->create();
+        $bike = \App\Models\Bike::factory()->create([
+            'created_by_user' => $this->user
+        ]);
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user
+        ]);
 
         $order->bikes()->attach($bike->id, [
             'order_value' => 1,
@@ -435,25 +420,23 @@ class AdminTest extends TestCase
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
-        $admin = \App\Models\User::factory()->create();
-
-        $this->actingAs($admin)
-            ->from(route('users.edit', $user))
-            ->delete(route('users.destroy', $user))
+        $this->actingAs($this->admin)
+            ->from(route('users.edit', $this->user))
+            ->delete(route('users.destroy', $this->user))
             ->assertSessionHasNoErrors();
 
-        $this->assertSoftDeleted($user);
+        $this->assertSoftDeleted($this->user);
 
         $this->get(route('brands.show', $brand))
             ->assertStatus(200)
-            ->assertSee($user->nameAndUsername());
+            ->assertSee($this->user->nameAndUsername());
 
         $this->get(route('bikes.show', $bike))
             ->assertStatus(200)
-            ->assertSee($user->nameAndUsername());
+            ->assertSee($this->user->nameAndUsername());
 
         $this->get(route('orders.show', $order))
             ->assertStatus(200)
-            ->assertSee($user->nameAndUsername());
+            ->assertSee($this->user->nameAndUsername());
     }
 }

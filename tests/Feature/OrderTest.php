@@ -11,6 +11,41 @@ class OrderTest extends TestCase
     use WithFaker, RefreshDatabase;
 
     /**
+     * Resources using in test.
+     * 
+     * @var mixed
+     */
+    protected $user, $tester, $manager, $brands, $bikes;
+
+    /**
+     * Setting up test resources.
+     * 
+     * @return void
+     */
+    public function setUp() : void {
+        parent::setUp();
+
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->user = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $this->tester = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_STAFF,
+        ]);
+
+        $this->manager = \App\Models\User::factory()->create([
+            'role' => \App\Models\Role::ROLE_MANAGER
+        ]);
+
+        $this->brands = \App\Models\Brand::factory()->count(10)->create();
+        $this->bikes = \App\Models\Bike::factory()->count(10)->create([
+            'bike_stock' => 1337
+        ]);
+    }
+
+    /**
      * Attempts to create a new Order, expect to see the signature.
      * 
      * @return void
@@ -30,23 +65,13 @@ class OrderTest extends TestCase
      */
     public function test_create_order_without_authentication() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        // Create new user, brand and bikes.
-        $user = \App\Models\User::factory()->create();
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bikes = \App\Models\Bike::factory()
-            ->count(random_int(1, 13))
-            ->create();
 
         // Create and test order
         $order_detail = [];
         $quantity = 0;
         $revenue = 0;
         $profit = 0;
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $addValue = random_int(1, $bike->bike_stock);
             $quantity += $addValue;
             $revenue += $addValue * $bike->bike_sell_price;
@@ -80,27 +105,15 @@ class OrderTest extends TestCase
      */
     public function test_create_order_with_random_bikes() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
 
-        // Create new user, brand and bikes.
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::all()->random()->id,
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bikes = \App\Models\Bike::factory()
-            ->count(random_int(1, 13))
-            ->create(['bike_stock' => 1337]);
-
-        $this->actingAs($user);
+        $this->actingAs($this->user);
 
         // Create and test order with random stock.
         $order_detail = [];
         $quantity = 0;
         $revenue = 0;
         $profit = 0;
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $addValue = random_int(1, $bike->bike_stock);
             $quantity += $addValue;
             $revenue += $addValue * $bike->bike_sell_price;
@@ -127,10 +140,10 @@ class OrderTest extends TestCase
             ->assertSee($profit);
 
         $this->assertDatabaseCount('orders', 1);
-        $this->assertDatabaseCount('order_bike', $bikes->count());
+        $this->assertDatabaseCount('order_bike', $this->bikes->count());
 
-        $bikes = $bikes->fresh();
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes as $bike) {
             $this->assertNotEquals($bike->bike_stock, 1337);
         }
 
@@ -165,24 +178,12 @@ class OrderTest extends TestCase
     public function test_create_order_with_invalid_data() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
  
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->actingAs($this->user);
 
-        // Create new user, brand and bikes.
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::all()->random()->id,
-        ]);
-
-        $this->actingAs($user);
-
-        $brand = \App\Models\Brand::factory()->create();
-
-        $bikes = \App\Models\Bike::factory()
-            ->count(random_int(10, 13))
-            ->create();
         $order_detail = [];
 
         // Create and test order with invalid order_value
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             array_push($order_detail, [
                 'bike_id' => $bike->id,
                 'order_value' => $bike->bike_stock + 1
@@ -198,21 +199,21 @@ class OrderTest extends TestCase
         // Invalid bike_id
         $formData['order_detail'] = [
             ['bike_id' => 1337, 'order_value' => 1],
-            ['bike_id' => $bikes->first()->id, 'order_value' => 1],
+            ['bike_id' => $this->bikes->first()->id, 'order_value' => 1],
         ];
         $this->createAndAssert($formData, 'Lỗi');
 
         // Missing bike_id.
         $formData['order_detail'] = [
             ['order_value' => 1337],
-            ['bike_id' => $bikes->first()->id,'order_value' => 1]
+            ['bike_id' => $this->bikes->first()->id,'order_value' => 1]
         ];
         $this->createAndAssert($formData, 'Lỗi');
 
         // Missing order_value, but needs to have different bikes.
-        $bike1 = $bikes->random()->id;
-        $bike2 = $bikes->random()->id;
-        while ($bike1 === $bike2) $bike2 = $bikes->random()->id;
+        $bike1 = $this->bikes->random()->id;
+        $bike2 = $this->bikes->random()->id;
+        while ($bike1 === $bike2) $bike2 = $this->bikes->random()->id;
         $formData['order_detail'] = [
             ['bike_id' => $bike1],
             ['bike_id' => $bike2, 'order_value' => 1],
@@ -241,23 +242,12 @@ class OrderTest extends TestCase
     public function test_delete_non_checked_out_order_as_owner() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brands = \App\Models\Brand::factory()->count(10)->create();
-        $bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1337
-        ]);
-
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $user->id,
-            'updated_by_user' => $user->id,
+            'created_by_user' => $this->user->id,
+            'updated_by_user' => $this->user->id,
         ]);
 
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
                 'order_value' => $bike->bike_stock,
                 'order_buy_price' => $bike->bike_buy_price,
@@ -267,10 +257,10 @@ class OrderTest extends TestCase
         }
 
         $this->assertDatabaseCount('orders', 1);
-        $this->assertDatabaseCount('order_bike', $bikes->count());
+        $this->assertDatabaseCount('order_bike', $this->bikes->count());
 
-        $bikes = $bikes->fresh();
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes as $bike) {
             $this->assertEquals($bike->bike_stock, 0);
         }
 
@@ -280,16 +270,16 @@ class OrderTest extends TestCase
         }
 
         // Attempts to delete.
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(200);
-        
+
         $this->assertSoftDeleted($order);
         
-        $bikes = $bikes->fresh();
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes as $bike) {
             $this->assertEquals($bike->bike_stock, 1337);
         }
     }
@@ -302,25 +292,11 @@ class OrderTest extends TestCase
     public function test_delete_non_checked_out_order_as_stranger() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-
-        $brands = \App\Models\Brand::factory()->count(10)->create();
-        $bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1337
-        ]);
-
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $user->id
+            'created_by_user' => $this->user->id
         ]);
 
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
                 'order_value' => 1337,
                 'order_buy_price' => $bike->bike_buy_price,
@@ -329,7 +305,7 @@ class OrderTest extends TestCase
             $bike->update(['bike_stock' => 0]);
         }
 
-        $this->actingAs($tester)
+        $this->actingAs($this->tester)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
@@ -340,8 +316,8 @@ class OrderTest extends TestCase
             'checkout_at' => NULL,
         ]);
 
-        $bikes = $bikes->fresh();
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes as $bike) {
             $this->assertNotEquals($bike->bike_stock, 1337);
         }
     }
@@ -354,25 +330,11 @@ class OrderTest extends TestCase
     public function test_delete_non_checked_out_order_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER,
-        ]);
-
-        $brands = \App\Models\Brand::factory()->count(10)->create();
-        $bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1337
-        ]);
-
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $user->id
+            'created_by_user' => $this->user->id
         ]);
 
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
                 'order_value' => 1337,
                 'order_buy_price' => $bike->bike_buy_price,
@@ -381,7 +343,7 @@ class OrderTest extends TestCase
             $bike->update(['bike_stock' => 0]);
         }
 
-        $this->actingAs($tester)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
@@ -391,8 +353,8 @@ class OrderTest extends TestCase
 
         $this->assertSoftDeleted($order);
 
-        $bikes = $bikes->fresh();
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes as $bike) {
             $this->assertEquals($bike->bike_stock, 1337);
         }
     }
@@ -405,23 +367,12 @@ class OrderTest extends TestCase
     public function test_delete_checked_out_order_as_staff() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-
-        $brands = \App\Models\Brand::factory()->count(10)->create();
-        $bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1337
-        ]);
-
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $user->id,
+            'created_by_user' => $this->user->id,
             'checkout_at' => \Carbon\Carbon::now(),
         ]);
 
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
                 'order_value' => 1337,
                 'order_buy_price' => $bike->bike_buy_price,
@@ -430,7 +381,7 @@ class OrderTest extends TestCase
             $bike->update(['bike_stock' => 0]);
         }
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
@@ -441,8 +392,8 @@ class OrderTest extends TestCase
             'deleted_at' => NULL
         ]);
 
-        $bikes = $bikes->fresh();
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes as $bike) {
             $this->assertNotEquals($bike->bike_stock, 1337);
         }
     }
@@ -455,25 +406,12 @@ class OrderTest extends TestCase
     public function test_delete_checked_out_order_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_ADMIN,
-        ]);
-        $brands = \App\Models\Brand::factory()->count(10)->create();
-        $bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1337
-        ]);
-
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $user->id,
+            'created_by_user' => $this->user->id,
             'checkout_at' => \Carbon\Carbon::now(),
         ]);
 
-        foreach ($bikes as $bike) {
+        foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
                 'order_value' => 1337,
                 'order_buy_price' => $bike->bike_buy_price,
@@ -482,7 +420,7 @@ class OrderTest extends TestCase
             $bike->update(['bike_stock' => 0]);
         }
 
-        $this->actingAs($tester)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
@@ -501,31 +439,31 @@ class OrderTest extends TestCase
     public function test_view_update_order() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user
         ]);
 
-        $brand = \App\Models\Brand::factory()->create();
-        $bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1330
-        ]);
-        $bike = \App\Models\Bike::all()->random();
+        $random_bike = $this->bikes->random();
+        $random_bike->update(['bike_stock' => 0]);
 
-        $order = \App\Models\Order::factory()->create();
-        $order->bikes()->attach($bike, [
-            'order_value' => 7,
-            'order_buy_price' => $bike->bike_buy_price,
-            'order_sell_price' => $bike->bike_sell_price,
-        ]);
+        foreach ($this->bikes->except($random_bike->id) as $bike) {
+            $order->bikes()->attach($bike->id, [
+                'order_value' => 7,
+                'order_buy_price' => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price,
+            ]);
 
-        $response = $this->actingAs($tester)
+            $bike->update(['bike_stock' => 0]);
+        }
+
+        $response = $this->actingAs($this->user)
             ->get(route('orders.edit', $order));
 
-        foreach ($bikes as $bike) {
+        $this->bikes = $this->bikes->fresh();
+        foreach ($this->bikes->except($random_bike->id) as $bike) {
             $response->assertSee($bike->bike_name);
         }
+        $response->assertDontSee($random_bike->bike_name);
     }
 
     /**
@@ -536,38 +474,31 @@ class OrderTest extends TestCase
     public function test_update_order_as_owner() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user->id
         ]);
 
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create([
-            'bike_stock' => 1330
-        ]);
+        $bike = $this->bikes->random();
 
-        $order = \App\Models\Order::factory()->create();
         $order->bikes()->attach($bike, [
-            'order_value' => 7,
+            'order_value' => 3,
             'order_buy_price' => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->followingRedirects()
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
                 'customer_name' => $order->customer_name,
                 'customer_email' => $order->customer_email,
                 'order_detail' => [
-                    ['bike_id' => $bike->id, 'order_value' => 1337]
+                    ['bike_id' => $bike->id, 'order_value' => 1340]
                 ]
             ])
-            ->assertSee(1337);
+            ->assertSee(1340);
 
-        $bike = $bike->fresh();
-        $this->assertEquals($bike->bike_stock, 0);
+        $this->assertEquals($bike->fresh()->bike_stock, 0);
     }
 
     /**
@@ -578,29 +509,18 @@ class OrderTest extends TestCase
     public function test_update_order_as_stranger() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $bike = $this->bikes->random();
 
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user,
         ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create([
-            'bike_stock' => 1330
-        ]);
-
-        $order = \App\Models\Order::factory()->create();
         $order->bikes()->attach($bike, [
             'order_value' => 7,
             'order_buy_price' => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-
-        $this->actingAs($tester)
+        $this->actingAs($this->tester)
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
                 'customer_name' => $order->customer_name,
@@ -611,7 +531,6 @@ class OrderTest extends TestCase
             ])
             ->assertStatus(403);
 
-        $bike = $bike->fresh();
         $this->assertNotEquals($bike->bike_stock, 0);
     }
 
@@ -623,32 +542,21 @@ class OrderTest extends TestCase
     public function test_update_order_as_manager() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
+        $order = \App\Models\Order::factory()->create([
+            'created_by_user' => $this->user,
         ]);
 
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create([
-            'bike_stock' => 1330
-        ]);
-        $new_bike = \App\Models\Bike::factory()->create([
-            'bike_stock' => 1337
-        ]);
+        $bike = $this->bikes->random();
 
-        $order = \App\Models\Order::factory()->create();
+        $new_bike = $this->bikes->except($bike->id)->random();
+
         $order->bikes()->attach($bike, [
-            'order_value' => 7,
+            'order_value' => 3,
             'order_buy_price' => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER,
-        ]);
-
-        $this->actingAs($tester)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
@@ -661,14 +569,16 @@ class OrderTest extends TestCase
             ])
             ->assertStatus(200);
 
-        $this->assertEquals($bike->fresh()->bike_stock, 1337);
+        $this->assertEquals($bike->fresh()->bike_stock, 1340);
         $this->assertEquals($new_bike->fresh()->bike_stock, 0);
         $this->assertTrue($order->fresh()->getCheckedOut());
 
-        $this->actingAs($user)
+        $this->actingAs($this->user)
             ->get(route('orders.show', $order))
+            ->assertSee($new_bike->bike_name)
+            ->assertDontSee($bike->bike_name)
             ->assertSee(1337)
-            ->assertSee($tester->nameAndUsername());
+            ->assertSee($this->manager->nameAndUsername());
     }
 
     /**
@@ -679,25 +589,17 @@ class OrderTest extends TestCase
     public function test_update_order_with_not_exist_bikes() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create([
-            'bike_stock' => 1330
-        ]);
+        $bike = $this->bikes->random();
 
         $order = \App\Models\Order::factory()->create();
+
         $order->bikes()->attach($bike, [
-            'order_value' => 7,
+            'order_value' => 3,
             'order_buy_price' => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
-        $this->actingAs($tester)
+        $this->actingAs($this->manager)
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
                 'customer_name' => $order->customer_name,
@@ -709,7 +611,7 @@ class OrderTest extends TestCase
             ->assertSessionHasErrors(['order_detail.*.bike_id']);
 
         $bike = $bike->fresh();
-        $this->assertEquals($bike->bike_stock, 1330);
+        $this->assertEquals($bike->bike_stock, 1337);
     }
 
     /**
@@ -720,25 +622,16 @@ class OrderTest extends TestCase
     public function test_update_order_with_overstock() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $tester = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF,
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create([
-            'bike_stock' => 1330
-        ]);
+        $bike = $this->bikes->random();
 
         $order = \App\Models\Order::factory()->create();
         $order->bikes()->attach($bike, [
-            'order_value' => 7,
+            'order_value' => 3,
             'order_buy_price' => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
-        $response = $this->actingAs($tester)
+        $this->actingAs($this->manager)
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
                 'customer_name' => $order->customer_name,
@@ -750,7 +643,7 @@ class OrderTest extends TestCase
             ->assertSessionHasErrors();
 
         $bike = $bike->fresh();
-        $this->assertEquals($bike->bike_stock, 1330);
+        $this->assertEquals($bike->bike_stock, 1337);
     }
 
     /**
@@ -760,15 +653,8 @@ class OrderTest extends TestCase
      */
     public function test_update_checkedout_orders() {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        
-        $this->seed(\Database\Seeders\RoleSeeder::class);
 
-        $user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
-        ]);
-
-        $brand = \App\Models\Brand::factory()->create();
-        $bike = \App\Models\Bike::factory()->create();
+        $bike = $this->bikes->random();
 
         $order = \App\Models\Order::factory()->create([
             'checkout_at' => \Carbon\Carbon::now()
@@ -779,7 +665,7 @@ class OrderTest extends TestCase
             'order_sell_price' => $bike->bike_sell_price
         ]);
 
-        $this->actingAs($user)
+        $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->put(route('orders.update', $order), [
