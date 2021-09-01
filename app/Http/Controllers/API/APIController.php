@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Order;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -23,94 +21,27 @@ class APIController extends Controller
     ];
 
     /**
-     * Get start / end date of month.
+     * Order Services will be using.
      * 
-     * @param  string $date
-     * @return array
+     * @var  \App\Services\OrderServices
      */
-    private function getStartEndDateOfMonth($date) {
-        return [
-            'start_date' => \Carbon\Carbon::parse($date)->firstOfMonth(),
-            'end_date' => \Carbon\Carbon::parse($date)->endOfMonth(),
-        ];
-    }
+    private $orderServices;
 
     /**
-     * Get bike name and total sales in the range [startDate, endDate].
+     * Bike Services will be using.
      * 
-     * @param  \Carbon\Carbon $startDate
-     * @param  \Carbon\Carbon $endDate
-     * @return \Illuminate\Support\Facades\DB
+     * @var \App\Services\BikeServices
      */
-    private function bikeQuantityInRange($startDate, $endDate) {
-        return DB::table('order_bike')
-            ->join('orders', 'order_bike.order_id', '=', 'orders.id')
-            ->join('bikes', 'order_bike.bike_id', '=', 'bikes.id')
-            ->select(
-                'bikes.id',
-                'bikes.bike_name', 
-                DB::raw('SUM(order_bike.order_value) AS bike_order_value')
-            )
-            ->where('checkout_at', '>=', $startDate)
-            ->where('checkout_at', '<=', $endDate)
-            ->where('bikes.deleted_at', '=', NULL)
-            ->where('orders.deleted_at', '=', NULL)
-            ->groupBy('bikes.id', 'bikes.bike_name')
-            ->orderBy('bike_order_value', 'DESC')
-            ->get();
-    }
+    private $bikeServices;
 
     /**
-     * Get Orders that checked out in range [startDate, endDate].
+     * Constructor for APIController
      * 
-     * @param  \Carbon\Carbon $startDate
-     * @param  \Carbon\Carbon $endDate
-     * @return \Illuminate\Support\Facades\DB
+     * @return void
      */
-    private function getOrdersStatInRange($startDate, $endDate) {
-        return DB::table('order_bike')
-            ->join('orders', 'order_bike.order_id', '=', 'orders.id')
-            ->join('bikes', 'order_bike.bike_id', '=', 'bikes.id')
-            ->select(
-                'orders.id',
-                DB::raw('SUM(order_bike.order_value) AS quantity'),
-                DB::raw(
-                    'SUM(order_bike.order_value * 
-                        order_bike.order_sell_price) as revenue'
-                ),
-                DB::raw(
-                    'SUM(order_bike.order_value * 
-                        ( order_bike.order_sell_price - 
-                        order_bike.order_buy_price )) as profit'
-                ))
-            ->where('checkout_at', '>=', $startDate)
-            ->where('checkout_at', '<=', $endDate)
-            ->where('bikes.deleted_at', '=', NULL)
-            ->where('orders.deleted_at', '=', NULL)
-            ->groupBy('orders.id')
-            ->orderBy('profit', 'DESC')
-            ->get();
-    }
-
-    /**
-     * Get Orders in range [startDate, endDate]
-     * 
-     * @param  string $startData
-     * @param  string $endDate
-     * @return \App\Models\Order
-     */
-    private function getOrdersInRange($startDate, $endDate) {
-        return Order::where('created_at', '>=', $startDate)
-            ->where('created_at', '<=', $endDate)
-            ->orderBy('created_at', 'DESC')
-            ->get()
-            ->each(function ($item) {
-                $item->created = $item->created_at->format('Y-m-d h:i:s');
-                $item->detail_url = route('orders.show', $item->id);
-                $item->checkout = $item->getCheckedOut()
-                    ? $item->checkout_at->format('Y-m-d h:i:s')
-                    : 'Chưa thanh toán';
-            });
+    public function __construct() {
+        $this->bikeServices = new \App\Services\BikeServices;
+        $this->orderServices = new \App\Services\OrderServices;
     }
 
     /**
@@ -130,22 +61,17 @@ class APIController extends Controller
         }
 
         // Get the month we are querying for.
-        $thisMonth = $this->getStartEndDateOfMonth($request->month);
+        $month = \Carbon\Carbon::parse($request->month);
 
         $quantity = $this
-            ->bikeQuantityInRange(
-                $thisMonth['start_date'], 
-                $thisMonth['end_date']
-            )
-            ->each(function ($item) {
-                $item->url = route('bikes.show', $item->id);
-            });
+            ->bikeServices
+            ->bikeQuantityInMonth($month);
 
         return response()->json([
             'data' => [
                 'detail' => $quantity,
                 'items' => count($quantity),
-                'month' => $thisMonth['start_date']->format('m-Y')
+                'month' => $month->format('m-Y')
             ]
         ]);
     }
@@ -166,29 +92,23 @@ class APIController extends Controller
                 ->json(['data' => ['errors' => $validator->errors()]]);
         }
 
-        $thisMonth = $this->getStartEndDateOfMonth($request->month);
+        $month = \Carbon\Carbon::parse($request->month);
 
         $ordersInRange = $this
-            ->getOrdersStatInRange(
-                $thisMonth['start_date'],
-                $thisMonth['end_date']
-            )
-            ->each(function($item) {
-                $item->url = route('orders.show', $item->id);
-            });
-        $ordersTotal = [
-            'quantity' => collect($ordersInRange)->sum('quantity'),
-            'revenue' => collect($ordersInRange)->sum('revenue'),
-            'profit' => collect($ordersInRange)->sum('profit'),
-        ];
+            ->orderServices
+            ->getOrdersStatInMonth($month);
 
         return response()
             ->json([
                 'data' => [
-                    'month' => $thisMonth['start_date']->format('m-Y'),
+                    'month' => $month->format('m-Y'),
                     'items' => count($ordersInRange),
                     'detail' => $ordersInRange,
-                    'total' => $ordersTotal
+                    'total' =>  [
+                        'quantity' => collect($ordersInRange)->sum('quantity'),
+                        'revenue' => collect($ordersInRange)->sum('revenue'),
+                        'profit' => collect($ordersInRange)->sum('profit'),
+                    ]
                 ],
             ]);
     }
@@ -209,17 +129,14 @@ class APIController extends Controller
                 ->json(['data' => ['errors' => $validator->errors()]]);
         }
 
-        $thisMonth = $this->getStartEndDateOfMonth($request->month);
+        $month = \Carbon\Carbon::parse($request->month);
         
-        $orders = $this->getOrdersInRange(
-            $thisMonth['start_date'], 
-            $thisMonth['end_date']
-        );
+        $orders = $this->orderServices->getOrdersInMonth($month);
 
         return response()
             ->json([
                 'data' => [
-                    'month' => $thisMonth['start_date']->format('m-Y'),
+                    'month' => $month->format('m-Y'),
                     'detail' => $orders,
                     'items' => $orders->count(),
                 ]

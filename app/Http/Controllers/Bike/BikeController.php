@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Bike;
 
 use App\Models\Brand;
 use App\Models\Bike;
-use App\Models\Stock;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBikeRequest;
 
@@ -105,8 +103,6 @@ class BikeController extends Controller
         $validator = $request->validated();
 
         $bike->update($validator);
-
-        $bike->save();
 
         return redirect()
             ->route('bikes.edit', $bike)

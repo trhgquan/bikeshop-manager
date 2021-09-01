@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Order;
-use App\Models\Bike;
 use Illuminate\Support\Facades\Auth;
 
 class OrderObserver

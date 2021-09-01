@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Bike;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 
 class OrderServices {
     /**
@@ -44,7 +45,7 @@ class OrderServices {
      * @param  array $validator
      * @return array
      */
-    public function validateItemQuantityCreate($validator) {
+    public function validateItemQuantityCreate(array $validator) : array {
         $errors = [];
 
         foreach ($validator['order_detail'] as $order_detail) {
@@ -62,11 +63,12 @@ class OrderServices {
     /**
      * Validate item quantity on Update.
      * 
-     * @param  array $validator
      * @param  \App\Models\Order $order
+     * @param  array $validator
      * @return array
      */
-    public function validateItemQuantityUpdate($validator, Order $order) {
+    public function validateItemQuantityUpdate(
+        Order $order, array $validator) : array {
         $errors = [];
 
         foreach ($validator['order_detail'] as $order_detail) {
@@ -155,5 +157,67 @@ class OrderServices {
             : NULL;
 
         $order->save();
+    }
+
+    /**
+     * Get Orders in a month.
+     * 
+     * @param  \Carbon\Carbon $date
+     * @return \Illuminate\Support\Collection
+     */
+    public function getOrdersInMonth(
+        \Carbon\Carbon $month) : \Illuminate\Support\Collection {
+        $startDate = $month->copy()->firstOfMonth();
+        $endDate = $month->copy()->endOfMonth();
+
+        return Order::where('created_at', '>=', $startDate)
+            ->where('created_at', '<=', $endDate)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->each(function ($item) {
+                $item->created = $item->created_at->format('Y-m-d h:i:s');
+                $item->detail_url = route('orders.show', $item->id);
+                $item->checkout = $item->getCheckedOut()
+                    ? $item->checkout_at->format('Y-m-d h:i:s')
+                    : 'Chưa thanh toán';
+            });
+    }
+
+    /**
+     * Get Orders that checked out in a month.
+     * 
+     * @param  \Carbon\Carbon $date
+     * @return \Illuminate\Support\Collection
+     */
+    public function getOrdersStatInMonth(
+        \Carbon\Carbon $date) : \Illuminate\Support\Collection {
+        $startDate = $date->copy()->firstOfMonth();
+        $endDate = $date->copy()->lastOfMonth();
+
+        return DB::table('order_bike')
+            ->join('orders', 'order_bike.order_id', '=', 'orders.id')
+            ->join('bikes', 'order_bike.bike_id', '=', 'bikes.id')
+            ->select(
+                'orders.id',
+                DB::raw('SUM(order_bike.order_value) AS quantity'),
+                DB::raw(
+                    'SUM(order_bike.order_value * 
+                        order_bike.order_sell_price) as revenue'
+                ),
+                DB::raw(
+                    'SUM(order_bike.order_value * 
+                        ( order_bike.order_sell_price - 
+                        order_bike.order_buy_price )) as profit'
+                ))
+            ->where('checkout_at', '>=', $startDate)
+            ->where('checkout_at', '<=', $endDate)
+            ->where('bikes.deleted_at', '=', NULL)
+            ->where('orders.deleted_at', '=', NULL)
+            ->groupBy('orders.id')
+            ->orderBy('profit', 'DESC')
+            ->get()
+            ->each(function($item) {
+                $item->url = route('orders.show', $item->id);
+            });
     }
 }

@@ -73,7 +73,8 @@ class OrderController extends Controller
         $validator = $request->validated();
         $validator['order_checkout'] = $request->has('order_checkout');
 
-        $quantityErrors = $this->orderServices
+        $quantityErrors = $this
+            ->orderServices
             ->validateItemQuantityCreate($validator);
 
         if (count($quantityErrors) > 0) {
@@ -132,8 +133,9 @@ class OrderController extends Controller
         $validator = $request->validated();
         $validator['order_checkout'] = $request->has('order_checkout');
 
-        $quantityErrors = $this->orderServices
-            ->validateItemQuantityUpdate($validator, $order);
+        $quantityErrors = $this
+            ->orderServices
+            ->validateItemQuantityUpdate($order, $validator);
 
         if (count($quantityErrors) > 0) {
             return redirect()
