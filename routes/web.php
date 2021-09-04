@@ -166,4 +166,14 @@ Route::group([
 Route::resource(
     'users',
     \App\Http\Controllers\UserManagementController::class
-)->except('show')->middleware('auth');
+)->except(['show', 'update'])->middleware('auth');
+
+Route::put('users/{user}/update/password', [
+    \App\Http\Controllers\UserManagementController::class,
+    'update_password'
+])->name('users.update.password')->middleware('auth');
+
+Route::put('users/{user}/update/role', [
+    \App\Http\Controllers\UserManagementController::class,
+    'update_role'
+])->name('users.update.role')->middleware('auth');

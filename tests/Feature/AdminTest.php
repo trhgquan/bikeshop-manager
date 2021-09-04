@@ -238,14 +238,14 @@ class AdminTest extends TestCase
 
         $this->actingAs($this->user)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.role', $this->example), [
                 'role' => \App\Models\Role::ROLE_MANAGER
             ])
             ->assertStatus(403);
 
         $this->actingAs($this->manager)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.role', $this->example), [
                 'role' => \App\Models\Role::ROLE_MANAGER
             ])
             ->assertStatus(403);
@@ -257,7 +257,7 @@ class AdminTest extends TestCase
         
         $this->actingAs($this->admin)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.role', $this->example), [
                 'role' => \App\Models\Role::ROLE_ADMIN
             ])
             ->assertSessionHasErrors();
@@ -269,7 +269,7 @@ class AdminTest extends TestCase
 
         $this->actingAs($this->admin)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.role', $this->example), [
                 'role' => \App\Models\Role::ROLE_MANAGER
             ])
             ->assertSessionHasNoErrors();
@@ -292,7 +292,7 @@ class AdminTest extends TestCase
 
         $this->actingAs($this->user)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.password', $this->example), [
                 'new_password' => $new_password,
                 're_password' => $new_password
             ])
@@ -300,7 +300,7 @@ class AdminTest extends TestCase
 
         $this->actingAs($this->manager)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.password', $this->example), [
                 'new_password' => $new_password,
                 're_password' => $new_password
             ])
@@ -310,28 +310,15 @@ class AdminTest extends TestCase
             'username' => $this->example->username,
             'password' => $new_password
         ]));
-        
-        $this->actingAs($this->admin)
-            ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
-                'role' => \App\Models\Role::ROLE_ADMIN,
-                'new_password' => $new_password
-            ])
-            ->assertSessionHasErrors(['role']);
-
-        $this->assertFalse(auth()->attempt([
-            'username' => $this->example->username,
-            'password' => $new_password
-        ]));
 
         $this->actingAs($this->admin)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example))
-            ->assertStatus(403);
+            ->put(route('users.update.password', $this->example))
+            ->assertSessionHasErrors();
 
         $this->actingAs($this->admin)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.password', $this->example), [
                 'new_password' => '1337',
                 're_password' => $new_password
             ])
@@ -339,23 +326,7 @@ class AdminTest extends TestCase
 
         $this->actingAs($this->admin)
             ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
-                'role' => \App\Models\Role::all()
-                    ->except(\App\Models\Role::ROLE_ADMIN)
-                    ->random()->id,
-                'new_password' => $new_password,
-                're_password' => $new_password,
-            ])
-            ->assertSessionHasNoErrors();
-
-        $this->assertFalse(auth()->attempt([
-            'username' => $this->example->username,
-            'password' => $new_password
-        ]));
-
-        $this->actingAs($this->admin)
-            ->from(route('users.edit', $this->example))
-            ->put(route('users.update', $this->example), [
+            ->put(route('users.update.password', $this->example), [
                 'new_password' => $new_password,
                 're_password' => $new_password
             ])
