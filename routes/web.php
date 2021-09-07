@@ -75,16 +75,20 @@ Route::get('/logout', [
  * User should logged in before access this route.
  */
 
-Route::middleware(['auth'])->group(function () {
+Route::group([
+  'as' => 'auth.changepassword.',
+  'middleware' => 'auth'
+], function() {
     Route::get('/changepassword', [
         App\Http\Controllers\Auth\ChangePasswordController::class,
         'index'
-    ])->name('auth.changepassword.index');
+    ])->name('index');
 
     Route::post('/changepassword', [
         App\Http\Controllers\Auth\ChangePasswordController::class,
         'handle'
-    ])->name('auth.changepassword.handle');
+    ])->name('handle');
+  
 });
 
 /*
@@ -168,12 +172,18 @@ Route::resource(
     \App\Http\Controllers\UserManagementController::class
 )->except(['show', 'update'])->middleware('auth');
 
-Route::put('users/{user}/update/password', [
+Route::group([
+  'as' => 'users.update.',
+  'prefix' => 'users/{user}/update',
+  'middleware' => 'auth'
+], function() {
+  Route::put('/password', [
     \App\Http\Controllers\UserManagementController::class,
     'update_password'
-])->name('users.update.password')->middleware('auth');
+  ])->name('password');
 
-Route::put('users/{user}/update/role', [
+  Route::put('/role', [
     \App\Http\Controllers\UserManagementController::class,
     'update_role'
-])->name('users.update.role')->middleware('auth');
+  ])->name('role');
+});
