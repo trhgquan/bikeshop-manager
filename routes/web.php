@@ -76,8 +76,8 @@ Route::get('/logout', [
  */
 
 Route::group([
-  'as' => 'auth.changepassword.',
-  'middleware' => 'auth'
+    'as' => 'auth.changepassword.',
+    'middleware' => 'auth'
 ], function() {
     Route::get('/changepassword', [
         App\Http\Controllers\Auth\ChangePasswordController::class,
@@ -87,8 +87,7 @@ Route::group([
     Route::post('/changepassword', [
         App\Http\Controllers\Auth\ChangePasswordController::class,
         'handle'
-    ])->name('handle');
-  
+    ])->name('handle');  
 });
 
 /*
@@ -173,17 +172,17 @@ Route::resource(
 )->except(['show', 'update'])->middleware('auth');
 
 Route::group([
-  'as' => 'users.update.',
-  'prefix' => 'users/{user}/update',
-  'middleware' => 'auth'
+    'as' => 'users.update.',
+    'prefix' => 'users/{user}/update',
+    'middleware' => 'auth'
 ], function() {
-  Route::put('/password', [
-    \App\Http\Controllers\UserManagementController::class,
-    'update_password'
-  ])->name('password');
+    Route::put('/password', [
+        \App\Http\Controllers\UserManagementController::class,
+        'update_password'
+    ])->name('password');
 
-  Route::put('/role', [
-    \App\Http\Controllers\UserManagementController::class,
-    'update_role'
-  ])->name('role');
+    Route::put('/role', [
+        \App\Http\Controllers\UserManagementController::class,
+        'update_role'
+    ])->name('role');
 });

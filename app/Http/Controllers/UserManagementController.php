@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\Role;
 use App\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -78,13 +77,7 @@ class UserManagementController extends Controller
     public function store(CreateUserRequest $request) {
         $validator = $request->validated();
 
-        User::create([
-            'username' => $validator['username'],
-            'password' => Hash::make($validator['password']),
-            'email' => $validator['email'],
-            'name' => $validator['name'],
-            'role' => $validator['role']
-        ]);
+        $this->userServices->createUser($request->validated());
 
         return redirect()
             ->route('users.index')
