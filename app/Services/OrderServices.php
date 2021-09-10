@@ -76,8 +76,7 @@ class OrderServices
     public function validateItemQuantityUpdate(
         Order $order,
         array $validator
-    ): array
-    {
+    ): array {
         $errors = [];
 
         foreach ($validator['order_detail'] as $order_detail) {
@@ -181,8 +180,7 @@ class OrderServices
      */
     public function getOrdersInMonth(
         \Carbon\Carbon $month
-    ): \Illuminate\Support\Collection
-    {
+    ): \Illuminate\Support\Collection {
         $startDate = $month->copy()->firstOfMonth();
         $endDate = $month->copy()->endOfMonth();
 
@@ -208,8 +206,7 @@ class OrderServices
      */
     public function getOrdersStatInMonth(
         \Carbon\Carbon $date
-    ): \Illuminate\Support\Collection
-    {
+    ): \Illuminate\Support\Collection {
         $startDate = $date->copy()->firstOfMonth();
         $endDate = $date->copy()->lastOfMonth();
 

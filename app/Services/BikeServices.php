@@ -15,8 +15,7 @@ class BikeServices
      */
     public function bikeQuantityInMonth(
         \Carbon\Carbon $month
-    ): \Illuminate\Support\Collection
-    {
+    ): \Illuminate\Support\Collection {
         $startDate = $month->copy()->startOfMonth();
         $endDate = $month->copy()->endOfMonth();
 
