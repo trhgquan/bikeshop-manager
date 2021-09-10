@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Models\Order;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class OrderPolicy
@@ -14,10 +14,12 @@ class OrderPolicy
     /**
      * Determine whether the user can view any models.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny(User $user) {
+    public function viewAny(User $user)
+    {
         // Any User can view every Orders.
         return true;
     }
@@ -25,11 +27,13 @@ class OrderPolicy
     /**
      * Determine whether the user can view the model.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
+     * @param \App\Models\User  $user
+     * @param \App\Models\Order $order
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Order $order) {
+    public function view(User $user, Order $order)
+    {
         // Any User can view any Order.
         return true;
     }
@@ -37,10 +41,12 @@ class OrderPolicy
     /**
      * Determine whether the user can create models.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create(User $user) {
+    public function create(User $user)
+    {
         // Any User can create Order.
         return true;
     }
@@ -48,15 +54,17 @@ class OrderPolicy
     /**
      * Determine whether the user can update the model.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
+     * @param \App\Models\User  $user
+     * @param \App\Models\Order $order
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Order $order) {
+    public function update(User $user, Order $order)
+    {
         // User can update an order if it is not checked out and either
         // he's the creator or an Admin / Manager!
-        return !$order->getCheckedOut() 
-            && (($user->id == $order->created_by_user) ||  
+        return !$order->getCheckedOut()
+            && (($user->id == $order->created_by_user) ||
                 in_array($user->role, [
                     Role::ROLE_ADMIN,
                     Role::ROLE_MANAGER,
@@ -66,15 +74,17 @@ class OrderPolicy
     /**
      * Determine whether the user can delete the model.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Order  $order
+     * @param \App\Models\User  $user
+     * @param \App\Models\Order $order
+     *
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Order $order) {
+    public function delete(User $user, Order $order)
+    {
         // User can delete an order if it is not checked out,
         // and is the creator of the order; or User is an Admin / Manager!
-        return (!$order->getCheckedOut() 
-                && ($user->id == $order->created_by_user)) 
+        return (!$order->getCheckedOut()
+                && ($user->id == $order->created_by_user))
             || in_array($user->role, [
                 Role::ROLE_ADMIN,
                 Role::ROLE_MANAGER,

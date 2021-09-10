@@ -8,22 +8,22 @@ class LoginRequest extends FormRequest
 {
     /**
      * Validation rules for LoginController.
-     * 
+     *
      * @var array
      */
     private $validationRules = [
         'username' => 'required',
-        'password' => 'required'
+        'password' => 'required',
     ];
 
     /**
      * Validation messages for LoginController.
-     * 
+     *
      * @var array
      */
     private $validationMessages = [
         'username.required' => 'Tên người dùng đang bỏ trống.',
-        'password.required' => 'Mật khẩu đang bỏ trống.'
+        'password.required' => 'Mật khẩu đang bỏ trống.',
     ];
 
     /**
@@ -31,7 +31,8 @@ class LoginRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize() {
+    public function authorize()
+    {
         return true;
     }
 
@@ -40,16 +41,18 @@ class LoginRequest extends FormRequest
      *
      * @return array
      */
-    public function rules() {
+    public function rules()
+    {
         return $this->validationRules;
     }
 
     /**
      * Get the error messages for the defined validation rules.
-     * 
+     *
      * @return array
      */
-    public function messages() {
+    public function messages()
+    {
         return $this->validationMessages;
     }
 }

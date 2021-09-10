@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Middleware;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,93 +20,90 @@ Route::get('/', function () {
 
 /**
  * Routing for Dashboard.
- * 
+ *
  * User should be logged in before accessing Dashboard.
  */
-Route::get('/dashboard', function() {
+Route::get('/dashboard', function () {
     return view('home.dashboard');
 })->middleware('auth')->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
 | Authenticating route.
-| 
+|
 | These routes do authentication actions.
 |--------------------------------------------------------------------------
 */
 
 /**
  * Log user in the system.
- * 
+ *
  * User should NOT be logged in before acccesing this route.
  */
-
-Route::middleware(['guest'])->group(function () {   
+Route::middleware(['guest'])->group(function () {
     Route::get('/login', [
         App\Http\Controllers\Auth\LoginController::class,
-        'index'
+        'index',
     ])->name('auth.login.index');
 
     Route::post('/login', [
         App\Http\Controllers\Auth\LoginController::class,
-        'handle'
-    ])->name('auth.login.handle'); 
+        'handle',
+    ])->name('auth.login.handle');
 });
 
 /**
- * Log user out of the system
- * 
+ * Log user out of the system.
+ *
  * User should logged in before access this route.
  */
-
 Route::post('/logout', [
     App\Http\Controllers\Auth\LogoutController::class,
-    'handle'
+    'handle',
 ])->middleware('auth')->name('auth.logout');
 
 Route::get('/logout', [
     App\Http\Controllers\Auth\LogoutController::class,
-    'index'
+    'index',
 ]);
 
 /**
  * Change user's password.
- * 
+ *
  * User should logged in before access this route.
  */
-
 Route::group([
-    'as' => 'auth.changepassword.',
-    'middleware' => 'auth'
-], function() {
+    'as'         => 'auth.changepassword.',
+    'middleware' => 'auth',
+], function () {
     Route::get('/changepassword', [
         App\Http\Controllers\Auth\ChangePasswordController::class,
-        'index'
+        'index',
     ])->name('index');
 
     Route::post('/changepassword', [
         App\Http\Controllers\Auth\ChangePasswordController::class,
-        'handle'
-    ])->name('handle');  
+        'handle',
+    ])->name('handle');
 });
 
 /*
 |--------------------------------------------------------------------------
 | Bike Brand route.
-| 
+|
 | These routes do Bike Brand actions.
 |--------------------------------------------------------------------------
 */
 
 Route::resource(
-    'brands', 
+    'brands',
     App\Http\Controllers\Bike\BrandController::class
 )->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
 | Bikes route.
-| 
+|
 | These routes do Bikes actions.
 |--------------------------------------------------------------------------
 */
@@ -119,7 +116,7 @@ Route::resource(
 /*
 |--------------------------------------------------------------------------
 | Order route.
-| 
+|
 | These routes do Orders actions.
 |--------------------------------------------------------------------------
 */
@@ -132,36 +129,36 @@ Route::resource(
 /*
 |--------------------------------------------------------------------------
 | Report route.
-| 
+|
 | These routes do Reports actions.
 |--------------------------------------------------------------------------
 */
 
 Route::group([
-    'as' => 'report.',
-    'prefix' => 'report',
-    'middleware' => 'auth'
+    'as'         => 'report.',
+    'prefix'     => 'report',
+    'middleware' => 'auth',
 ], function () {
     Route::get('/out-of-stock', [
         \App\Http\Controllers\ReportController::class,
-        'out_of_stock_index'
+        'out_of_stock_index',
     ])->name('out_of_stock');
 
     Route::get('/month-quantity-stat', [
         \App\Http\Controllers\ReportController::class,
-        'month_quantity_stat_index'
+        'month_quantity_stat_index',
     ])->name('month_quantity_stat.index');
 
     Route::get('/month-revenue-stat', [
         \App\Http\Controllers\ReportController::class,
-        'month_revenue_stat_index'
+        'month_revenue_stat_index',
     ])->name('month_revenue_stat.index');
 });
 
 /*
 |--------------------------------------------------------------------------
 | User Management route.
-| 
+|
 | These routes do User Management actions.
 |--------------------------------------------------------------------------
 */
@@ -172,17 +169,17 @@ Route::resource(
 )->except(['show', 'update'])->middleware('auth');
 
 Route::group([
-    'as' => 'users.update.',
-    'prefix' => 'users/{user}/update',
-    'middleware' => 'auth'
-], function() {
+    'as'         => 'users.update.',
+    'prefix'     => 'users/{user}/update',
+    'middleware' => 'auth',
+], function () {
     Route::put('/password', [
         \App\Http\Controllers\UserManagementController::class,
-        'update_password'
+        'update_password',
     ])->name('password');
 
     Route::put('/role', [
         \App\Http\Controllers\UserManagementController::class,
-        'update_role'
+        'update_role',
     ])->name('role');
 });

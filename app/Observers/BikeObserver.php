@@ -9,11 +9,13 @@ class BikeObserver
 {
     /**
      * Handle the Bike "creating" event.
-     * 
-     * @param  \App\Models\Bike $bike
+     *
+     * @param \App\Models\Bike $bike
+     *
      * @return void
      */
-    public function creating(Bike $bike) {
+    public function creating(Bike $bike)
+    {
         if (Auth::check()) {
             $bike->created_by_user = Auth::id();
             $bike->updated_by_user = Auth::id();
@@ -22,11 +24,13 @@ class BikeObserver
 
     /**
      * Handle the Bike "updating" event.
-     * 
-     * @param  \App\Models\Bike $bike
+     *
+     * @param \App\Models\Bike $bike
+     *
      * @return void
      */
-    public function updating(Bike $bike) {
+    public function updating(Bike $bike)
+    {
         if (Auth::check()) {
             $bike->updated_by_user = Auth::id();
         }
@@ -34,17 +38,18 @@ class BikeObserver
 
     /**
      * Handle the Bike "deleted" event.
-     * 
-     * @param  \App\Models\Bike $bike
+     *
+     * @param \App\Models\Bike $bike
+     *
      * @return void
      */
-    public function deleted(Bike $bike) {
+    public function deleted(Bike $bike)
+    {
         if (Auth::check()) {
             $bike->updated_by_user = Auth::id();
             $bike->save();
         }
 
         // Adding relationships to delete here.
-        
     }
 }

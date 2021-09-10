@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\User;
 
 class Order extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
-     * 
+     *
      * @var array
      */
     protected $fillable = [
@@ -21,7 +21,7 @@ class Order extends Model
         'customer_email',
         'checkout_at',
         'created_by_user',
-        'updated_by_user'
+        'updated_by_user',
     ];
 
     /**
@@ -40,30 +40,32 @@ class Order extends Model
 
     /**
      * The attributes that should be cast to native types.
-     * 
+     *
      * @var array
      */
     protected $casts = [
         'checkout_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
     ];
 
     /**
      * Is this order checked out?
-     * 
+     *
      * @return bool
      */
-    public function getCheckedOut() {
-        return $this->checkout_at != NULL;
+    public function getCheckedOut()
+    {
+        return $this->checkout_at != null;
     }
 
     /**
      * The User that created this Order.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relationship\BelongsTo
      */
-    public function created_by() {
+    public function created_by()
+    {
         return $this->belongsTo(
             User::class,
             'created_by_user',
@@ -73,10 +75,11 @@ class Order extends Model
 
     /**
      * The User that last updated this Order.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relationship\BelongsTo
      */
-    public function updated_by() {
+    public function updated_by()
+    {
         return $this->belongsTo(
             User::class,
             'updated_by_user',
@@ -86,25 +89,27 @@ class Order extends Model
 
     /**
      * Bikes that ordered in this Order.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relationship\BelongsToMany
      */
-    public function bikes() {
+    public function bikes()
+    {
         return $this
             ->belongsToMany(Bike::class, 'order_bike')
             ->withPivot([
                 'order_value',
                 'order_buy_price',
-                'order_sell_price'
+                'order_sell_price',
             ]);
     }
 
     /**
      * Order value of a Bike in this Order.
-     * 
+     *
      * @return int
      */
-    public function orderValue(Bike $bike) {
+    public function orderValue(Bike $bike)
+    {
         $bikes_ordered = $this
             ->bikes()
             ->where('bike_id', $bike->id);
@@ -116,20 +121,22 @@ class Order extends Model
 
     /**
      * Total bikes in this Order.
-     * 
+     *
      * @return int
      */
-    public function quantity() {
+    public function quantity()
+    {
         return $this->bikes->sum('pivot.order_value');
     }
 
     /**
      * Revenue gained by this Order.
-     * 
+     *
      * @return int
      */
-    public function revenue() {
-        return $this->bikes->sum(function($detail) {
+    public function revenue()
+    {
+        return $this->bikes->sum(function ($detail) {
             return $detail->pivot->order_value
                 * $detail->pivot->order_sell_price;
         });
@@ -137,12 +144,13 @@ class Order extends Model
 
     /**
      * Profit gained by this Order.
-     * 
+     *
      * @return int
      */
-    public function profit() {
+    public function profit()
+    {
         return $this->bikes->sum(function ($detail) {
-            return $detail->pivot->order_value 
+            return $detail->pivot->order_value
                 * ($detail->pivot->order_sell_price
                 - $detail->pivot->order_buy_price);
         });

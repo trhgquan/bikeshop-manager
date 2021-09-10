@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class BrandTest extends TestCase
@@ -12,35 +11,38 @@ class BrandTest extends TestCase
 
     /**
      * Resources during test.
-     * 
+     *
      * @var mixed
      */
-    protected $user, $manager, $admin;
+    protected $user;
+    protected $manager;
+    protected $admin;
     protected $brand;
 
     /**
      * Models created by default.
-     * 
+     *
      * @var int
      */
     protected $created = 1;
 
     /**
      * Setting up all test resources.
-     * 
+     *
      * @return void
      */
-    public function setUp() : void  {
+    public function setUp(): void
+    {
         parent::setUp();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $this->user = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_STAFF
+            'role' => \App\Models\Role::ROLE_STAFF,
         ]);
 
         $this->manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
+            'role' => \App\Models\Role::ROLE_MANAGER,
         ]);
 
         $this->admin = \App\Models\User::factory()->create();
@@ -50,10 +52,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if non-auth user redirected back to login page or not.
-     * 
+     *
      * @return void
      */
-    public function test_view_brands_index_as_not_authentiated_user() {
+    public function test_view_brands_index_as_not_authentiated_user()
+    {
         $this->get(route('brands.index'))
             ->assertRedirect(route('auth.login.index'));
     }
@@ -63,7 +66,8 @@ class BrandTest extends TestCase
      *
      * @return void
      */
-    public function test_view_brands_index_as_authenticated_user() {
+    public function test_view_brands_index_as_authenticated_user()
+    {
         // Anyone can view every Brand.
         $this->actingAs($this->user)
             ->get(route('brands.index'))
@@ -72,10 +76,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a non-authenticated user cannot view a brand.
-     * 
+     *
      * @return void
      */
-    public function test_view_brands_show_as_non_authenticated_user() {
+    public function test_view_brands_show_as_non_authenticated_user()
+    {
         $this->get(route('brands.show', $this->brand))
             ->assertRedirect(route('auth.login.index'));
     }
@@ -85,7 +90,8 @@ class BrandTest extends TestCase
      *
      * @return void
      */
-    public function test_view_brands_show_as_authenticated_user() {
+    public function test_view_brands_show_as_authenticated_user()
+    {
         $this->actingAs($this->user)
             ->get(route('brands.show', $this->brand))
             ->assertStatus(200)
@@ -95,10 +101,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a staff can view Create Brand page.
-     * 
+     *
      * @return void
      */
-    public function test_view_create_brand_as_staff() {
+    public function test_view_create_brand_as_staff()
+    {
         $this->actingAs($this->user)
             ->get(route('brands.create'))
             ->assertStatus(403);
@@ -106,10 +113,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a manager can view Create Brand page.
-     * 
+     *
      * @return void
      */
-    public function test_view_create_brand_as_manager() {
+    public function test_view_create_brand_as_manager()
+    {
         $this->actingAs($this->manager)
             ->get(route('brands.create'))
             ->assertStatus(200);
@@ -117,14 +125,15 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Staff cannot create a Brand.
-     * 
+     *
      * @return void
      */
-    public function test_create_brand_as_staff() {
+    public function test_create_brand_as_staff()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
         $this->actingAs($this->user)
             ->post(route('brands.store'), [
-                'brand_name' => 'Lorem ipsum',
+                'brand_name'        => 'Lorem ipsum',
                 'brand_description' => 'Lorem ipsum dolor sit amet, cost',
             ])
             ->assertStatus(403);
@@ -134,14 +143,15 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Manager can create a Brand.
-     * 
+     *
      * @return void
      */
-    public function test_create_brand_as_manager() {
+    public function test_create_brand_as_manager()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $formData = [
-            'brand_name' => 'Lorem ipsum',
+            'brand_name'        => 'Lorem ipsum',
             'brand_description' => 'Lorem ipsum dolor sit amet, cost',
         ];
 
@@ -157,15 +167,16 @@ class BrandTest extends TestCase
 
     /**
      * Test create Brand with invalid data.
-     * 
+     *
      * @return void
      */
-    public function test_create_brand_with_invalid_data() {
+    public function test_create_brand_with_invalid_data()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         // Brand name too long.
         $formData = [
-            'brand_name' => \Illuminate\Support\Str::random(1337),
+            'brand_name'        => \Illuminate\Support\Str::random(1337),
             'brand_description' => \Illuminate\Support\Str::random(100),
         ];
 
@@ -220,10 +231,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Staff cannot view Edit Brand page.
-     * 
+     *
      * @return void
      */
-    public function test_view_edit_brand_as_staff() {
+    public function test_view_edit_brand_as_staff()
+    {
         $this->actingAs($this->user)
             ->get(route('brands.edit', $this->brand))
             ->assertStatus(403);
@@ -231,10 +243,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Manager can view Edit Brand page.
-     * 
+     *
      * @return void
      */
-    public function test_view_edit_brand_as_manager() {
+    public function test_view_edit_brand_as_manager()
+    {
         $this->actingAs($this->manager)
             ->get(route('brands.edit', $this->brand))
             ->assertStatus(200)
@@ -244,10 +257,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Staff cannot edit a Brand.
-     * 
+     *
      * @return void
      */
-    public function test_edit_brand_as_staff() {
+    public function test_edit_brand_as_staff()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $this->actingAs($this->user)
@@ -264,14 +278,15 @@ class BrandTest extends TestCase
 
     /**
      * Test if Manager can edit a Brand.
-     * 
+     *
      * @return void
      */
-    public function test_edit_brand_as_manager() {
+    public function test_edit_brand_as_manager()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $formData = [
-            'brand_name' => 'Cheeky breeky iv damke!',
+            'brand_name'        => 'Cheeky breeky iv damke!',
             'brand_description' => 'Lorem ipsum dolor sit amet',
         ];
 
@@ -288,7 +303,7 @@ class BrandTest extends TestCase
         );
 
         $this->assertEquals(
-            $this->brand->fresh()->brand_description, 
+            $this->brand->fresh()->brand_description,
             $formData['brand_description']
         );
 
@@ -299,15 +314,16 @@ class BrandTest extends TestCase
 
     /**
      * Test edit Brand with invalid data.
-     * 
+     *
      * @return void
      */
-    public function test_edit_brand_with_invalid_data() {
+    public function test_edit_brand_with_invalid_data()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         // Brand name too long.
         $formData = [
-            'brand_name' => \Illuminate\Support\Str::random(1337),
+            'brand_name'        => \Illuminate\Support\Str::random(1337),
             'brand_description' => $this->brand->brand_description,
         ];
 
@@ -389,10 +405,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Staff cannot delete a Brand.
-     * 
+     *
      * @return void
      */
-    public function test_delete_brand_as_staff() {
+    public function test_delete_brand_as_staff()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $this->actingAs($this->user)
@@ -404,10 +421,11 @@ class BrandTest extends TestCase
 
     /**
      * Test if a Manager can delete a Brand.
-     * 
+     *
      * @return void
      */
-    public function test_delete_brand_as_manager() {
+    public function test_delete_brand_as_manager()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $bikes = \App\Models\Bike::factory()->count(100)->create();

@@ -36,7 +36,7 @@ class CreateBikesTable extends Migration
             $table->foreign('created_by_user')
                 ->references('id')
                 ->on('users');
-            
+
             $table->foreign('updated_by_user')
                 ->references('id')
                 ->on('users');
