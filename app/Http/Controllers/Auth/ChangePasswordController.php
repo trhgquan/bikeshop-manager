@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
-use App\Models\User;
 
 class ChangePasswordController extends Controller
 {
@@ -20,13 +18,20 @@ class ChangePasswordController extends Controller
     ];
 
     /**
-     * Message when failed.
+     * User Service will be using.
      * 
-     * @var array
+     * @var  \App\Services\UserServices;
      */
-    private $failedMessage = [
-        'failed' => 'Đổi mật khẩu thất bại.'
-    ];
+    private $userServices;
+
+    /**
+     * Constructor for ChangePasswordController.
+     * 
+     * @return void
+     */
+    public function __construct() {
+        $this->userServices = new \App\Services\UserServices;
+    }
 
     /**
      * Invoke change password procedure.
@@ -35,12 +40,10 @@ class ChangePasswordController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function handle(ChangePasswordRequest $request) {
-        // Generate hash value for new password.
-        $new_password = Hash::make($request->new_password);
-
-        // Update new password, then return with success message.
-        Auth::user()->password = $new_password;
-        Auth::user()->save();
+        $this->userServices->updateUserPassword(
+            Auth::user(),
+            $request->new_password
+        );
 
         return redirect()
             ->route('auth.changepassword.index')

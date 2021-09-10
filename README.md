@@ -1,4 +1,8 @@
 # bikeshop-manager
+
+[![Test Laravel App](https://github.com/trhgquan/bikeshop-manager/actions/workflows/laravel.yml/badge.svg)](https://github.com/trhgquan/bikeshop-manager/actions/workflows/laravel.yml)
+![GitHub](https://img.shields.io/github/license/trhgquan/bikeshop-manager?style=flat-square)
+
 Quản lý cửa hàng xe máy
 
 Đồ án lớn Lập trình Hướng đối tượng (CSC10003)

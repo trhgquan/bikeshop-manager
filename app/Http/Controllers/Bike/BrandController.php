@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Bike;
 
 use App\Models\Brand;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBrandRequest;
 
@@ -65,10 +64,7 @@ class BrandController extends Controller
         $validator = $request->validated();
         
         // Create a new brand!
-        $new_brand = Brand::create([
-            'brand_name' => $validator['brand_name'],
-            'brand_description' => $validator['brand_description'],
-        ]);
+        $new_brand = Brand::create($validator);
 
         // Return with a congratulation message!
         return redirect()

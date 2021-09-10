@@ -6,8 +6,6 @@ use App\Models\User;
 use App\Models\Role;
 use App\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -34,65 +32,11 @@ class UserManagementController extends Controller
     ];
 
     /**
-     * Update user Role.
+     * User Services will be using.
      * 
-     * @param  array $request
-     * @param  \App\Models\User $user
-     * @return \Illuminate\Http\Response
+     * @var \App\Services\UserServices
      */
-    private function updateRole(Array $request, User $user) {
-        $validator = Validator::make($request, [
-            'role' => [
-                'required',
-                'exists:App\Models\Role,id',
-                Rule::in([
-                    Role::ROLE_MANAGER,
-                    Role::ROLE_STAFF
-                ])
-            ]
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()
-                ->route('users.edit', $user)
-                ->withErrors($validator);
-        }
-
-        $user->role = $request['role'];
-        $user->save();
-
-        return redirect()
-            ->route('users.edit', $user)
-            ->with('notify', $this->successMessages['update_role']);
-    }
-
-    /**
-     * Update user password.
-     * 
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\Models\User $user
-     * @return \Illuminate\Http\Response
-     */
-    private function updatePassword(Array $request, User $user) {
-        $validator = Validator::make($request, [
-            'new_password' => 'required|min:8',
-            're_password' => 'required|same:new_password'
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()
-                ->route('users.edit', $user)
-                ->withInput()
-                ->withErrors($validator);
-        }
-
-        $user->password = Hash::make($request['new_password']);
-        $user->save();
-
-        return redirect()
-            ->route('users.edit', $user)
-            ->with('notify', $this->successMessages['update_password']);
-    }
+    private $userServices;
 
     /**
      * Constructor for UserManagementController.
@@ -101,6 +45,7 @@ class UserManagementController extends Controller
      */
     public function __construct() {
         $this->authorizeResource(User::class, 'user');
+        $this->userServices = new \App\Services\UserServices;
     }
 
     /**
@@ -132,13 +77,7 @@ class UserManagementController extends Controller
     public function store(CreateUserRequest $request) {
         $validator = $request->validated();
 
-        User::create([
-            'username' => $validator['username'],
-            'password' => Hash::make($validator['password']),
-            'email' => $validator['email'],
-            'name' => $validator['name'],
-            'role' => $validator['role']
-        ]);
+        $this->userServices->createUser($request->validated());
 
         return redirect()
             ->route('users.index')
@@ -157,25 +96,66 @@ class UserManagementController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
+     * Update a User's password.
+     * 
+     * @param  \Illuminate\Http\Request $request
+     * @param  \App\Models\User $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user) {
-        if ($request->has('role')) {
-            return $this->updateRole($request->only('role'), $user);
+    public function update_password(Request $request, User $user) {
+        $this->authorize('update', $user);
+
+        $validator = Validator::make($request->all(), [
+            'new_password' => 'required|min:8',
+            're_password' => 'required|same:new_password'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->route('users.edit', $user)
+                ->withErrors($validator);
         }
 
-        if ($request->has(['new_password', 're_password'])) {
-            return $this->updatePassword(
-                $request->only(['new_password', 're_password']),
-                $user
-            );
+        $this->userServices
+            ->updateUserPassword($user, $request->new_password);
+
+        return redirect()
+            ->route('users.edit', $user)
+            ->with('notify', $this->successMessages['update_password']);
+    }
+
+    /**
+     * Update a User's role.
+     * 
+     * @param  \Illuminate\Http\Request $request
+     * @param  \App\Models\User $user
+     * @return \Illuminate\Http\Response
+     */
+    public function update_role(Request $request, User $user) {
+        $this->authorize('update', $user);
+
+        $validator = Validator::make($request->all(), [
+            'role' => [
+                'required',
+                'exists:App\Models\Role,id',
+                Rule::in([
+                    Role::ROLE_MANAGER,
+                    Role::ROLE_STAFF
+                ])
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->route('users.edit', $user)
+                ->withErrors($validator);
         }
 
-        return abort(403);
+        $this->userServices->updateUserRole($user, $request->role);
+
+        return redirect()
+            ->route('users.edit', $user)
+            ->with('notify', $this->successMessages['update_role']);
     }
 
     /**

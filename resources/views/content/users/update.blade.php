@@ -7,7 +7,7 @@
 @endsection
 
 @section('page-form')
-<form action="{{ route('users.update', $user) }}" method="POST">
+<form action="{{ route('users.update.role', $user) }}" method="POST">
 @csrf
 @method('PUT')
 <small class="lead">Chỉnh sửa quyền</small>
@@ -32,7 +32,7 @@
 
 <small class="lead">Đặt mật khẩu mới</small>
 <hr>
-<form action="{{ route('users.update', $user) }}" method="POST">
+<form action="{{ route('users.update.password', $user) }}" method="POST">
 @csrf
 @method('PUT')
 <div class="row mb-3">
