@@ -8,56 +8,60 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Brand extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
-     * 
+     *
      * @var array
      */
     protected $fillable = [
         'brand_name',
         'brand_description',
         'created_by_user',
-        'updated_by_user'
+        'updated_by_user',
     ];
 
     /**
      * The attributes that should be cast to native types.
-     * 
+     *
      * @var array
      */
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
      * Return id - name format.
-     * 
+     *
      * @return string
      */
-    public function idAndName() {
+    public function idAndName()
+    {
         return sprintf('%s - %s', $this->id, $this->brand_name);
     }
 
     /**
      * Get Bikes that belongs to this Brand.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function bikes() {
+    public function bikes()
+    {
         return $this->hasMany(Bike::class);
     }
 
     /**
-     * Get the user that created the Brand
+     * Get the user that created the Brand.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function created_by() {
+    public function created_by()
+    {
         return $this->belongsTo(
-            User::class, 
+            User::class,
             'created_by_user',
             'id'
         )->withTrashed();
@@ -68,10 +72,11 @@ class Brand extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function updated_by() {
+    public function updated_by()
+    {
         return $this->belongsTo(
             User::class,
-            'updated_by_user', 
+            'updated_by_user',
             'id'
         )->withTrashed();
     }

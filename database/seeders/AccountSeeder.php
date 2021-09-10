@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Services\UserServices;
+use Illuminate\Database\Seeder;
 
 class AccountSeeder extends Seeder
 {
@@ -15,12 +15,13 @@ class AccountSeeder extends Seeder
     protected $userServices;
 
     /**
-     * Constructor for AccountSeeder
+     * Constructor for AccountSeeder.
      *
      * @return void
      */
-    public function __construct() {
-        $this->userServices = new UserServices;
+    public function __construct()
+    {
+        $this->userServices = new UserServices();
     }
 
     /**
@@ -32,19 +33,19 @@ class AccountSeeder extends Seeder
     {
         // Add a sample account.
         $this->userServices->createUser([
-            'name' => 'Trần Hoàng Quân',
+            'name'     => 'Trần Hoàng Quân',
             'username' => 'thquan',
-            'email' => 'thquan@fit.hcmus.edu.vn',
+            'email'    => 'thquan@fit.hcmus.edu.vn',
             'password' => 'thquan@fit.hcmus.edu.vn',
-            'role' => \App\Models\Role::ROLE_ADMIN
+            'role'     => \App\Models\Role::ROLE_ADMIN,
         ]);
 
         $this->userServices->createUser([
-            'name' => 'Trần Lùi Xuống',
+            'name'     => 'Trần Lùi Xuống',
             'username' => 'tlxuong',
-            'email' => 'tlxuong@fit.hcmus.edu.vn',
+            'email'    => 'tlxuong@fit.hcmus.edu.vn',
             'password' => 'tlxuong@fit.hcmus.edu.vn',
-            'role' => \App\Models\Role::ROLE_MANAGER,
+            'role'     => \App\Models\Role::ROLE_MANAGER,
         ]);
     }
 }

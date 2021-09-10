@@ -19,15 +19,15 @@ class CreateOrdersTable extends Migration
             $table->string('customer_email');
             $table->unsignedBigInteger('created_by_user');
             $table->unsignedBigInteger('updated_by_user');
-            $table->timestamp('checkout_at')->nullable()->default(NULL);
+            $table->timestamp('checkout_at')->nullable()->default(null);
             $table->timestamps();
             $table->softDeletes();
-        
+
             $table->foreign('created_by_user')
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade');
-            
+
             $table->foreign('updated_by_user')
                 ->references('id')
                 ->on('users')

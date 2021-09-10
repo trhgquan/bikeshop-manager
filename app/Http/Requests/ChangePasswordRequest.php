@@ -8,36 +8,36 @@ class ChangePasswordRequest extends FormRequest
 {
     /**
      * Validation rules for ChangePasswordController.
-     * 
+     *
      * @var array
      */
     private $validationRules = [
-        'password' => 'required|current_password',
-        'new_password' => 'required|min:8',
-        'confirm_password' => 'required|same:new_password'
+        'password'         => 'required|current_password',
+        'new_password'     => 'required|min:8',
+        'confirm_password' => 'required|same:new_password',
     ];
 
     /**
      * Validation message for ChangePasswordController.
-     * 
+     *
      * @var array
      */
     private $validationMessages = [
-        'required' => 'Bạn chưa điền ô :attribute.',
+        'required'         => 'Bạn chưa điền ô :attribute.',
         'current_password' => ':attribute không khớp.',
-        'min' => 'Độ dài ô :attribute phải có độ dài tối thiểu :min ký tự',
-        'same' => 'Ô :attribute phải trùng với ô :other'
+        'min'              => 'Độ dài ô :attribute phải có độ dài tối thiểu :min ký tự',
+        'same'             => 'Ô :attribute phải trùng với ô :other',
     ];
 
     /**
      * Validation attributes for ChangePasswordController.
-     * 
+     *
      * @var array
      */
     private $validationAttributes = [
-        'password' => 'Mật khẩu hiện tại',
-        'new_password' => 'Mật khẩu mới',
-        'confirm_password' => 'Nhập lại mật khẩu mới'
+        'password'         => 'Mật khẩu hiện tại',
+        'new_password'     => 'Mật khẩu mới',
+        'confirm_password' => 'Nhập lại mật khẩu mới',
     ];
 
     /**
@@ -45,7 +45,8 @@ class ChangePasswordRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize() {
+    public function authorize()
+    {
         return true;
     }
 
@@ -54,25 +55,28 @@ class ChangePasswordRequest extends FormRequest
      *
      * @return array
      */
-    public function rules() {
+    public function rules()
+    {
         return $this->validationRules;
     }
 
     /**
      * Get the error messages for the defined validation rules.
-     * 
+     *
      * @return array
      */
-    public function messages() {
+    public function messages()
+    {
         return $this->validationMessages;
     }
 
     /**
      * Get custom attributes for validator errors.
-     * 
+     *
      * @return array
      */
-    public function attributes() {
+    public function attributes()
+    {
         return $this->validationAttributes;
     }
 }

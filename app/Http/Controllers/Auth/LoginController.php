@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     /**
      * Authentication messages.
-     * 
+     *
      * @var array
      */
     private $authenticationMessage = [
-        'failed' => 'Thông tin đăng nhập sai, vui lòng thử lại!'
+        'failed' => 'Thông tin đăng nhập sai, vui lòng thử lại!',
     ];
 
     /**
@@ -24,11 +24,13 @@ class LoginController extends Controller
 
     /**
      * Handle an authentication request.
-     * 
-     * @param  \App\Http\Requests\LoginRequest $request
+     *
+     * @param \App\Http\Requests\LoginRequest $request
+     *
      * @return \Illuminate\Http\Response
      */
-    public function handle(LoginRequest $request) {
+    public function handle(LoginRequest $request)
+    {
         // Get validated form data.
         $credentials = $request->validated();
 
@@ -47,10 +49,11 @@ class LoginController extends Controller
 
     /**
      * Show the login form.
-     * 
+     *
      * @return \Illuminate\View\View
      */
-    public function index() {
+    public function index()
+    {
         return view('auth.login');
     }
 }

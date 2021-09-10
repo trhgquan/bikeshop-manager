@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Bike extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
-     * 
+     *
      * @var array
      */
     protected $fillable = [
@@ -23,38 +24,40 @@ class Bike extends Model
         'bike_buy_price',
         'bike_sell_price',
         'created_by_user',
-        'updated_by_user'
+        'updated_by_user',
     ];
 
     /**
      * The attributes that should be cast to native types.
-     * 
+     *
      * @var array
      */
     protected $cast = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
-     * Get the Brand that owns the Bike
+     * Get the Brand that owns the Bike.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function brand() {
+    public function brand()
+    {
         return $this->belongsTo(
-            Brand::class, 
-            'brand_id', 
+            Brand::class,
+            'brand_id',
             'id'
         );
     }
 
     /**
      * Get all Orders related to this Bike.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function orders() {
+    public function orders()
+    {
         return $this->belongsToMany(Order::class, 'order_bike');
     }
 
@@ -63,7 +66,8 @@ class Bike extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function created_by() {
+    public function created_by()
+    {
         return $this->belongsTo(
             User::class,
             'created_by_user',
@@ -76,7 +80,8 @@ class Bike extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function updated_by() {
+    public function updated_by()
+    {
         return $this->belongsTo(
             User::class,
             'updated_by_user',
