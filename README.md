@@ -12,6 +12,8 @@ Quản lý cửa hàng xe máy
 
 **GVHD:** Thầy Trần Duy Quang
 
+[Video demo](https://www.youtube.com/watch?v=RvLpw_3N3uQ)
+
 ## Công nghệ sử dụng
 - [Laravel 8.x](https://laravel.com)
 - [Chart.js](https://www.chartjs.org) (vẽ biểu đồ)
