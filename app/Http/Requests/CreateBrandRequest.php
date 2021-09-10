@@ -8,33 +8,33 @@ class CreateBrandRequest extends FormRequest
 {
     /**
      * Validation rules for LoginController.
-     * 
+     *
      * @var array
      */
     private $validationRules = [
-        'brand_name' => 'required|min:6|max:50',
-        'brand_description' => 'required|min:20|max:100'
+        'brand_name'        => 'required|min:6|max:50',
+        'brand_description' => 'required|min:20|max:100',
     ];
 
     /**
      * Validation messages for LoginController.
-     * 
+     *
      * @var array
      */
     private $validationMessages = [
         'required' => 'Ô :attribute bị bỏ trống.',
-        'min' => 'Ô :attribute phải có tối thiểu :min ký tự.',
-        'max' => 'Ô :attribute phải có tối đa :max ký tự.'
+        'min'      => 'Ô :attribute phải có tối thiểu :min ký tự.',
+        'max'      => 'Ô :attribute phải có tối đa :max ký tự.',
     ];
 
     /**
      * Validation attributes for BrandController.
-     * 
+     *
      * @var array
      */
     private $validationAttributes = [
-        'brand_name' => 'Tên hãng xe',
-        'brand_description' => 'Mô tả hãng xe'
+        'brand_name'        => 'Tên hãng xe',
+        'brand_description' => 'Mô tả hãng xe',
     ];
 
     /**
@@ -42,7 +42,8 @@ class CreateBrandRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize() {
+    public function authorize()
+    {
         return true;
     }
 
@@ -51,25 +52,28 @@ class CreateBrandRequest extends FormRequest
      *
      * @return array
      */
-    public function rules() {
+    public function rules()
+    {
         return $this->validationRules;
     }
 
     /**
      * Get the error messages for the defined validation rules.
-     * 
+     *
      * @return array
      */
-    public function messages() {
+    public function messages()
+    {
         return $this->validationMessages;
     }
 
     /**
      * Get custom attributes for validator errors.
-     * 
+     *
      * @param array
      */
-    public function attributes() {
+    public function attributes()
+    {
         return $this->validationAttributes;
     }
 }

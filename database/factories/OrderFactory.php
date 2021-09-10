@@ -22,9 +22,9 @@ class OrderFactory extends Factory
     public function definition()
     {
         return [
-            'customer_name' => $this->faker->name(),
-            'customer_email' => $this->faker->email(),
-            'checkout_at' => NULL,
+            'customer_name'   => $this->faker->name(),
+            'customer_email'  => $this->faker->email(),
+            'checkout_at'     => null,
             'created_by_user' => \App\Models\User::all()->random()->id,
             'updated_by_user' => \App\Models\User::all()->random()->id,
         ];

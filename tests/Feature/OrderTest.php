@@ -8,21 +8,27 @@ use Tests\TestCase;
 
 class OrderTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use WithFaker;
+    use RefreshDatabase;
 
     /**
      * Resources using in test.
-     * 
+     *
      * @var mixed
      */
-    protected $user, $tester, $manager, $brands, $bikes;
+    protected $user;
+    protected $tester;
+    protected $manager;
+    protected $brands;
+    protected $bikes;
 
     /**
      * Setting up test resources.
-     * 
+     *
      * @return void
      */
-    public function setUp() : void {
+    public function setUp(): void
+    {
         parent::setUp();
 
         $this->seed(\Database\Seeders\RoleSeeder::class);
@@ -36,21 +42,22 @@ class OrderTest extends TestCase
         ]);
 
         $this->manager = \App\Models\User::factory()->create([
-            'role' => \App\Models\Role::ROLE_MANAGER
+            'role' => \App\Models\Role::ROLE_MANAGER,
         ]);
 
         $this->brands = \App\Models\Brand::factory()->count(10)->create();
         $this->bikes = \App\Models\Bike::factory()->count(10)->create([
-            'bike_stock' => 1337
+            'bike_stock' => 1337,
         ]);
     }
 
     /**
      * Attempts to create a new Order, expect to see the signature.
-     * 
+     *
      * @return void
      */
-    private function createAndAssert($formData, $signature) {
+    private function createAndAssert($formData, $signature)
+    {
         $this->followingRedirects()
             ->from(route('orders.create'))
             ->post(route('orders.store'), $formData)
@@ -60,10 +67,11 @@ class OrderTest extends TestCase
 
     /**
      * Test if non-authenticated user cannot create new order.
-     * 
+     *
      * @return void
      */
-    public function test_create_order_without_authentication() {
+    public function test_create_order_without_authentication()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         // Create and test order
@@ -75,18 +83,18 @@ class OrderTest extends TestCase
             $addValue = random_int(1, $bike->bike_stock);
             $quantity += $addValue;
             $revenue += $addValue * $bike->bike_sell_price;
-            $profit += $addValue 
+            $profit += $addValue
                 * ($bike->bike_sell_price - $bike->bike_buy_price);
             array_push($order_detail, [
-                'bike_id' => $bike->id,
-                'order_value' => $addValue
+                'bike_id'     => $bike->id,
+                'order_value' => $addValue,
             ]);
         }
 
         $formData = [
-            'customer_name' => $this->faker->name(),
+            'customer_name'  => $this->faker->name(),
             'customer_email' => $this->faker->email(),
-            'order_detail' => $order_detail
+            'order_detail'   => $order_detail,
         ];
 
         $response = $this->from(route('orders.create'))
@@ -95,7 +103,7 @@ class OrderTest extends TestCase
         $response->assertRedirect(route('auth.login.index'));
 
         $this->assertDatabaseCount('orders', 0);
-        $this->assertDatabaseCount('order_bike', 0);  
+        $this->assertDatabaseCount('order_bike', 0);
     }
 
     /**
@@ -103,7 +111,8 @@ class OrderTest extends TestCase
      *
      * @return void
      */
-    public function test_create_order_with_random_bikes() {
+    public function test_create_order_with_random_bikes()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $this->actingAs($this->user);
@@ -117,18 +126,18 @@ class OrderTest extends TestCase
             $addValue = random_int(1, $bike->bike_stock);
             $quantity += $addValue;
             $revenue += $addValue * $bike->bike_sell_price;
-            $profit += $addValue 
+            $profit += $addValue
                 * ($bike->bike_sell_price - $bike->bike_buy_price);
             array_push($order_detail, [
-                'bike_id' => $bike->id,
-                'order_value' => $addValue
+                'bike_id'     => $bike->id,
+                'order_value' => $addValue,
             ]);
         }
 
         $formData = [
-            'customer_name' => $this->faker->name(),
+            'customer_name'  => $this->faker->name(),
             'customer_email' => $this->faker->email(),
-            'order_detail' => $order_detail,
+            'order_detail'   => $order_detail,
             'order_checkout' => '1',
         ];
 
@@ -172,12 +181,13 @@ class OrderTest extends TestCase
 
     /**
      * Test if invalid items cannot be used to create Order!
-     * 
+     *
      * @return void
      */
-    public function test_create_order_with_invalid_data() {
+    public function test_create_order_with_invalid_data()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
- 
+
         $this->actingAs($this->user);
 
         $order_detail = [];
@@ -185,14 +195,14 @@ class OrderTest extends TestCase
         // Create and test order with invalid order_value
         foreach ($this->bikes as $bike) {
             array_push($order_detail, [
-                'bike_id' => $bike->id,
-                'order_value' => $bike->bike_stock + 1
+                'bike_id'     => $bike->id,
+                'order_value' => $bike->bike_stock + 1,
             ]);
         }
         $formData = [
-            'customer_name' => $this->faker->name(),
+            'customer_name'  => $this->faker->name(),
             'customer_email' => $this->faker->email(),
-            'order_detail' => $order_detail
+            'order_detail'   => $order_detail,
         ];
         $this->createAndAssert($formData, 'Lỗi');
 
@@ -206,20 +216,22 @@ class OrderTest extends TestCase
         // Missing bike_id.
         $formData['order_detail'] = [
             ['order_value' => 1337],
-            ['bike_id' => $this->bikes->first()->id,'order_value' => 1]
+            ['bike_id' => $this->bikes->first()->id, 'order_value' => 1],
         ];
         $this->createAndAssert($formData, 'Lỗi');
 
         // Missing order_value, but needs to have different bikes.
         $bike1 = $this->bikes->random()->id;
         $bike2 = $this->bikes->random()->id;
-        while ($bike1 === $bike2) $bike2 = $this->bikes->random()->id;
+        while ($bike1 === $bike2) {
+            $bike2 = $this->bikes->random()->id;
+        }
         $formData['order_detail'] = [
             ['bike_id' => $bike1],
             ['bike_id' => $bike2, 'order_value' => 1],
         ];
         $this->createAndAssert($formData, 'Lỗi');
-        
+
         // Ordering a bike twice
         $formData['order_detail'] = [
             ['bike_id' => $bike1, 'order_value' => 1],
@@ -239,7 +251,8 @@ class OrderTest extends TestCase
     /**
      * Test if a user can delete his own order.
      */
-    public function test_delete_non_checked_out_order_as_owner() {
+    public function test_delete_non_checked_out_order_as_owner()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
@@ -249,9 +262,9 @@ class OrderTest extends TestCase
 
         foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => $bike->bike_stock,
-                'order_buy_price' => $bike->bike_buy_price,
-                'order_sell_price' => $bike->bike_sell_price
+                'order_value'      => $bike->bike_stock,
+                'order_buy_price'  => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price,
             ]);
             $bike->update(['bike_stock' => 0]);
         }
@@ -277,7 +290,7 @@ class OrderTest extends TestCase
             ->assertStatus(200);
 
         $this->assertSoftDeleted($order);
-        
+
         $this->bikes = $this->bikes->fresh();
         foreach ($this->bikes as $bike) {
             $this->assertEquals($bike->bike_stock, 1337);
@@ -286,21 +299,22 @@ class OrderTest extends TestCase
 
     /**
      * Test if a stranger cannot delete a user's order.
-     * 
+     *
      * @return void
      */
-    public function test_delete_non_checked_out_order_as_stranger() {
+    public function test_delete_non_checked_out_order_as_stranger()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $this->user->id
+            'created_by_user' => $this->user->id,
         ]);
 
         foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => 1337,
-                'order_buy_price' => $bike->bike_buy_price,
-                'order_sell_price' => $bike->bike_sell_price
+                'order_value'      => 1337,
+                'order_buy_price'  => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price,
             ]);
             $bike->update(['bike_stock' => 0]);
         }
@@ -312,8 +326,8 @@ class OrderTest extends TestCase
             ->assertStatus(403);
 
         $this->assertDatabaseHas($order, [
-            'id' => $order->id,
-            'checkout_at' => NULL,
+            'id'          => $order->id,
+            'checkout_at' => null,
         ]);
 
         $this->bikes = $this->bikes->fresh();
@@ -324,21 +338,22 @@ class OrderTest extends TestCase
 
     /**
      * Test if Manager can delete order, even if he did not create it.
-     * 
+     *
      * @return void
      */
-    public function test_delete_non_checked_out_order_as_manager() {
+    public function test_delete_non_checked_out_order_as_manager()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $this->user->id
+            'created_by_user' => $this->user->id,
         ]);
 
         foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => 1337,
-                'order_buy_price' => $bike->bike_buy_price,
-                'order_sell_price' => $bike->bike_sell_price
+                'order_value'      => 1337,
+                'order_buy_price'  => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price,
             ]);
             $bike->update(['bike_stock' => 0]);
         }
@@ -361,22 +376,23 @@ class OrderTest extends TestCase
 
     /**
      * Test if Staff cannot delete checked out order.
-     * 
+     *
      * @return void
      */
-    public function test_delete_checked_out_order_as_staff() {
+    public function test_delete_checked_out_order_as_staff()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
             'created_by_user' => $this->user->id,
-            'checkout_at' => \Carbon\Carbon::now(),
+            'checkout_at'     => \Carbon\Carbon::now(),
         ]);
 
         foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => 1337,
-                'order_buy_price' => $bike->bike_buy_price,
-                'order_sell_price' => $bike->bike_sell_price
+                'order_value'      => 1337,
+                'order_buy_price'  => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price,
             ]);
             $bike->update(['bike_stock' => 0]);
         }
@@ -386,10 +402,10 @@ class OrderTest extends TestCase
             ->from(route('orders.show', $order))
             ->delete(route('orders.destroy', $order))
             ->assertStatus(403);
-        
+
         $this->assertDatabaseHas('orders', [
-            'id' => $order->id,
-            'deleted_at' => NULL
+            'id'         => $order->id,
+            'deleted_at' => null,
         ]);
 
         $this->bikes = $this->bikes->fresh();
@@ -400,22 +416,23 @@ class OrderTest extends TestCase
 
     /**
      * Test if Manager can delete checked out Order.
-     * 
+     *
      * @return void
      */
-    public function test_delete_checked_out_order_as_manager() {
+    public function test_delete_checked_out_order_as_manager()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
             'created_by_user' => $this->user->id,
-            'checkout_at' => \Carbon\Carbon::now(),
+            'checkout_at'     => \Carbon\Carbon::now(),
         ]);
 
         foreach ($this->bikes as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => 1337,
-                'order_buy_price' => $bike->bike_buy_price,
-                'order_sell_price' => $bike->bike_sell_price
+                'order_value'      => 1337,
+                'order_buy_price'  => $bike->bike_buy_price,
+                'order_sell_price' => $bike->bike_sell_price,
             ]);
             $bike->update(['bike_stock' => 0]);
         }
@@ -427,20 +444,21 @@ class OrderTest extends TestCase
             ->assertStatus(200)
             ->assertDontSee($order->customer_name)
             ->assertDontSee($order->customer_email);
-        
+
         $this->assertSoftDeleted($order);
     }
 
     /**
      * Test if we can view Order Update with all bikes.
-     * 
+     *
      * @return void
      */
-    public function test_view_update_order() {
+    public function test_view_update_order()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $this->user
+            'created_by_user' => $this->user,
         ]);
 
         $random_bike = $this->bikes->random();
@@ -448,8 +466,8 @@ class OrderTest extends TestCase
 
         foreach ($this->bikes->except($random_bike->id) as $bike) {
             $order->bikes()->attach($bike->id, [
-                'order_value' => 7,
-                'order_buy_price' => $bike->bike_buy_price,
+                'order_value'      => 7,
+                'order_buy_price'  => $bike->bike_buy_price,
                 'order_sell_price' => $bike->bike_sell_price,
             ]);
 
@@ -468,21 +486,22 @@ class OrderTest extends TestCase
 
     /**
      * Test if Owner can update his Order.
-     * 
+     *
      * @return void
      */
-    public function test_update_order_as_owner() {
+    public function test_update_order_as_owner()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
-            'created_by_user' => $this->user->id
+            'created_by_user' => $this->user->id,
         ]);
 
         $bike = $this->bikes->random();
 
         $order->bikes()->attach($bike, [
-            'order_value' => 3,
-            'order_buy_price' => $bike->bike_buy_price,
+            'order_value'      => 3,
+            'order_buy_price'  => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
@@ -490,11 +509,11 @@ class OrderTest extends TestCase
             ->followingRedirects()
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
-                'customer_name' => $order->customer_name,
+                'customer_name'  => $order->customer_name,
                 'customer_email' => $order->customer_email,
-                'order_detail' => [
-                    ['bike_id' => $bike->id, 'order_value' => 1340]
-                ]
+                'order_detail'   => [
+                    ['bike_id' => $bike->id, 'order_value' => 1340],
+                ],
             ])
             ->assertSee(1340);
 
@@ -503,10 +522,11 @@ class OrderTest extends TestCase
 
     /**
      * Test if Stranger cannot update orders he did not created.
-     * 
+     *
      * @return void
      */
-    public function test_update_order_as_stranger() {
+    public function test_update_order_as_stranger()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $bike = $this->bikes->random();
@@ -515,19 +535,19 @@ class OrderTest extends TestCase
             'created_by_user' => $this->user,
         ]);
         $order->bikes()->attach($bike, [
-            'order_value' => 7,
-            'order_buy_price' => $bike->bike_buy_price,
+            'order_value'      => 7,
+            'order_buy_price'  => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
         $this->actingAs($this->tester)
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
-                'customer_name' => $order->customer_name,
+                'customer_name'  => $order->customer_name,
                 'customer_email' => $order->customer_email,
-                'order_detail' => [
-                    ['bike_id' => $bike->id, 'order_value' => 1337]
-                ]
+                'order_detail'   => [
+                    ['bike_id' => $bike->id, 'order_value' => 1337],
+                ],
             ])
             ->assertStatus(403);
 
@@ -536,10 +556,11 @@ class OrderTest extends TestCase
 
     /**
      * Test if Manager can update Order he did not created.
-     * 
+     *
      * @return void
      */
-    public function test_update_order_as_manager() {
+    public function test_update_order_as_manager()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $order = \App\Models\Order::factory()->create([
@@ -551,8 +572,8 @@ class OrderTest extends TestCase
         $new_bike = $this->bikes->except($bike->id)->random();
 
         $order->bikes()->attach($bike, [
-            'order_value' => 3,
-            'order_buy_price' => $bike->bike_buy_price,
+            'order_value'      => 3,
+            'order_buy_price'  => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
@@ -560,10 +581,10 @@ class OrderTest extends TestCase
             ->followingRedirects()
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
-                'customer_name' => $order->customer_name,
+                'customer_name'  => $order->customer_name,
                 'customer_email' => $order->customer_email,
-                'order_detail' => [
-                    ['bike_id' => $new_bike->id, 'order_value' => 1337]
+                'order_detail'   => [
+                    ['bike_id' => $new_bike->id, 'order_value' => 1337],
                 ],
                 'order_checkout' => '1',
             ])
@@ -583,10 +604,11 @@ class OrderTest extends TestCase
 
     /**
      * Test if we cannot update Order with non exist bikes.
-     * 
+     *
      * @return void
      */
-    public function test_update_order_with_not_exist_bikes() {
+    public function test_update_order_with_not_exist_bikes()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $bike = $this->bikes->random();
@@ -594,19 +616,19 @@ class OrderTest extends TestCase
         $order = \App\Models\Order::factory()->create();
 
         $order->bikes()->attach($bike, [
-            'order_value' => 3,
-            'order_buy_price' => $bike->bike_buy_price,
+            'order_value'      => 3,
+            'order_buy_price'  => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
         $this->actingAs($this->manager)
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
-                'customer_name' => $order->customer_name,
+                'customer_name'  => $order->customer_name,
                 'customer_email' => $order->customer_email,
-                'order_detail' => [
-                    ['bike_id' => 1337, 'order_value' => 1337]
-                ]
+                'order_detail'   => [
+                    ['bike_id' => 1337, 'order_value' => 1337],
+                ],
             ])
             ->assertSessionHasErrors(['order_detail.*.bike_id']);
 
@@ -616,29 +638,30 @@ class OrderTest extends TestCase
 
     /**
      * Test if we cannot update Order with overstock.
-     * 
+     *
      * @return void
      */
-    public function test_update_order_with_overstock() {
+    public function test_update_order_with_overstock()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $bike = $this->bikes->random();
 
         $order = \App\Models\Order::factory()->create();
         $order->bikes()->attach($bike, [
-            'order_value' => 3,
-            'order_buy_price' => $bike->bike_buy_price,
+            'order_value'      => 3,
+            'order_buy_price'  => $bike->bike_buy_price,
             'order_sell_price' => $bike->bike_sell_price,
         ]);
 
         $this->actingAs($this->manager)
             ->from(route('orders.edit', $order))
             ->put(route('orders.update', $order), [
-                'customer_name' => $order->customer_name,
+                'customer_name'  => $order->customer_name,
                 'customer_email' => $order->customer_email,
-                'order_detail' => [
-                    ['bike_id' => $bike->id, 'order_value' => 7331]
-                ]
+                'order_detail'   => [
+                    ['bike_id' => $bike->id, 'order_value' => 7331],
+                ],
             ])
             ->assertSessionHasErrors();
 
@@ -648,35 +671,36 @@ class OrderTest extends TestCase
 
     /**
      * Test if no one can update checked out Orders.
-     * 
+     *
      * @return void
      */
-    public function test_update_checkedout_orders() {
+    public function test_update_checkedout_orders()
+    {
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
         $bike = $this->bikes->random();
 
         $order = \App\Models\Order::factory()->create([
-            'checkout_at' => \Carbon\Carbon::now()
+            'checkout_at' => \Carbon\Carbon::now(),
         ]);
         $order->bikes()->attach($bike->id, [
-            'order_value' => 1337,
-            'order_buy_price' => $bike->bike_buy_price,
-            'order_sell_price' => $bike->bike_sell_price
+            'order_value'      => 1337,
+            'order_buy_price'  => $bike->bike_buy_price,
+            'order_sell_price' => $bike->bike_sell_price,
         ]);
 
         $this->actingAs($this->manager)
             ->followingRedirects()
             ->from(route('orders.show', $order))
             ->put(route('orders.update', $order), [
-                'customer_name' => $order->customer_name,
+                'customer_name'  => $order->customer_name,
                 'customer_email' => $order->customer_email,
-                'order_detail' => [
-                    ['bike_id' => $bike->id, 'order_value' => 1]
-                ]
+                'order_detail'   => [
+                    ['bike_id' => $bike->id, 'order_value' => 1],
+                ],
             ])
             ->assertStatus(403);
-        
+
         $this->assertEquals($order->quantity(), 1337);
     }
 }

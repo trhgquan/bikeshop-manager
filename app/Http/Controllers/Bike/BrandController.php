@@ -2,35 +2,36 @@
 
 namespace App\Http\Controllers\Bike;
 
-use App\Models\Brand;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateBrandRequest;
+use App\Models\Brand;
 
 class BrandController extends Controller
 {
     /**
      * Success messages to send.
-     * 
+     *
      * @var array
      */
     private $successMessages = [
         'create' => [
-            'success' => 'Thêm hãng xe mới thành công!'
+            'success' => 'Thêm hãng xe mới thành công!',
         ],
         'update' => [
-            'success' => 'Chỉnh sửa hãng xe thành công!'
+            'success' => 'Chỉnh sửa hãng xe thành công!',
         ],
         'destroy' => [
-            'success' => 'Xóa hãng xe thành công!'
-        ]
+            'success' => 'Xóa hãng xe thành công!',
+        ],
     ];
 
     /**
      * Constructor for BrandController.
-     * 
+     *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->authorizeResource(Brand::class, 'brand');
     }
 
@@ -39,8 +40,10 @@ class BrandController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $brands = Brand::all();
+
         return view('content.brand.dashboard', compact('brands'));
     }
 
@@ -49,20 +52,23 @@ class BrandController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() {
+    public function create()
+    {
         return view('content.brand.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\CreateBrandRequest  $request
+     * @param \App\Http\Requests\CreateBrandRequest $request
+     *
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateBrandRequest $request) {
+    public function store(CreateBrandRequest $request)
+    {
         // Get request validated data.
         $validator = $request->validated();
-        
+
         // Create a new brand!
         $new_brand = Brand::create($validator);
 
@@ -75,32 +81,39 @@ class BrandController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Brand $brand
+     * @param \App\Models\Brand $brand
+     *
      * @return \Illuminate\Http\Response
      */
-    public function show(Brand $brand) {
+    public function show(Brand $brand)
+    {
         $bikes = $brand->bikes()->get();
+
         return view('content.brand.details', compact('brand', 'bikes'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Brand $brand
+     * @param \App\Models\Brand $brand
+     *
      * @return \Illuminate\Http\Response
      */
-    public function edit(Brand $brand) {
+    public function edit(Brand $brand)
+    {
         return view('content.brand.update', compact('brand'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\CreateBrandRequest  $request
-     * @param  \App\Models\Brand $brand
+     * @param \App\Http\Requests\CreateBrandRequest $request
+     * @param \App\Models\Brand                     $brand
+     *
      * @return \Illuminate\Http\Response
      */
-    public function update(CreateBrandRequest $request, Brand $brand) {
+    public function update(CreateBrandRequest $request, Brand $brand)
+    {
         // Get validated data.
         $validator = $request->validated();
 
@@ -116,10 +129,12 @@ class BrandController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Brand $brand
+     * @param \App\Models\Brand $brand
+     *
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Brand $brand) {
+    public function destroy(Brand $brand)
+    {
         // Soft-delete the branch.
         $brand->delete();
 

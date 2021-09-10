@@ -2,45 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Bike;
 use App\Http\Requests\CreateOrderRequest;
+use App\Models\Bike;
+use App\Models\Order;
 use App\Services\OrderServices;
 
 class OrderController extends Controller
 {
     /**
      * Success messages.
-     * 
+     *
      * @var array
      */
     private $successMessages = [
         'create' => [
-            'success' => 'Tạo đơn hàng mới thành công.'
+            'success' => 'Tạo đơn hàng mới thành công.',
         ],
         'update' => [
-            'success' => 'Chỉnh sửa đơn hàng thành công.'
+            'success' => 'Chỉnh sửa đơn hàng thành công.',
         ],
         'destroy' => [
-            'success' => 'Hủy đơn hàng thành công.'
-        ]
+            'success' => 'Hủy đơn hàng thành công.',
+        ],
     ];
 
     /**
      * Order Service will be using.
-     * 
-     * @var  \App\Services\OrderServices
+     *
+     * @var \App\Services\OrderServices
      */
     private $orderServices;
 
     /**
      * Constructor for OrderController.
-     * 
+     *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->authorizeResource(Order::class, 'order');
-        $this->orderServices = new OrderServices;
+        $this->orderServices = new OrderServices();
     }
 
     /**
@@ -48,8 +49,10 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $orders = Order::orderBy('created_at', 'DESC')->get();
+
         return view('content.orders.dashboard', compact('orders'));
     }
 
@@ -58,18 +61,22 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() {
+    public function create()
+    {
         $bikes = Bike::where('bike_stock', '>', 0)->get();
+
         return view('content.orders.create', compact('bikes'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\CreateOrderRequest  $request
+     * @param \App\Http\Requests\CreateOrderRequest $request
+     *
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateOrderRequest $request) {
+    public function store(CreateOrderRequest $request)
+    {
         $validator = $request->validated();
         $validator['order_checkout'] = $request->has('order_checkout');
 
@@ -94,21 +101,26 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Order  $order
+     * @param \App\Models\Order $order
+     *
      * @return \Illuminate\Http\Response
      */
-    public function show(Order $order) {
+    public function show(Order $order)
+    {
         $detail = $order->bikes;
+
         return view('content.orders.details', compact('order', 'detail'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Order  $order
+     * @param \App\Models\Order $order
+     *
      * @return \Illuminate\Http\Response
      */
-    public function edit(Order $order) {
+    public function edit(Order $order)
+    {
         $bikes = Bike::where('bike_stock', '>', 0)
             ->orWhereHas('orders', function ($query) use ($order) {
                 $query->where('order_id', $order->id);
@@ -117,7 +129,7 @@ class OrderController extends Controller
         $details = $order->bikes()->get();
 
         return view(
-            'content.orders.update', 
+            'content.orders.update',
             compact('order', 'details', 'bikes')
         );
     }
@@ -125,11 +137,13 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\CreateOrderRequest  $request
-     * @param  \App\Models\Order  $order
+     * @param \App\Http\Requests\CreateOrderRequest $request
+     * @param \App\Models\Order                     $order
+     *
      * @return \Illuminate\Http\Response
      */
-    public function update(CreateOrderRequest $request, Order $order) {
+    public function update(CreateOrderRequest $request, Order $order)
+    {
         $validator = $request->validated();
         $validator['order_checkout'] = $request->has('order_checkout');
 
@@ -154,10 +168,12 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Order  $order
+     * @param \App\Models\Order $order
+     *
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Order $order) {
+    public function destroy(Order $order)
+    {
         $order->delete();
 
         return redirect()

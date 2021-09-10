@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Role;
 use App\Http\Requests\CreateUserRequest;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -12,40 +12,41 @@ use Illuminate\Validation\Rule;
 class UserManagementController extends Controller
 {
     /**
-     * Success messages for UserManagementController
-     * 
+     * Success messages for UserManagementController.
+     *
      * @var array
      */
     private $successMessages = [
         'create' => [
-            'success' => 'Thêm người dùng mới thành công!'
+            'success' => 'Thêm người dùng mới thành công!',
         ],
         'update_role' => [
-            'success' => 'Chỉnh sửa quyền người dùng thành công!'
+            'success' => 'Chỉnh sửa quyền người dùng thành công!',
         ],
         'update_password' => [
-            'success' => 'Chỉnh sửa mật khẩu người dùng thành công!'
+            'success' => 'Chỉnh sửa mật khẩu người dùng thành công!',
         ],
         'destroy' => [
-            'success' => 'Xóa người dùng thành công!'
+            'success' => 'Xóa người dùng thành công!',
         ],
     ];
 
     /**
      * User Services will be using.
-     * 
+     *
      * @var \App\Services\UserServices
      */
     private $userServices;
 
     /**
      * Constructor for UserManagementController.
-     * 
+     *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->authorizeResource(User::class, 'user');
-        $this->userServices = new \App\Services\UserServices;
+        $this->userServices = new \App\Services\UserServices();
     }
 
     /**
@@ -53,9 +54,11 @@ class UserManagementController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $users = User::with('roles')->get();
-        return view('content.users.dashboard', compact('users'));        
+
+        return view('content.users.dashboard', compact('users'));
     }
 
     /**
@@ -63,18 +66,22 @@ class UserManagementController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() {
+    public function create()
+    {
         $roles = Role::all()->except(Role::ROLE_ADMIN);
+
         return view('content.users.create', compact('roles'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\CreateUserRequest $request
+     * @param \App\Http\Requests\CreateUserRequest $request
+     *
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateUserRequest $request) {
+    public function store(CreateUserRequest $request)
+    {
         $validator = $request->validated();
 
         $this->userServices->createUser($request->validated());
@@ -87,27 +94,32 @@ class UserManagementController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
+     *
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user) {
+    public function edit(User $user)
+    {
         $roles = Role::all()->except(Role::ROLE_ADMIN);
+
         return view('content.users.update', compact('user', 'roles'));
     }
 
     /**
      * Update a User's password.
-     * 
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\Models\User $user
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\User         $user
+     *
      * @return \Illuminate\Http\Response
      */
-    public function update_password(Request $request, User $user) {
+    public function update_password(Request $request, User $user)
+    {
         $this->authorize('update', $user);
 
         $validator = Validator::make($request->all(), [
             'new_password' => 'required|min:8',
-            're_password' => 'required|same:new_password'
+            're_password'  => 'required|same:new_password',
         ]);
 
         if ($validator->fails()) {
@@ -126,12 +138,14 @@ class UserManagementController extends Controller
 
     /**
      * Update a User's role.
-     * 
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\Models\User $user
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\User         $user
+     *
      * @return \Illuminate\Http\Response
      */
-    public function update_role(Request $request, User $user) {
+    public function update_role(Request $request, User $user)
+    {
         $this->authorize('update', $user);
 
         $validator = Validator::make($request->all(), [
@@ -140,9 +154,9 @@ class UserManagementController extends Controller
                 'exists:App\Models\Role,id',
                 Rule::in([
                     Role::ROLE_MANAGER,
-                    Role::ROLE_STAFF
-                ])
-            ]
+                    Role::ROLE_STAFF,
+                ]),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -161,10 +175,12 @@ class UserManagementController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
+     *
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user) {
+    public function destroy(User $user)
+    {
         $user->delete();
 
         return redirect()

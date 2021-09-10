@@ -9,11 +9,13 @@ class BrandObserver
 {
     /**
      * Handle the Brand "creating" event.
-     * 
-     * @param  \App\Models\Brand $brand
+     *
+     * @param \App\Models\Brand $brand
+     *
      * @return void
      */
-    public function creating(Brand $brand) {
+    public function creating(Brand $brand)
+    {
         if (Auth::check()) {
             $brand->created_by_user = Auth::id();
             $brand->updated_by_user = Auth::id();
@@ -22,11 +24,13 @@ class BrandObserver
 
     /**
      * Handle the Brand "updating" event.
-     * 
-     * @param  \App\Models\Brand $brand
+     *
+     * @param \App\Models\Brand $brand
+     *
      * @return void
      */
-    public function updating(Brand $brand) {
+    public function updating(Brand $brand)
+    {
         if (Auth::check()) {
             $brand->updated_by_user = Auth::id();
         }
@@ -34,11 +38,13 @@ class BrandObserver
 
     /**
      * Handle the Brand "deleted" event.
-     * 
-     * @param  \App\Models\Brand $brand
+     *
+     * @param \App\Models\Brand $brand
+     *
      * @return void
      */
-    public function deleted(Brand $brand) {
+    public function deleted(Brand $brand)
+    {
         if (Auth::check()) {
             // Deleting also counted as updated.
             $brand->updated_by_user = Auth::id();
@@ -46,7 +52,7 @@ class BrandObserver
         }
 
         // Delete child Bike(s).
-        $brand->bikes->each(function($bike) {
+        $brand->bikes->each(function ($bike) {
             $bike->delete();
         });
     }
