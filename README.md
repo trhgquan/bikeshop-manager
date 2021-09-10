@@ -1,6 +1,7 @@
 # bikeshop-manager
 
 [![Test Laravel App](https://github.com/trhgquan/bikeshop-manager/actions/workflows/laravel.yml/badge.svg)](https://github.com/trhgquan/bikeshop-manager/actions/workflows/laravel.yml)
+[![StyleCI](https://github.styleci.io/repos/388805027/shield?branch=main)](https://github.styleci.io/repos/388805027?branch=main)
 ![GitHub](https://img.shields.io/github/license/trhgquan/bikeshop-manager?style=flat-square)
 
 Quản lý cửa hàng xe máy
